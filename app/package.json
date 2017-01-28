@@ -1,0 +1,14 @@
+{
+  "name": "core-control",
+  "version": "0.1.0",
+  "description": "Cosmoport core control application",
+  "main": "./main.js",
+  "author": {
+    "name": "S. Stepanov",
+    "email": "sergystepanov@gmail.com",
+    "url": "https://gitlab.com/cosmoport/core-control"
+  },
+  "private": true,
+  "license": "APL",
+  "dependencies": {}
+}
