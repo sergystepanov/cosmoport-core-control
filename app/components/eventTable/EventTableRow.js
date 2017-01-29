@@ -5,7 +5,7 @@ class EventTableRow extends Component {
     var name = this.props.event.status === 'inactive' ? 'canceled' : '';
 
     return (
-      <tr className="{name}">
+      <tr className={name}>
         <td>{this.props.event.departureTime}</td>
 				<td>
           <span className="type-name">{this.props.event.type}</span>
