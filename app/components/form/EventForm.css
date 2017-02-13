@@ -1,0 +1,17 @@
+
+.event_form {
+  margin-top: 1em;
+}
+
+.event_form label input {
+  width: 82%;
+}
+
+.label_text {
+  display: inline-block;
+  width: 5.555em;
+}
+
+.dropdown {
+  margin: 0 0 1em 5.3em;
+}

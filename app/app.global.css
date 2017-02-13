@@ -1,5 +1,6 @@
 @import "~normalize.css/normalize.css";
 @import "~@blueprintjs/core/dist/blueprint.css";
+@import "~fullcalendar/dist/fullcalendar.min.css";
 
 body {
  /*background-color: #394b59;
