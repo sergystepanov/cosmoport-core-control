@@ -10,11 +10,15 @@ export default class Translation extends Component {
 
     this
       .props
-      .onLocaleSelect('en');
+      .onLocaleSelect(e.target.getAttribute('data-id'));
   }
 
   renderLocale = ({id, code, defaultLocale, localeDescription}) => (
-    <Tag key={id} className={styles.localeTag} onClick={this.handleClick}>
+    <Tag
+      key={id}
+      data-id={id}
+      className={styles.localeTag}
+      onClick={this.handleClick}>
       {code}&nbsp;({localeDescription})
     </Tag>
   );
