@@ -1,0 +1,7 @@
+.localeTag {
+  margin-right: .5em;
+}
+
+.localeTag:hover {
+  cursor: pointer;
+}

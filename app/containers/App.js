@@ -13,7 +13,10 @@ export default class App extends Component {
     return (
       <div className="pt-ui-text">
         <div className={styles.container}>
-          <NavigationBar/> {this.props.children}
+          <NavigationBar/>
+          <div className={styles.content}>
+            {this.props.children}
+          </div>
         </div>
       </div>
     );

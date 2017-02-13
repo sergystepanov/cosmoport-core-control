@@ -1,3 +1,4 @@
 [submodule "lib/core-api-client"]
 	path = lib/core-api-client
 	url = git@gitlab.com:cosmoport/core-api-client.git
+	ignore = dirty
