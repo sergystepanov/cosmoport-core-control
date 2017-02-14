@@ -1,5 +1,6 @@
 // @flow
 import React, {Component} from 'react';
+import {EditableText, Tag, Intent} from "@blueprintjs/core";
 
 export default class TranslationTable extends Component {
   constructor(props) {
@@ -10,37 +11,66 @@ export default class TranslationTable extends Component {
       .bind(this);
   }
 
+  handleTextChange = (id, value) => {
+    this
+      .props
+      .onTextChange(id, value, this.onSaveOk, this.onSaveFail);
+  }
+
+  onSaveOk = () => {
+    console.log('ok');
+  }
+
+  onSaveFail = () => {
+    console.log('not ok');
+  }
+
   renderTable(tr) {
     if (tr !== undefined && tr.length > 0) {
 
       let rows = [];
 
+      const renderExternalTag = function (isExternal) {
+        if (isExternal) {
+          return <Tag className="pt-minimal">external</Tag>;
+        }
+      };
 
-      tr
-        .forEach((dat) => {
-          rows.push(
-            <tr key={dat.id}>
-              <td>{dat.id}</td>
-              <td>{dat.text}</td>
-              <td>{dat.i18n.tag}</td>
-              <td>{dat.i18n.description}</td>
-              <td>{dat.i18n.params}</td>
-              <td>{dat.i18n.external}</td>
-            </tr>
-          );
-        }, this);
+      const renderParamsTag = function (params) {
+        if (params) {
+          return <Tag intent={Intent.WARNING} className="pt-minimal">{params}</Tag>;
+        }
+      };
 
-        console.log(rows);
+      tr.forEach((dat) => {
+        rows.push(
+          <tr key={dat.id}>
+            <td>{dat.id}</td>
+            <td><EditableText
+              multiline
+              minLines={3}
+              maxLines={12}
+              defaultValue={dat.text}
+              onConfirm={this
+            .handleTextChange
+            .bind(this, dat.id)}/></td>
+            <td>{dat.i18n.description}</td>
+            <td>
+              <Tag className="pt-minimal">{dat.i18n.tag}</Tag>
+              {renderParamsTag(dat.i18n.params)}
+              {renderExternalTag(dat.i18n.external)}
+            </td>
+          </tr>
+        );
+      }, this);
 
       return (
         <table className="pt-table">
           <thead>
             <th>#</th>
             <th>Text</th>
-            <th>Tag</th>
             <th>Description</th>
-            <th>Params</th>
-            <th>External</th>
+            <th>Tags</th>
           </thead>
           <tbody>
             {rows}
