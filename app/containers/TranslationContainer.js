@@ -8,7 +8,7 @@ import TranslationTable from '../components/translation/TranslationTable';
 import LocaleAddDialog from '../components/dialog/LocaleAddDialog';
 import Api from '../../lib/core-api-client/ApiV1';
 
-export default class MainPage extends Component {
+export default class TranslationContainer extends Component {
   constructor(props) {
     super(props);
 
@@ -71,23 +71,25 @@ export default class MainPage extends Component {
   }
 
   handleLocaleCreate = (data) => {
+    const api = new Api();
 
-    this
-      .api
-      .createLocale({code: data.code, locale_description: data.description}, (data) => {
-        Message.show({message: "Locale has been created."});
-        this
-          .refs
-          .locale_add_dialog
-          .toggleDialog();
+    api.createLocale({
+      code: data.code,
+      locale_description: data.description
+    }, (data) => {
+      Message.show({message: 'Locale has been created.'});
+      this
+        .refs
+        .locale_add_dialog
+        .toggleDialog();
 
-        this.fetchLocales();
-      }, (error) => {
-        Message.show({
-          message: "An error occured, " + error,
-          intent: Intent.DANGER
-        })
+      this.fetchLocales();
+    }, (error) => {
+      Message.show({
+        message: "An error occured, " + error,
+        intent: Intent.DANGER
       });
+    });
   }
 
   render() {
