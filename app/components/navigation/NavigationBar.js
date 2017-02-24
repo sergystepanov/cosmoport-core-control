@@ -1,5 +1,4 @@
 import React, {Component} from 'react';
-import {Link} from 'react-router';
 
 import NavLink from './NavLink';
 import ServerTime from '../../components/time/ServerTime';
@@ -22,7 +21,7 @@ export default class NavigationBar extends Component {
           </NavLink>
         </div>
         <div className="pt-navbar-group pt-align-right">
-          <span>0/0</span>
+          <span>{this.props.nodes.timetables}/{this.props.nodes.gates}</span>
           <span className="pt-navbar-divider"/>
           <ServerTime timestamp={this.props.timestamp}/>
           <span className="pt-navbar-divider"/>
