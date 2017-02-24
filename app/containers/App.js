@@ -4,7 +4,7 @@ import React, {Component} from 'react';
 import NavigationBar from '../components/navigation/NavigationBar';
 import styles from './App.css';
 import ApiV1 from './ApiV11';
-import WebSocketWrapper from '../components/socket/WebSocketWrapper';
+import WebSocketWrapper from '../../lib/core-api-client/WebSocketWrapper';
 
 export default class App extends Component {
   constructor(props) {
