@@ -39,7 +39,6 @@ export default class TranslationContainer extends Component {
 
     api.fetchTranslationsForLocale(locale, (data) => {
       this.setState({translations: data, currentTranslation: locale});
-      console.log(data);
       Message.show({message: 'Translations data has been fetched from the server successfully.'});
     }, (error) => {
       Message.show({message: `Couldn't fetch translations data from the server, ${error}`, intent: Intent.DANGER});

@@ -22,12 +22,42 @@ export default class Calendar extends Component {
           center: 'title',
           right: 'month,basicWeek,basicDay'
         },
-        eventLimit: true,
+        timeFormat: 'HH:mm',
+        // eventLimit: true,
         eventSources: [
           {
             events: this.getEvents
           }
-        ]
+        ],
+        navLinks: true, // can click day/week names to navigate views
+        selectable: true,
+        selectHelper: true,
+        select: function (start, end) {
+          var title = prompt('Event Title:');
+          var eventData;
+          if (title) {
+            eventData = {
+              title: title,
+              start: start,
+              end: end
+            };
+            this
+              .$node
+              .fullCalendar('renderEvent', eventData, true); // stick? = true
+          }
+          this
+            .$node
+            .fullCalendar('unselect');
+        },
+        editable: true,
+
+        dayClick(date, jsEvent, view) {
+          alert('Clicked on: ' + date.format());
+          alert('Coordinates: ' + jsEvent.pageX + ',' + jsEvent.pageY);
+          alert('Current view: ' + view.name);
+          // change the day's background color just for fun
+          $(this).css('background-color', 'red');
+        }
       });
   }
 
@@ -56,18 +86,59 @@ export default class Calendar extends Component {
     let events = [];
 
     for (const event of this.events) {
+      let eventData = this.findEventRefByEventTypeId(event.eventTypeId);
       events.push({
-        title: `Event type: ${event.eventTypeId}`,
-        start: event.eventDate + 'T00:00:00',
-        end: event.eventDate + 'T10:10:10'
+        title: `${this.findTranslationById(eventData, 'i18nEventTypeName', 'xxx')} / ${this.findTranslationById(eventData, 'i18nEventTypeSubname', 'xxx')}`,
+        start: `${event
+          .eventDate}T${this
+          .minutesToHm(event.startTime)}`,
+        end: `${event
+          .eventDate}T${this
+          .minutesToHm(event.startTime + event.durationTime)}`
       });
     }
 
     callback(events);
   }
 
+  minutesToHm(minutes) {
+    if (minutes < 0) {
+      return '00:00:00';
+    }
+
+    const h = Math.trunc(minutes / 60);
+    const m = minutes % 60;
+
+    return `${h < 10
+      ? '0' + h
+      : h}:${m < 10
+        ? '0' + m
+        : m}:00`;
+  }
+
+  findEventRefByEventTypeId = (eventTypeId) => {
+    let result = false;
+
+    for (const eventType of this.props.refs.types) {
+      if (eventType.id === eventTypeId) {
+        result = eventType;
+        break;
+      }
+    }
+
+    return result;
+  }
+
+  findTranslationById = (ref, name, defaultValue) => {
+    return ref
+      ? this.props.locale[ref[name]].values[0]
+      : defaultValue;
+  }
+
   props : {
-    events: array
+    events: array,
+    locale: object,
+    refs: object
   }
 
   render() {

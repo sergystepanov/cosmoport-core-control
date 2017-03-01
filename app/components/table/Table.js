@@ -5,8 +5,6 @@ import {Button, Intent} from '@blueprintjs/core';
 import EventAddDialog from '../dialog/EventAddDialog';
 import EventTable from '../eventTable/EventTable';
 
-import styles from '../Main.css';
-
 export default class Table extends Component {
 
   handleCreate = (formData) => {
@@ -39,7 +37,7 @@ export default class Table extends Component {
     return (
       <div>
         <EventAddDialog ref="event_add_dialog" callback={this.handleCreate}/>
-        <div className={styles.buttons}>
+        <div>
           <Button className="pt-minimal" iconName="add" onClick={this.handleAddClick}/>
           <Button
             className="pt-minimal"

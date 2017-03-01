@@ -24,9 +24,6 @@ export default class NavigationBar extends Component {
           <span>{this.props.nodes.timetables}/{this.props.nodes.gates}</span>
           <span className="pt-navbar-divider"/>
           <ServerTime timestamp={this.props.timestamp}/>
-          <span className="pt-navbar-divider"/>
-          <button className="pt-button pt-minimal pt-icon-notifications"/>
-          <button className="pt-button pt-minimal pt-icon-cog"/>
         </div>
       </nav>
     );

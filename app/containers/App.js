@@ -1,10 +1,12 @@
 // @flow
 import React, {Component} from 'react';
+import {ipcRenderer} from 'electron';
 
 import NavigationBar from '../components/navigation/NavigationBar';
 import styles from './App.css';
 import ApiV1 from './ApiV11';
 import WebSocketWrapper from '../../lib/core-api-client/WebSocketWrapper';
+import Player from '../components/player/Player';
 
 export default class App extends Component {
   constructor(props) {
@@ -15,8 +17,11 @@ export default class App extends Component {
       nodes: {
         gates: 0,
         timetables: 0
-      }
+      },
+      audio: []
     };
+
+    ipcRenderer.on('audio', this.handleSetAudio);
 
     this.api = new ApiV1();
   }
@@ -27,7 +32,7 @@ export default class App extends Component {
       .fetchTime((data) => {
         this.setState({timestamp: data.timestamp});
       }, () => {});
-      this.trySocket(this);
+    this.trySocket(this);
   }
 
   getNodes() {
@@ -36,6 +41,14 @@ export default class App extends Component {
       .fetchNodes((data) => {
         this.setState({nodes: data});
       }, () => {});
+  }
+
+  handleSetAudio = (event, files) => {
+    this.setState({audio: files});
+  }
+
+  handleClick = () => {
+    console.log("audio", this.state.audio);
   }
 
   trySocket = (self) => {
@@ -75,6 +88,8 @@ export default class App extends Component {
       <div className="pt-ui-text">
         <div className={styles.container}>
           <NavigationBar timestamp={this.state.timestamp} nodes={this.state.nodes}/>
+          <div onClick={this.handleClick}>aaaaa</div>
+          <Player music={this.state.audio}/>
           <div className={styles.content}>
             {this.props.children}
           </div>
