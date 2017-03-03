@@ -5,17 +5,17 @@ import PlayerControls from './PlayerControls';
 import SongSelector from './SongSelector';
 
 const {app} = require('electron').remote;
-// var userDataPath = app.getPath('userData');
 
 export default class Player extends Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      currentSong: '',
+      track: 0,
       position: 0,
-      volume: 30,
-      playStatus: Sound.status.PLAYING
+      volume: 20,
+      // Played / Stoped
+      playStatus: Sound.status.STOPPED
     };
   }
 
@@ -24,15 +24,12 @@ export default class Player extends Component {
 
     return (
       <div>
-        <SongSelector
-          music={this.props.music}
-          selectedSong={this.state.currentSong}
-          onSongSelected={this.handleSongSelected}/> {this.state.currentSong && this.renderCurrentSong()}
         <PlayerControls
           playStatus={this.state.playStatus}
+          onNext={this.handleNext}
+          onBack={this.handleBack}
           onPlay={() => this.setState({playStatus: Sound.status.PLAYING})}
           onPause={() => this.setState({playStatus: Sound.status.PAUSED})}
-          onResume={() => this.setState({playStatus: Sound.status.PLAYING})}
           onStop={() => this.setState({playStatus: Sound.status.STOPPED, position: 0})}
           onSeek={position => this.setState({position})}
           onVolumeUp={() => this.setState({
@@ -45,25 +42,34 @@ export default class Player extends Component {
             ? volume
             : volume - 10
         })}
-          duration={this.state.currentSong
-          ? 0
-          : 0}
-          position={this.state.position}/> {this.state.currentSong && <Sound
-          url={this.buildUrl(this.state.currentSong)}
+          duration={0}
+          position={this.state.position}/> {this.hasTrack() && <Sound
+          url={this.buildUrl(this.getTrack(this.state.track))}
           playStatus={this.state.playStatus}
           playFromPosition={this.state.position}
-          volume={volume}
+          volume={this.state.volume}
           onLoading={({bytesLoaded, bytesTotal}) => console.log(`${bytesLoaded / bytesTotal * 100}% loaded`)}
           onPlaying={({position}) => console.log(position)}
-          onFinishedPlaying={() => this.setState({playStatus: Sound.status.STOPPED})}/>}
+          onFinishedPlaying={this.handleFinish}/>}
+        {this.renderCurrentSong()}
       </div>
     );
   }
 
-  buildUrl(file) {
-    const url = `file:///${app.getPath('music')}/${file}`;
+  handleNext = () => {
+    this.shiftPlayTrack(1);
+  }
 
-    return url;
+  handleBack= () => {
+    this.shiftPlayTrack(-1);
+  }
+
+  buildUrl(file) {
+    return `file:///${app.getPath('music')}/${file}`;
+  }
+
+  hasTrack() {
+    return this.state.track > -1 && this.props.music.length > 0;
   }
 
   getStatus() {
@@ -75,20 +81,29 @@ export default class Player extends Component {
       case Sound.status.STOPPED:
         return 'stopped';
       default:
-        return '(unknown)'
+        return '(unknown)';
     }
   }
 
-  renderCurrentSong() {
-    return (
-      <p>
-        `Track ${this.state.currentSong}
-        is ${this.getStatus()}`
-      </p>
-    );
+  getTrack(index) {
+    return this.props.music[index];
   }
 
-  handleSongSelected = (song) => {
-    this.setState({currentSong: song, position: 0});
+  shiftPlayTrack(shift) {
+    const tracks = this.props.music;
+
+    this.setState({
+      track: (this.state.track + shift) % this.props.music.length,
+      position: 0
+    });
+  }
+
+  handleFinish = () => {
+    // this.setState({playStatus: Sound.status.STOPPED})}
+    this.shiftPlayTrack(1);
+  }
+
+  renderCurrentSong() {
+    return (<span>{`Track ${this.getTrack(this.state.track)} is ${this.getStatus()}`}</span>);
   }
 }

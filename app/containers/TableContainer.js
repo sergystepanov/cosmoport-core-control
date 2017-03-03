@@ -13,20 +13,13 @@ export default class TableContainer extends Component {
 
     this.state = {
       events: [],
-      refs: []
+      locale: {},
+      refs: {}
     };
   }
 
   getData() {
-    this
-      .api
-      .fetchReferenceData((data) => {
-        this.setState({refs: data});
-        this.getEvents();
-        Message.show({message: 'Got reference data.'});
-      }, (error) => {
-        Message.show({message: `Couldn't fetch reference data from the server, ${error}`, intent: Intent.DANGER});
-      });
+    this.getReferenceData();
   }
 
   getEvents() {
@@ -40,11 +33,40 @@ export default class TableContainer extends Component {
       });
   }
 
+  getReferenceData = () => {
+    this
+      .api
+      .fetchReferenceData((data) => {
+        this.setState({refs: data});
+        this.getTranslationData();
+      }, (error) => {
+        console.error(`[refs] fetch, ${error}`);
+      });
+  }
+
+  getTranslationData() {
+    this
+      .api
+      .fetchTranslations((data) => {
+        this.setState({locale: data['en']});
+        this
+          .api
+          .fetchTimetable((data) => {
+            this.setState({events: data});
+            this.getEvents();
+          }, (error) => {
+            console.error(`[data] fetch, ${error}`);
+          });
+      }, (error) => {
+        console.error(`[translations] fetch, ${error}`);
+      });
+  }
+
   componentDidMount() {
     this.getData();
   }
 
   render() {
-    return (<Table events={this.state.events} refs={this.state.refs}/>);
+    return (<Table events={this.state.events} refs={this.state.refs} locale={this.state.locale}/>);
   }
 }

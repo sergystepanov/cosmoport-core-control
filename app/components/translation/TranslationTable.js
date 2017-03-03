@@ -1,6 +1,6 @@
 // @flow
 import React, {Component} from 'react';
-import {EditableText, Tag, Intent} from "@blueprintjs/core";
+import {EditableText, Tag, Intent} from '@blueprintjs/core';
 
 export default class TranslationTable extends Component {
   constructor(props) {
@@ -27,7 +27,6 @@ export default class TranslationTable extends Component {
 
   renderTable(tr) {
     if (tr !== undefined && tr.length > 0) {
-
       let rows = [];
 
       const renderExternalTag = function (isExternal) {
@@ -82,10 +81,7 @@ export default class TranslationTable extends Component {
 
   render() {
     return (
-      <div>
-        <h3>-----</h3>
-        <div>{this.renderTable(this.props.translation)}</div>
-      </div>
+      <div>{this.renderTable(this.props.translation)}</div>
     );
   }
 }

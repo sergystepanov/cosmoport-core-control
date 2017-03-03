@@ -47,10 +47,6 @@ export default class App extends Component {
     this.setState({audio: files});
   }
 
-  handleClick = () => {
-    console.log("audio", this.state.audio);
-  }
-
   trySocket = (self) => {
     let socket = new WebSocketWrapper({
       url: 'ws://127.0.0.1:8080/events?id=core-control',
@@ -88,7 +84,6 @@ export default class App extends Component {
       <div className="pt-ui-text">
         <div className={styles.container}>
           <NavigationBar timestamp={this.state.timestamp} nodes={this.state.nodes}/>
-          <div onClick={this.handleClick}>aaaaa</div>
           <Player music={this.state.audio}/>
           <div className={styles.content}>
             {this.props.children}

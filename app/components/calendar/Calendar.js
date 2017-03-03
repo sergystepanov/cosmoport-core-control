@@ -2,12 +2,15 @@
 import React, {Component} from 'react';
 import $ from 'jquery';
 
+import L18n from '../l18n/L18n';
+
 require('fullcalendar/dist/fullcalendar.min.js');
 
 export default class Calendar extends Component {
   constructor(props) {
     super(props);
 
+    this.l18n = new L18n(this.props.locale, this.props.refs);
     this.events = [];
   }
 
@@ -52,11 +55,9 @@ export default class Calendar extends Component {
         editable: true,
 
         dayClick(date, jsEvent, view) {
-          alert('Clicked on: ' + date.format());
-          alert('Coordinates: ' + jsEvent.pageX + ',' + jsEvent.pageY);
-          alert('Current view: ' + view.name);
-          // change the day's background color just for fun
-          $(this).css('background-color', 'red');
+          // alert('Clicked on: ' + date.format()); alert('Coordinates: ' + jsEvent.pageX
+          // + ',' + jsEvent.pageY); alert('Current view: ' + view.name); change the day's
+          // background color just for fun $(this).css('background-color', 'red');
         }
       });
   }
@@ -69,6 +70,7 @@ export default class Calendar extends Component {
     // this.$node.sortable(nextProps.enable ? 'enable' : 'disable'); } if
     // (nextProps.events) {
     this.events = nextProps.events;
+    this.l18n = new L18n(nextProps.locale, nextProps.refs);
     this
       .$node
       .fullCalendar('refetchEvents');
@@ -83,12 +85,18 @@ export default class Calendar extends Component {
   }
 
   getEvents = (start, end, timezone, callback) => {
-    let events = [];
+    const events = [];
 
     for (const event of this.events) {
-      let eventData = this.findEventRefByEventTypeId(event.eventTypeId);
+      const eventData = this
+        .l18n
+        .findEventRefByEventTypeId(event.eventTypeId);
       events.push({
-        title: `${this.findTranslationById(eventData, 'i18nEventTypeName', 'xxx')} / ${this.findTranslationById(eventData, 'i18nEventTypeSubname', 'xxx')}`,
+        title: `${this
+          .l18n
+          .findTranslationById(eventData, 'i18nEventTypeName')} / ${this
+          .l18n
+          .findTranslationById(eventData, 'i18nEventTypeSubname')}`,
         start: `${event
           .eventDate}T${this
           .minutesToHm(event.startTime)}`,
@@ -114,25 +122,6 @@ export default class Calendar extends Component {
       : h}:${m < 10
         ? '0' + m
         : m}:00`;
-  }
-
-  findEventRefByEventTypeId = (eventTypeId) => {
-    let result = false;
-
-    for (const eventType of this.props.refs.types) {
-      if (eventType.id === eventTypeId) {
-        result = eventType;
-        break;
-      }
-    }
-
-    return result;
-  }
-
-  findTranslationById = (ref, name, defaultValue) => {
-    return ref
-      ? this.props.locale[ref[name]].values[0]
-      : defaultValue;
   }
 
   props : {

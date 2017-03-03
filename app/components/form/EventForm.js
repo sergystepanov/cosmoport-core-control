@@ -1,24 +1,25 @@
 import React, {Component} from 'react';
+
+import L18n from '../l18n/L18n';
+
 import styles from './EventForm.css';
 
 export default class EventForm extends Component {
   constructor(props) {
     super(props);
 
+    this.l18n = new L18n(this.props.locale, this.props.refs);
+
+    console.log(this.props.locale, this.props.refs);
+
     this.state = {
-      duration: 0
+      duration: 0,
+      limit: 1,
+      bought: 0
     };
-
-    this.handleInputChange = this
-      .handleInputChange
-      .bind(this);
-
-    this.getFormData = this
-      .getFormData
-      .bind(this)
   }
 
-  handleInputChange(event) {
+  handleInputChange = (event) => {
     const target = event.target;
     const value = target.type === 'checkbox'
       ? target.checked
@@ -28,8 +29,27 @@ export default class EventForm extends Component {
     this.setState({[name]: value});
   }
 
-  getFormData() {
+  getFormData = () => {
     return this.state;
+  }
+
+  renderEventType = (types) => {
+    const values = types.map((type) => {
+      const eventData = this
+        .l18n
+        .findEventRefByEventTypeId(type.id);
+
+      return (
+        <option key={type.id} value={type.id}>
+          {this
+            .l18n
+            .findTranslationById(eventData, 'i18nEventTypeName')}&nbsp;/&nbsp;{this
+            .l18n
+            .findTranslationById(eventData, 'i18nEventTypeSubname')}
+        </option>
+      );
+    });
+    return values;
   }
 
   render() {
@@ -41,11 +61,8 @@ export default class EventForm extends Component {
           marginBottom: '1em'
         }}>
           <select>
-            <option >Select a type...</option>
-            <option value="1">One</option>
-            <option value="2">Two</option>
-            <option value="3">Three</option>
-            <option value="4">Four</option>
+            <option key={0}>Select a type...</option>
+            {this.renderEventType(this.props.refs.types)}
           </select>
         </div>
         <div
@@ -75,6 +92,21 @@ export default class EventForm extends Component {
             <option value="4">Four</option>
           </select>
         </div>
+
+        <div
+          className={'pt-select pt-minimal ' + styles.dropdown}
+          style={{
+          marginBottom: '1em'
+        }}>
+          <select>
+            <option >Select a destination...</option>
+            <option value="1">One</option>
+            <option value="2">Two</option>
+            <option value="3">Three</option>
+            <option value="4">Four</option>
+          </select>
+        </div>
+
         <label className="pt-label pt-inline">
           <span className={styles.label_text}>Duration</span>
           <input
@@ -85,14 +117,6 @@ export default class EventForm extends Component {
             dir="auto"
             value={this.state.duration}
             onChange={this.handleInputChange}/>
-        </label>
-        <label className="pt-label pt-inline">
-          <span className={styles.label_text}>Destination</span>
-          <input
-            className="pt-input pt-inline"
-            type="text"
-            placeholder="Destination"
-            dir="auto"/>
         </label>
         <label className="pt-label pt-inline">
           <span className={styles.label_text}>Cost</span>
@@ -117,7 +141,8 @@ export default class EventForm extends Component {
             className="pt-input .modifier"
             type="text"
             placeholder="Tickets' limit"
-            dir="auto"/>
+            dir="auto"
+            value={this.state.limit}/>
         </label>
         <label className="pt-label pt-inline">
           <span className={styles.label_text}>Bought</span>
@@ -125,7 +150,8 @@ export default class EventForm extends Component {
             className="pt-input .modifier"
             type="text"
             placeholder="Tickets bought"
-            dir="auto"/>
+            dir="auto"
+            value={this.state.bought}/>
         </label>
       </div>
     );

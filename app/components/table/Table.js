@@ -36,7 +36,7 @@ export default class Table extends Component {
   render() {
     return (
       <div>
-        <EventAddDialog ref="event_add_dialog" callback={this.handleCreate}/>
+        <EventAddDialog ref="event_add_dialog" callback={this.handleCreate} refs={this.props.refs} locale={this.props.locale}/>
         <div>
           <Button className="pt-minimal" iconName="add" onClick={this.handleAddClick}/>
           <Button

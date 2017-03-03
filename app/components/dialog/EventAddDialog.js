@@ -10,10 +10,6 @@ export default class EventAddDialog extends Component {
       isOpen: false
     };
 
-    this.toggleDialog = this
-      .toggleDialog
-      .bind(this)
-
     this.passState = this.passState.bind(this);
   }
   render() {
@@ -25,7 +21,7 @@ export default class EventAddDialog extends Component {
         canOutsideClickClose={false}
         title="Create event">
         <div className="pt-dialog-body">
-          <EventForm ref='form'/>
+          <EventForm ref='form' locale={this.props.locale} refs={this.props.refs}/>
         </div>
         <div className="pt-dialog-footer">
           <div className="pt-dialog-footer-actions">
@@ -40,7 +36,7 @@ export default class EventAddDialog extends Component {
     this.props.callback(this.refs.form.getFormData());
   }
 
-  toggleDialog() {
+  toggleDialog = () => {
     this.setState({
       isOpen: !this.state.isOpen
     });
