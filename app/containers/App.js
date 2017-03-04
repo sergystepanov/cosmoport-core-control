@@ -6,7 +6,6 @@ import NavigationBar from '../components/navigation/NavigationBar';
 import styles from './App.css';
 import ApiV1 from './ApiV11';
 import WebSocketWrapper from '../../lib/core-api-client/WebSocketWrapper';
-import Player from '../components/player/Player';
 
 export default class App extends Component {
   constructor(props) {
@@ -83,8 +82,8 @@ export default class App extends Component {
     return (
       <div className="pt-ui-text">
         <div className={styles.container}>
-          <NavigationBar timestamp={this.state.timestamp} nodes={this.state.nodes}/>
-          <Player music={this.state.audio}/>
+          <NavigationBar timestamp={this.state.timestamp} nodes={this.state.nodes} audio={this.state.audio}/>
+
           <div className={styles.content}>
             {this.props.children}
           </div>

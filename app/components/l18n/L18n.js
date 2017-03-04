@@ -5,11 +5,23 @@ export default class L18n {
   }
 
   findEventRefByEventTypeId(eventTypeId) {
+    return this.findEventById(eventTypeId, 'types');
+  }
+
+  findEventRefByEventStatusId(eventStatusId) {
+    return this.findEventById(eventStatusId, 'statuses');
+  }
+
+  findEventRefByEventDestinationId(eventDestinationId) {
+    return this.findEventById(eventDestinationId, 'destinations');
+  }
+
+  findEventById(id, property) {
     let result = false;
 
-    for (const eventType of this.refs.types) {
-      if (eventType.id === eventTypeId) {
-        result = eventType;
+    for (const eventProp of this.refs[property]) {
+      if (eventProp.id === id) {
+        result = eventProp;
         break;
       }
     }

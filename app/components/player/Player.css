@@ -1,0 +1,9 @@
+
+.centred {
+  text-align: center;
+}
+
+.player {
+  font-size: 85%;
+  cursor: default;
+}

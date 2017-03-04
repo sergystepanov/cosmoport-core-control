@@ -149,8 +149,10 @@
     "webpack-validator": "^2.3.0"
   },
   "dependencies": {
-    "@blueprintjs/core": "^1.10.0",
+    "@blueprintjs/core": "^1.11.0",
+    "@blueprintjs/datetime": "^1.9.0",
     "electron-debug": "^1.1.0",
+    "fullcalendar": "^3.2.0",
     "react": "^15.4.2",
     "react-addons-css-transition-group": "^15.4.2",
     "react-dom": "^15.4.2",

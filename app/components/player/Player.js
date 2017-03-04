@@ -2,7 +2,9 @@ import React, {Component} from 'react';
 import Sound from 'react-sound';
 
 import PlayerControls from './PlayerControls';
-import SongSelector from './SongSelector';
+//import SongSelector from './SongSelector';
+
+import styles from './Player.css';
 
 const {app} = require('electron').remote;
 
@@ -23,7 +25,7 @@ export default class Player extends Component {
     const {volume} = this.state;
 
     return (
-      <div>
+      <div className={styles.centred}>
         <PlayerControls
           playStatus={this.state.playStatus}
           onNext={this.handleNext}
@@ -49,7 +51,6 @@ export default class Player extends Component {
           playFromPosition={this.state.position}
           volume={this.state.volume}
           onLoading={({bytesLoaded, bytesTotal}) => console.log(`${bytesLoaded / bytesTotal * 100}% loaded`)}
-          onPlaying={({position}) => console.log(position)}
           onFinishedPlaying={this.handleFinish}/>}
         {this.renderCurrentSong()}
       </div>
@@ -60,7 +61,7 @@ export default class Player extends Component {
     this.shiftPlayTrack(1);
   }
 
-  handleBack= () => {
+  handleBack = () => {
     this.shiftPlayTrack(-1);
   }
 
@@ -103,7 +104,16 @@ export default class Player extends Component {
     this.shiftPlayTrack(1);
   }
 
+  cropMiddle(text, length) {
+    return `${text.substring(0, length)}...${text.substring(text.length - length)}`;
+  }
+
   renderCurrentSong() {
-    return (<span>{`Track ${this.getTrack(this.state.track)} is ${this.getStatus()}`}</span>);
+    const track = this.getTrack(this.state.track);
+    const text = this.cropMiddle(`Track ${track} is ${this.getStatus()}`, 17);
+
+    return (
+      <div title={track} className={`${styles.centred} ${styles.player}`}>{text}</div>
+    );
   }
 }

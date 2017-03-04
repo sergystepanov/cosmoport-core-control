@@ -61,9 +61,10 @@ app.on('ready', async() => {
       fs.readdir(path0, (err, dir) => {
         let files = [];
         for (var i = 0, path_; path_ = dir[i]; i++) {
-          files.push(path_);
+          if (path_.endsWith('.mp3')) {
+            files.push(path_);
+          }
         }
-        myConsole.log(`[audio] files: ${files}`);
         mainWindow
           .webContents
           .send('audio', files);
