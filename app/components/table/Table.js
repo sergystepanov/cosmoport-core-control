@@ -47,6 +47,7 @@ export default class Table extends Component {
         <EventTable
           callback={this.handleRowRemove}
           refs={this.props.refs}
+          locale={this.props.locale}
           events={this.props.events}/>
       </div>
     );

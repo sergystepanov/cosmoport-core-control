@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {DateInput} from '@blueprintjs/datetime';
+import {DateInput, TimePicker} from '@blueprintjs/datetime';
 
 import L18n from '../l18n/L18n';
 
@@ -11,15 +11,16 @@ export default class EventForm extends Component {
 
     this.l18n = new L18n(this.props.locale, this.props.refs);
 
-    console.log(this.props.locale, this.props.refs);
-
     this.state = {
       date: new Date(),
+      time: new Date(),
       duration: 0,
       limit: 1,
       bought: 0
     };
   }
+
+  getFormData = () => this.state
 
   handleInputChange = (event) => {
     const target = event.target;
@@ -31,71 +32,63 @@ export default class EventForm extends Component {
     this.setState({[name]: value});
   }
 
-  getFormData = () => {
-    return this.state;
+  handleDateChange = (day, selectedDate) => {
+    if (selectedDate !== null) {
+      this.setState({date: selectedDate});
+    }
   }
 
-  renderEventType = (types) => {
-    const values = types.map((type) => {
-      const eventData = this
+  handleTimeChange = (date) => {
+    this.setState({time: date});
+  }
+
+  /**
+   * Renders event types as select options.
+   */
+  renderEventTypeOptions = (types) => types.map((type) => (
+    <option key={type.id} value={type.id}>
+      {this
         .l18n
-        .findEventRefByEventTypeId(type.id);
-
-      return (
-        <option key={type.id} value={type.id}>
-          {this
-            .l18n
-            .findTranslationById(eventData, 'i18nEventTypeName')}&nbsp;/&nbsp;{this
-            .l18n
-            .findTranslationById(eventData, 'i18nEventTypeSubname')}
-        </option>
-      );
-    });
-    return values;
-  }
-
-  renderEventStatuses = (statuses) => {
-    const values = statuses.map((status) => {
-      const eventData = this
+        .findTranslationById(type, 'i18nEventTypeName')}&nbsp;/&nbsp;{this
         .l18n
-        .findEventRefByEventStatusId(status.id);
+        .findTranslationById(type, 'i18nEventTypeSubname')}
+    </option>
+  ))
 
-      return (
-        <option key={status.id} value={status.id}>
-          {this
-            .l18n
-            .findTranslationById(eventData, 'i18nStatus')}
-        </option>
-      );
-    });
-
-    return values;
-  }
-
-  renderEventDestinations = (destinations) => {
-    const values = destinations.map((dest) => {
-      const eventData = this
+  /**
+   * Renders event statuses as select options.
+   */
+  renderEventStatusOptions = (statuses) => statuses.map((status) => (
+    <option key={status.id} value={status.id}>
+      {this
         .l18n
-        .findEventRefByEventDestinationId(dest.id);
+        .findTranslationById(status, 'i18nStatus')}
+    </option>
+  ))
 
-      return (
-        <option key={dest.id} value={dest.id}>
-          {this
-            .l18n
-            .findTranslationById(eventData, 'i18nEventDestinationName')}
-        </option>
-      );
-    });
-
-    return values;
-  }
+  /**
+   * Renders event destinations as select options.
+   */
+  renderEventDestinationOptions = (destinations) => destinations.map((dest) => (
+    <option key={dest.id} value={dest.id}>
+      {this
+        .l18n
+        .findTranslationById(dest, 'i18nEventDestinationName')}
+    </option>
+  ))
 
   render() {
     return (
       <div>
-        <DateInput value={this.state.date} onChange={this.handleInputChange}/>
+        <label className="pt-label pt-inline">
+          <span className={styles.label_text}>Day</span>
+        </label>
+        <DateInput
+          value={this.state.date}
+          onChange={this
+          .handleDateChange
+          .bind(this, 'day')}/>
         <div ref="container" className={styles.event_form}>
-
           <div
             className={'pt-select pt-minimal ' + styles.dropdown}
             style={{
@@ -103,7 +96,7 @@ export default class EventForm extends Component {
           }}>
             <select>
               <option key={0}>Select a type...</option>
-              {this.renderEventType(this.props.refs.types)}
+              {this.renderEventTypeOptions(this.props.refs.types)}
             </select>
           </div>
           <div
@@ -113,7 +106,7 @@ export default class EventForm extends Component {
           }}>
             <select>
               <option key={0}>Select a status...</option>
-              {this.renderEventStatuses(this.props.refs.statuses)}
+              {this.renderEventStatusOptions(this.props.refs.statuses)}
             </select>
           </div>
 
@@ -132,13 +125,13 @@ export default class EventForm extends Component {
           </div>
 
           <div
-            className={'pt-select pt-minimal ' + styles.dropdown}
+            className={`pt-select pt-minimal ${styles.dropdown}`}
             style={{
             marginBottom: '1em'
           }}>
             <select>
               <option key={0}>Select a destination...</option>
-              {this.renderEventDestinations(this.props.refs.destinations)}
+              {this.renderEventDestinationOptions(this.props.refs.destinations)}
             </select>
           </div>
 
@@ -164,13 +157,9 @@ export default class EventForm extends Component {
           </label>
           <label className="pt-label pt-inline">
             <span className={styles.label_text}>Departure</span>
-            <input
-              className="pt-input .modifier"
-              type="text"
-              placeholder="The departure time"
-              dir="auto"
-              value={0}/>
           </label>
+
+          <TimePicker value={this.state.time} onChange={this.handleTimeChange}/>
 
           <label className="pt-label pt-inline">
             <span className={styles.label_text}>Limit</span>

@@ -4,7 +4,7 @@ import EventTableRow from './EventTableRow';
 
 import styles from './EventTable.css';
 
-class EventTable extends Component {
+export default class EventTable extends Component {
   handleRemove = (id) => {
     this
       .props
@@ -22,6 +22,7 @@ class EventTable extends Component {
         rows.push(<EventTableRow
           event={event}
           refs={this.props.refs}
+          locale={this.props.locale}
           key={i}
           callback={this.handleRemove}/>);
         i++;
@@ -40,7 +41,8 @@ class EventTable extends Component {
               <th>Cost</th>
               <th>Duration</th>
               <th>Status</th>
-              <th/>
+              <th>Tickets</th>
+              <th title="It is `operations`">Ops</th>
             </tr>
           </thead>
           <tbody>{rows}</tbody>
@@ -50,11 +52,11 @@ class EventTable extends Component {
       result = (
         <div className="pt-non-ideal-state">
           <div className="pt-non-ideal-state-visual pt-non-ideal-state-icon">
-            <span className="pt-icon pt-icon-offline"></span>
+            <span className="pt-icon pt-icon-offline"/>
           </div>
           <h4 className="pt-non-ideal-state-title">Nothing here</h4>
           <div className="pt-non-ideal-state-description">
-            Create a new event / reload data from the server.
+            Create new event / reload data from the server.
           </div>
         </div>
       );
@@ -62,7 +64,4 @@ class EventTable extends Component {
 
     return result;
   }
-
 }
-
-export default EventTable;
