@@ -1,17 +1,58 @@
-import React, {Component} from 'react';
-import {Dialog, Button, Intent} from "@blueprintjs/core";
+import React, { Component, PropTypes } from 'react';
+import { Dialog, Button, Intent } from '@blueprintjs/core';
+
+import EventTypePropType from '../../props/EventTypePropType';
+import EventDestinationPropType from '../../props/EventDestinationPropType';
+import EventStatusPropType from '../../props/EventStatusPropType';
+import LocalePropType from '../../props/LocalePropType';
 import EventForm from '../form/EventForm';
 
+/**
+ * The class for event add dialog.
+ *
+ * @since 0.1.0
+ */
 export default class EventAddDialog extends Component {
+  static propTypes = {
+    callback: PropTypes.func.isRequired,
+    refs: PropTypes.shape({
+      destinations: PropTypes.arrayOf(EventDestinationPropType),
+      statuses: PropTypes.arrayOf(EventStatusPropType),
+      types: PropTypes.arrayOf(EventTypePropType)
+    }).isRequired,
+    locale: LocalePropType.isRequired
+  }
+
+  static defaultProps = {
+    callback: () => { },
+    refs: {
+      destinations: [],
+      statuses: [],
+      types: []
+    },
+    locale: {}
+  }
+
   constructor(props) {
     super(props);
 
     this.state = {
       isOpen: false
     };
-
-    this.passState = this.passState.bind(this);
   }
+
+  passState = () => {
+    this
+      .props
+      .callback(this.form.getFormData());
+  }
+
+  toggleDialog = () => {
+    this.setState({
+      isOpen: !this.state.isOpen
+    });
+  }
+
   render() {
     return (
       <Dialog
@@ -19,26 +60,23 @@ export default class EventAddDialog extends Component {
         isOpen={this.state.isOpen}
         onClose={this.toggleDialog}
         canOutsideClickClose={false}
-        title="Create event">
+        title="Create event"
+      >
         <div className="pt-dialog-body">
-          <EventForm ref='form' locale={this.props.locale} refs={this.props.refs}/>
+          <EventForm
+            ref={(c) => {
+              this.form = c;
+            }}
+            locale={this.props.locale}
+            refs={this.props.refs}
+          />
         </div>
         <div className="pt-dialog-footer">
           <div className="pt-dialog-footer-actions">
-            <Button intent={Intent.PRIMARY} onClick={this.passState} text="Create"/>
+            <Button intent={Intent.PRIMARY} onClick={this.passState} text="Create" />
           </div>
         </div>
       </Dialog>
     );
-  }
-
-  passState(state) {
-    this.props.callback(this.refs.form.getFormData());
-  }
-
-  toggleDialog = () => {
-    this.setState({
-      isOpen: !this.state.isOpen
-    });
   }
 }
