@@ -6,6 +6,7 @@ import EventDestinationPropType from '../../props/EventDestinationPropType';
 import EventStatusPropType from '../../props/EventStatusPropType';
 import LocalePropType from '../../props/LocalePropType';
 import L18n from '../l18n/L18n';
+import _date from '../../components/date/_date';
 
 import styles from './EventForm.css';
 
@@ -39,9 +40,12 @@ export default class EventForm extends Component {
     this.l18n = new L18n(this.props.locale, this.props.refs);
 
     this.state = {
+      // The event day date
       date: new Date(),
-      time: new Date(),
-      duration: new Date(),
+      // Start minute of the event
+      time: 0,
+      // Duration in minutes of the event
+      duration: 30,
       limit: 1,
       bought: 0,
       type: 0,
@@ -65,28 +69,28 @@ export default class EventForm extends Component {
   }
 
   /**
-   * Handles input field of date type change.
+   * Handles the change event on the day input field.
    *
-   * @param {Date} selectedDate The date value.
+   * @param {Date} day The date value.
    *
    * @since 0.1.0
    */
-  handleDayChange = (selectedDate) => {
+  handleDayChange = (day) => {
     // It can be null if user selects same date - skip the state change in that case
-    if (selectedDate) {
-      this.setState({ date: selectedDate });
+    if (day) {
+      this.setState({ date: day });
     }
   }
 
   /**
-   * Handles input field of time type change.
+   * Handles the change event on an input field of time type.
    *
    * @param {Date} date The date value. Only matters the time part of the date.
    *
    * @since 0.1.0
    */
   handleTimeChange = (date) => {
-    this.setState({ time: date });
+    this.setState({ time: _date.toMinutes(date) });
   }
 
   /**
@@ -139,12 +143,12 @@ export default class EventForm extends Component {
 
         <label htmlFor="departure" className="pt-label pt-inline">
           <span className={styles.label_text}>Start</span>
-          <TimePicker id="departure" value={this.state.time} onChange={this.handleTimeChange} />
+          <TimePicker id="departure" value={_date.toDate(this.state.time)} onChange={this.handleTimeChange} />
         </label>
 
         <label htmlFor="duration" className="pt-label pt-inline">
           <span className={styles.label_text}>End</span>
-          <TimePicker id="duration" value={this.state.duration} onChange={this.handleTimeChange} />
+          <TimePicker id="duration" value={_date.toDate(this.state.duration)} onChange={this.handleTimeChange} />
         </label>
 
 
