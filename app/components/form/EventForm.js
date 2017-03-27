@@ -1,12 +1,12 @@
 import React, { Component, PropTypes } from 'react';
-import { DateInput, TimePicker } from '@blueprintjs/datetime';
+import { DateInput } from '@blueprintjs/datetime';
 
 import EventTypePropType from '../../props/EventTypePropType';
 import EventDestinationPropType from '../../props/EventDestinationPropType';
 import EventStatusPropType from '../../props/EventStatusPropType';
 import LocalePropType from '../../props/LocalePropType';
 import L18n from '../l18n/L18n';
-import _date from '../../components/date/_date';
+import TimeFieldGroup from './group/TimeFieldGroup';
 
 import styles from './EventForm.css';
 
@@ -56,7 +56,7 @@ export default class EventForm extends Component {
     };
   }
 
-  getFormData = () => this.state
+  getFormData = () => Object.assign(this.state, { valid: this.isValid() });
 
   handleInputChange = (event) => {
     const target = event.target;
@@ -89,9 +89,21 @@ export default class EventForm extends Component {
    *
    * @since 0.1.0
    */
-  handleTimeChange = (date) => {
-    this.setState({ time: _date.toMinutes(date) });
+  handleTimeChange = (name, minutes) => {
+    if (name === 'dep') {
+      this.setState({ time: minutes });
+    } else if (name === 'dur') {
+      this.setState({ duration: minutes });
+    }
   }
+
+  handleStartValidation = () => (this.state.time >= this.state.duration ? 'Start time should be less than end.' : '')
+
+  handleEndValidation = () => (this.state.time + this.state.duration >= 24 * 60 ? 'End time should be less than 24.' : '')
+
+  isValid = () =>
+    ![this.handleStartValidation, this.handleEndValidation]
+      .some(validator => validator() !== '')
 
   /**
    * Renders event types as select options.
@@ -123,6 +135,9 @@ export default class EventForm extends Component {
       </option>
     );
 
+    const startValidation = this.handleStartValidation();
+    const endValidation = this.handleEndValidation();
+
     return (
       <div>
         <label htmlFor="day" className="pt-label pt-inline">
@@ -141,16 +156,8 @@ export default class EventForm extends Component {
           </div>
         </label>
 
-        <label htmlFor="departure" className="pt-label pt-inline">
-          <span className={styles.label_text}>Start</span>
-          <TimePicker id="departure" value={_date.toDate(this.state.time)} onChange={this.handleTimeChange} />
-        </label>
-
-        <label htmlFor="duration" className="pt-label pt-inline">
-          <span className={styles.label_text}>End</span>
-          <TimePicker id="duration" value={_date.toDate(this.state.duration)} onChange={this.handleTimeChange} />
-        </label>
-
+        <TimeFieldGroup name="dep" caption="Start" minutes={this.state.time} onChange={this.handleTimeChange} validation={startValidation} />
+        <TimeFieldGroup name="dur" caption="End" minutes={this.state.duration} onChange={this.handleTimeChange} validation={endValidation} />
 
         <label htmlFor="status" className="pt-label pt-inline">
           <span className={styles.label_text}>Status</span>
