@@ -9,6 +9,9 @@ export default class Table extends Component {
 
   handleCreate = (formData) => {
     console.log(formData);
+
+    // TODO Post validation of values from db
+
     // this   .api   .addEvent(formData, (data) => {     Message.show({message:
     // "Event has been saved."});     this       .refs       .event_add_dialog
     // .toggleDialog();     this.getTableData();   }, (error) => { Message.show({

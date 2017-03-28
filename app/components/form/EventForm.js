@@ -7,6 +7,7 @@ import EventStatusPropType from '../../props/EventStatusPropType';
 import LocalePropType from '../../props/LocalePropType';
 import L18n from '../l18n/L18n';
 import TimeFieldGroup from './group/TimeFieldGroup';
+import ListFieldGroup from './group/ListFieldGroup';
 
 import styles from './EventForm.css';
 
@@ -68,6 +69,10 @@ export default class EventForm extends Component {
     this.setState({ [name]: value });
   }
 
+  handleListSelectionChange = (name, value) => {
+    this.setState({ [name]: value });
+  }
+
   /**
    * Handles the change event on the day input field.
    *
@@ -97,12 +102,27 @@ export default class EventForm extends Component {
     }
   }
 
-  handleStartValidation = () => (this.state.time >= this.state.duration ? 'Start time should be less than end.' : '')
+  validateBeginTime = () => (this.state.time >= this.state.duration ? 'Start time should be less than end.' : '')
 
-  handleEndValidation = () => (this.state.time + this.state.duration >= 24 * 60 ? 'End time should be less than 24.' : '')
+  validateEndTime = () => (this.state.time + this.state.duration >= 24 * 60 ? 'End time should be less than 24.' : '')
+
+  validateType = () => (this.state.type === 0 ? 'Type is not selected.' : '')
+
+  validateStatus = () => (this.state.status === 0 ? 'Status is not selected.' : '')
+
+  validateGate = () => (this.state.gate === 0 ? 'Gate is not selected.' : '')
+
+  validateDestination = () => (this.state.destination === 0 ? 'Destination is not selected.' : '')
 
   isValid = () =>
-    ![this.handleStartValidation, this.handleEndValidation]
+    ![
+      this.validateBeginTime,
+      this.validateEndTime,
+      this.validateType,
+      this.validateStatus,
+      this.validateGate,
+      this.validateDestination
+    ]
       .some(validator => validator() !== '')
 
   /**
@@ -135,8 +155,12 @@ export default class EventForm extends Component {
       </option>
     );
 
-    const startValidation = this.handleStartValidation();
-    const endValidation = this.handleEndValidation();
+    const startValidation = this.validateBeginTime();
+    const endValidation = this.validateEndTime();
+    const typeValidation = this.validateType();
+    const statusValidation = this.validateStatus();
+    const destValidation = this.validateDestination();
+    const gateValidation = this.validateGate();
 
     return (
       <div>
@@ -145,52 +169,41 @@ export default class EventForm extends Component {
           <DateInput id="day" value={this.state.date} onChange={this.handleDayChange} />
         </label>
 
+        <ListFieldGroup name="type" index={this.state.type} validation={typeValidation} onChange={this.handleListSelectionChange}>
+          {types}
+        </ListFieldGroup>
 
-        <label htmlFor="type" className="pt-label pt-inline">
-          <span className={styles.label_text}>Type</span>
-          <div className="pt-select pt-minimal">
-            <select id="type" name="type" value={this.state.type} onChange={this.handleInputChange}>
-              <option key={0} value={0}>Select a type...</option>
-              {types}
-            </select>
-          </div>
-        </label>
+        <div className="form-time-range">
+          <TimeFieldGroup
+            name="dep"
+            caption="Start"
+            minutes={this.state.time}
+            onChange={this.handleTimeChange}
+            validation={startValidation}
+          />
+          <TimeFieldGroup
+            name="dur"
+            caption="End"
+            minutes={this.state.duration}
+            onChange={this.handleTimeChange}
+            validation={endValidation}
+          />
+        </div>
 
-        <TimeFieldGroup name="dep" caption="Start" minutes={this.state.time} onChange={this.handleTimeChange} validation={startValidation} />
-        <TimeFieldGroup name="dur" caption="End" minutes={this.state.duration} onChange={this.handleTimeChange} validation={endValidation} />
+        <ListFieldGroup name="status" index={this.state.status} validation={statusValidation} onChange={this.handleListSelectionChange}>
+          {statuses}
+        </ListFieldGroup>
 
-        <label htmlFor="status" className="pt-label pt-inline">
-          <span className={styles.label_text}>Status</span>
-          <div className="pt-select pt-minimal">
-            <select id="status" name="status" value={this.state.status} onChange={this.handleInputChange}>
-              <option key={0} value={0}>Select a status...</option>
-              {statuses}
-            </select>
-          </div>
-        </label>
+        <ListFieldGroup name="gate" index={this.state.gate} validation={gateValidation} onChange={this.handleListSelectionChange}>
+          <option value="1">One</option>
+          <option value="2">Two</option>
+          <option value="3">Three</option>
+          <option value="4">Four</option>
+        </ListFieldGroup>
 
-        <label htmlFor="gate" className="pt-label pt-inline">
-          <span className={styles.label_text}> Gate</span>
-          <div className="pt-select pt-minimal">
-            <select id="gate" name="gate" value={this.state.gate} onChange={this.handleInputChange}>
-              <option value={0}>Select a gate...</option>
-              <option value="1">One</option>
-              <option value="2">Two</option>
-              <option value="3">Three</option>
-              <option value="4">Four</option>
-            </select>
-          </div>
-        </label>
-
-        <label htmlFor="destination" className="pt-label pt-inline">
-          <span className={styles.label_text}>Destination</span>
-          <div className="pt-select pt-minimal">
-            <select id="destination" name="destination" value={this.state.destination} onChange={this.handleInputChange}>
-              <option key={0} value={0}>Select a destination...</option>
-              {destinations}
-            </select>
-          </div>
-        </label>
+        <ListFieldGroup name="destination" index={this.state.destination} validation={destValidation} onChange={this.handleListSelectionChange}>
+          {destinations}
+        </ListFieldGroup>
 
         <label htmlFor="cost" className="pt-label pt-inline">
           <span className={styles.label_text}>Cost</span>
@@ -228,7 +241,7 @@ export default class EventForm extends Component {
             onChange={this.handleInputChange}
           />
         </label>
-      </div>
+      </div >
     );
   }
 }

@@ -8,10 +8,15 @@
 }
 
 .label_text {
+  text-transform: capitalize;
   display: inline-block;
   width: 5.555em;
 }
 
 .dropdown {
   margin: 0 0 1em 5.3em;
+}
+
+.form-time-range {
+  display: flex;
 }
