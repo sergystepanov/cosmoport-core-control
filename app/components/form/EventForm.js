@@ -8,6 +8,7 @@ import LocalePropType from '../../props/LocalePropType';
 import L18n from '../l18n/L18n';
 import TimeFieldGroup from './group/TimeFieldGroup';
 import ListFieldGroup from './group/ListFieldGroup';
+import NumberFieldGroup from './group/NumberFieldGroup';
 
 import styles from './EventForm.css';
 
@@ -26,26 +27,20 @@ export default class EventForm extends Component {
     locale: LocalePropType.isRequired
   }
 
-  static defaultProps = {
-    refs: {
-      destinations: [],
-      statuses: [],
-      types: []
-    },
-    locale: {}
-  }
+  static defaultProps = { refs: { destinations: [], statuses: [], types: [] }, locale: {} }
 
+  // TODO number inputs
   constructor(props) {
     super(props);
 
     this.l18n = new L18n(this.props.locale, this.props.refs);
 
     this.state = {
-      // The event day date
+      // The day of the event
       date: new Date(),
-      // Start minute of the event
+      // Start minute of the event (in minutes)
       time: 0,
-      // Duration in minutes of the event
+      // Duration of the event (in minutes)
       duration: 30,
       limit: 1,
       bought: 0,
@@ -55,26 +50,36 @@ export default class EventForm extends Component {
       status: 1,
       cost: 1
     };
+
+    this.validators = {
+      time: () => (this.state.time >= this.state.duration ? 'Start time should be less than end.' : ''),
+      duration: () => (this.state.time + this.state.duration >= 24 * 60 ? 'End time should be less than 24.' : ''),
+      type: () => (this.state.type === 0 ? 'Type is not selected.' : ''),
+      status: () => (this.state.status === 0 ? 'Status is not selected.' : ''),
+      gate: () => (this.state.gate === 0 ? 'Gate is not selected.' : ''),
+      destination: () => (this.state.destination === 0 ? 'Destination is not selected.' : ''),
+      bought: () => (this.state.bought > this.state.limit ? 'Beyond the tickets limit.' : '')
+    };
   }
 
+  /**
+   * Returns all form's field mapped values.
+   *
+   * @return {Object} The form field values.
+   * @since 0.1.0
+   */
   getFormData = () => Object.assign(this.state, { valid: this.isValid() });
 
-  handleInputChange = (event) => {
-    const target = event.target;
-    const value = target.type === 'checkbox'
-      ? target.checked
-      : target.value;
-    const name = target.name;
-
-    this.setState({ [name]: value });
+  handleChangeEvent = (event) => {
+    this.handleChange(event.target.name, event.target.value);
   }
 
-  handleListSelectionChange = (name, value) => {
+  handleChange = (name, value) => {
     this.setState({ [name]: value });
   }
 
   /**
-   * Handles the change event on the day input field.
+   * Handles the change event on an input field of <day> type.
    *
    * @param {Date} day The date value.
    *
@@ -88,55 +93,13 @@ export default class EventForm extends Component {
   }
 
   /**
-   * Handles the change event on an input field of time type.
+   * Returns all form validators' call result.
+   * It will return false on a first validation with a negative result (which has a message).
    *
-   * @param {Date} date The date value. Only matters the time part of the date.
-   *
+   * @return {boolean} The result of validation.
    * @since 0.1.0
    */
-  handleTimeChange = (name, minutes) => {
-    if (name === 'dep') {
-      this.setState({ time: minutes });
-    } else if (name === 'dur') {
-      this.setState({ duration: minutes });
-    }
-  }
-
-  validateBeginTime = () => (this.state.time >= this.state.duration ? 'Start time should be less than end.' : '')
-
-  validateEndTime = () => (this.state.time + this.state.duration >= 24 * 60 ? 'End time should be less than 24.' : '')
-
-  validateType = () => (this.state.type === 0 ? 'Type is not selected.' : '')
-
-  validateStatus = () => (this.state.status === 0 ? 'Status is not selected.' : '')
-
-  validateGate = () => (this.state.gate === 0 ? 'Gate is not selected.' : '')
-
-  validateDestination = () => (this.state.destination === 0 ? 'Destination is not selected.' : '')
-
-  isValid = () =>
-    ![
-      this.validateBeginTime,
-      this.validateEndTime,
-      this.validateType,
-      this.validateStatus,
-      this.validateGate,
-      this.validateDestination
-    ]
-      .some(validator => validator() !== '')
-
-  /**
-   * Renders event types as select options.
-   */
-  renderEventTypeOptions = (types) => types.map((type) => (
-    <option key={type.id} value={type.id}>
-      {this
-        .l18n
-        .findTranslationById(type, 'i18nEventTypeName')}&nbsp;/&nbsp;{this
-          .l18n
-          .findTranslationById(type, 'i18nEventTypeSubname')}
-    </option>
-  ))
+  isValid = () => !Object.keys(this.validators).some(key => this.validators[key]() !== '')
 
   render() {
     const statuses = this.props.refs.statuses.map(status =>
@@ -154,94 +117,57 @@ export default class EventForm extends Component {
         {this.l18n.findTranslationById(type, 'i18nEventTypeName')}&nbsp;/&nbsp;{this.l18n.findTranslationById(type, 'i18nEventTypeSubname')}
       </option>
     );
-
-    const startValidation = this.validateBeginTime();
-    const endValidation = this.validateEndTime();
-    const typeValidation = this.validateType();
-    const statusValidation = this.validateStatus();
-    const destValidation = this.validateDestination();
-    const gateValidation = this.validateGate();
+    const { time, duration, type, status, destination, gate, bought } = this.validators;
 
     return (
       <div>
         <label htmlFor="day" className="pt-label pt-inline">
           <span className={styles.label_text}>Day</span>
-          <DateInput id="day" value={this.state.date} onChange={this.handleDayChange} />
+          <DateInput id="day" value={this.state.date} showActionsBar onChange={this.handleDayChange} />
         </label>
 
-        <ListFieldGroup name="type" index={this.state.type} validation={typeValidation} onChange={this.handleListSelectionChange}>
+        <ListFieldGroup name="type" index={this.state.type} validation={type()} onChange={this.handleChange}>
           {types}
         </ListFieldGroup>
 
         <div className="form-time-range">
           <TimeFieldGroup
-            name="dep"
+            name="time"
             caption="Start"
             minutes={this.state.time}
-            onChange={this.handleTimeChange}
-            validation={startValidation}
+            onChange={this.handleChange}
+            validation={time()}
           />
           <TimeFieldGroup
-            name="dur"
+            name="duration"
             caption="End"
             minutes={this.state.duration}
-            onChange={this.handleTimeChange}
-            validation={endValidation}
+            onChange={this.handleChange}
+            validation={duration()}
           />
         </div>
 
-        <ListFieldGroup name="status" index={this.state.status} validation={statusValidation} onChange={this.handleListSelectionChange}>
+        <ListFieldGroup name="status" index={this.state.status} validation={status()} onChange={this.handleChange}>
           {statuses}
         </ListFieldGroup>
 
-        <ListFieldGroup name="gate" index={this.state.gate} validation={gateValidation} onChange={this.handleListSelectionChange}>
+        <ListFieldGroup name="gate" index={this.state.gate} validation={gate()} onChange={this.handleChange}>
           <option value="1">One</option>
           <option value="2">Two</option>
           <option value="3">Three</option>
           <option value="4">Four</option>
         </ListFieldGroup>
 
-        <ListFieldGroup name="destination" index={this.state.destination} validation={destValidation} onChange={this.handleListSelectionChange}>
+        <ListFieldGroup name="destination" index={this.state.destination} validation={destination()} onChange={this.handleChange}>
           {destinations}
         </ListFieldGroup>
 
-        <label htmlFor="cost" className="pt-label pt-inline">
-          <span className={styles.label_text}>Cost</span>
-          <input
-            className="pt-input" id="cost" name="cost" type="text"
-            placeholder="The ticket cost" dir="auto"
-            value={this.state.cost} onChange={this.handleInputChange}
-          />
-        </label>
+        <NumberFieldGroup name="cost" number={this.state.cost} icon={'euro'} onChange={this.handleChange} />
 
-        <label htmlFor="limit" className="pt-label pt-inline">
-          <span className={styles.label_text}>Limit</span>
-          <input
-            id="limit"
-            name="limit"
-            className="pt-input .modifier"
-            type="text"
-            placeholder="Tickets' limit"
-            dir="auto"
-            value={this.state.limit}
-            onChange={this.handleInputChange}
-          />
-        </label>
+        <NumberFieldGroup name="limit" number={this.state.limit} onChange={this.handleChange} />
 
-        <label htmlFor="bought" className="pt-label pt-inline">
-          <span className={styles.label_text}>Bought</span>
-          <input
-            id="bought"
-            name="bought"
-            className="pt-input .modifier"
-            type="text"
-            placeholder="Tickets bought"
-            dir="auto"
-            value={this.state.bought}
-            onChange={this.handleInputChange}
-          />
-        </label>
-      </div >
+        <NumberFieldGroup name="bought" number={this.state.bought} validation={bought()} onChange={this.handleChange} />
+      </div>
     );
   }
 }
