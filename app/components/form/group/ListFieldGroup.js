@@ -8,7 +8,7 @@ export default class ListFieldGroup extends PureComponent {
     caption: PropTypes.string,
     index: PropTypes.number,
     onChange: PropTypes.func,
-    validation: PropTypes.string,
+    validator: PropTypes.string,
     children: PropTypes.node
   }
 
@@ -16,7 +16,7 @@ export default class ListFieldGroup extends PureComponent {
     caption: '',
     index: 0,
     onChange: () => { },
-    validation: '',
+    validator: '',
     children: null
   }
 
@@ -25,16 +25,17 @@ export default class ListFieldGroup extends PureComponent {
   }
 
   render() {
-    const invalid = this.props.validation !== '';
+    const invalid = this.props.validator !== '';
     const caption = this.props.caption !== '' ? this.props.caption : this.props.name;
+    const invalidMaybeClass = invalid ? ' pt-intent-danger' : '';
 
     return (
-      <div className={`pt-form-group pt-inline ${invalid && 'pt-intent-danger'}`}>
+      <div className={`pt-form-group pt-inline${invalidMaybeClass}`}>
         <label htmlFor={this.props.name} className={`pt-label pt-inline ${styles.label_text}`}>
           {caption}
         </label>
-        <div className={`pt-form-content ${invalid && 'pt-intent-danger'}`}>
-          <div className="pt-select pt-minimal">
+        <div className={`pt-form-content ${styles.fullWidth}${invalidMaybeClass}`}>
+          <div className="pt-select pt-fill">
             <select
               id={this.props.name}
               name={this.props.name}
@@ -45,7 +46,7 @@ export default class ListFieldGroup extends PureComponent {
               {this.props.children}
             </select>
           </div>
-          {invalid && <div className="pt-form-helper-text">{this.props.validation}</div>}
+          {invalid && <div className="pt-form-helper-text">{this.props.validator}</div>}
         </div>
       </div>
     );

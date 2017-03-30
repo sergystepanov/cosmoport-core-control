@@ -1,28 +1,26 @@
 import React, { PureComponent, PropTypes } from 'react';
-import { TimePicker } from '@blueprintjs/datetime';
-
-import _date from '../../../components/date/_date';
+import { DateInput } from '@blueprintjs/datetime';
 
 import styles from '../EventForm.css';
 
-export default class TimeFieldGroup extends PureComponent {
+export default class DateFieldGroup extends PureComponent {
   static propTypes = {
     name: PropTypes.string.isRequired,
     caption: PropTypes.string.isRequired,
-    minutes: PropTypes.number,
+    date: PropTypes.instanceOf(Date),
     onChange: PropTypes.func,
     validator: PropTypes.string
   }
 
   static defaultProps = {
-    minutes: 0,
+    date: new Date(),
     message: '',
     onChange: () => { },
     validator: ''
   }
 
-  handleTimeChange = (date) => {
-    this.props.onChange(this.props.name, _date.toMinutes(date));
+  handleDateChange = (date) => {
+    this.props.onChange(this.props.name, date);
   }
 
   render() {
@@ -35,11 +33,12 @@ export default class TimeFieldGroup extends PureComponent {
           <span>{this.props.caption}</span>
         </label>
         <div className={`pt-form-content${invalidMaybeClass}`}>
-          <TimePicker
+          <DateInput
             id={this.props.name}
-            className={styles.noPadding}
-            value={_date.toDate(this.props.minutes)}
-            onChange={this.handleTimeChange}
+            className={styles.fullWidth}
+            value={this.props.date}
+            showActionsBar
+            onChange={this.handleDateChange}
           />
           {invalid && <div className="pt-form-helper-text">{this.props.validator}</div>}
         </div>

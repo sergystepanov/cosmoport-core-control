@@ -6,6 +6,7 @@ import EventDestinationPropType from '../../props/EventDestinationPropType';
 import EventStatusPropType from '../../props/EventStatusPropType';
 import LocalePropType from '../../props/LocalePropType';
 import L18n from '../l18n/L18n';
+import DateFiledGroup from './group/DateFieldGroup';
 import TimeFieldGroup from './group/TimeFieldGroup';
 import ListFieldGroup from './group/ListFieldGroup';
 import NumberFieldGroup from './group/NumberFieldGroup';
@@ -29,7 +30,6 @@ export default class EventForm extends Component {
 
   static defaultProps = { refs: { destinations: [], statuses: [], types: [] }, locale: {} }
 
-  // TODO number inputs
   constructor(props) {
     super(props);
 
@@ -52,8 +52,8 @@ export default class EventForm extends Component {
     };
 
     this.validators = {
-      time: () => (this.state.time >= this.state.duration ? 'Start time should be less than end.' : ''),
-      duration: () => (this.state.time + this.state.duration >= 24 * 60 ? 'End time should be less than 24.' : ''),
+      time: () => (this.state.time >= this.state.duration ? 'The start time should be less than the end time.' : ''),
+      duration: () => (this.state.time + this.state.duration >= 24 * 60 ? 'End time should be less than 24 h in sum.' : ''),
       type: () => (this.state.type === 0 ? 'Type is not selected.' : ''),
       status: () => (this.state.status === 0 ? 'Status is not selected.' : ''),
       gate: () => (this.state.gate === 0 ? 'Gate is not selected.' : ''),
@@ -70,10 +70,20 @@ export default class EventForm extends Component {
    */
   getFormData = () => Object.assign(this.state, { valid: this.isValid() });
 
+  /**
+   * Handles a change event on an input component.
+   *
+   * @since 0.1.0
+   */
   handleChangeEvent = (event) => {
     this.handleChange(event.target.name, event.target.value);
   }
 
+  /**
+   * Handles a component's value change.
+   *
+   * @since 0.1.0
+   */
   handleChange = (name, value) => {
     this.setState({ [name]: value });
   }
@@ -121,44 +131,29 @@ export default class EventForm extends Component {
 
     return (
       <div>
-        <label htmlFor="day" className="pt-label pt-inline">
-          <span className={styles.label_text}>Day</span>
-          <DateInput id="day" value={this.state.date} showActionsBar onChange={this.handleDayChange} />
-        </label>
+        <DateFiledGroup name="date" caption="day" date={this.state.date} onChange={this.handleChange} />
 
-        <ListFieldGroup name="type" index={this.state.type} validation={type()} onChange={this.handleChange}>
+        <ListFieldGroup name="type" index={this.state.type} validator={type()} onChange={this.handleChange}>
           {types}
         </ListFieldGroup>
 
         <div className="form-time-range">
-          <TimeFieldGroup
-            name="time"
-            caption="Start"
-            minutes={this.state.time}
-            onChange={this.handleChange}
-            validation={time()}
-          />
-          <TimeFieldGroup
-            name="duration"
-            caption="End"
-            minutes={this.state.duration}
-            onChange={this.handleChange}
-            validation={duration()}
-          />
+          <TimeFieldGroup name="time" caption="Start" minutes={this.state.time} onChange={this.handleChange} validator={time()} />
+          <TimeFieldGroup name="duration" caption="End" minutes={this.state.duration} onChange={this.handleChange} validator={duration()} />
         </div>
 
-        <ListFieldGroup name="status" index={this.state.status} validation={status()} onChange={this.handleChange}>
+        <ListFieldGroup name="status" index={this.state.status} validator={status()} onChange={this.handleChange}>
           {statuses}
         </ListFieldGroup>
 
-        <ListFieldGroup name="gate" index={this.state.gate} validation={gate()} onChange={this.handleChange}>
+        <ListFieldGroup name="gate" index={this.state.gate} validator={gate()} onChange={this.handleChange}>
           <option value="1">One</option>
           <option value="2">Two</option>
           <option value="3">Three</option>
           <option value="4">Four</option>
         </ListFieldGroup>
 
-        <ListFieldGroup name="destination" index={this.state.destination} validation={destination()} onChange={this.handleChange}>
+        <ListFieldGroup name="destination" index={this.state.destination} validator={destination()} onChange={this.handleChange}>
           {destinations}
         </ListFieldGroup>
 
@@ -166,7 +161,7 @@ export default class EventForm extends Component {
 
         <NumberFieldGroup name="limit" number={this.state.limit} onChange={this.handleChange} />
 
-        <NumberFieldGroup name="bought" number={this.state.bought} validation={bought()} onChange={this.handleChange} />
+        <NumberFieldGroup name="bought" number={this.state.bought} validator={bought()} onChange={this.handleChange} />
       </div>
     );
   }

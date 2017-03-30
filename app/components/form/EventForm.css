@@ -7,10 +7,22 @@
   width: 82%;
 }
 
-.label_text {
+.label_text, .label_text_short {
   text-transform: capitalize;
   display: inline-block;
-  width: 5.555em;
+  width: 6.666em;
+}
+
+.label_text_short {
+  width: 5.4em;
+}
+
+.noPadding {
+  padding: 0 !important;
+}
+
+.fullWidth, .fullWidthChild span {
+  width: 100%;
 }
 
 .dropdown {

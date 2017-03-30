@@ -1,5 +1,5 @@
 import React, { PureComponent, PropTypes } from 'react';
-import { NumericInput } from '@blueprintjs/core';
+import { NumericInput, Intent } from '@blueprintjs/core';
 
 import styles from '../EventForm.css';
 
@@ -9,7 +9,7 @@ export default class NumberFieldGroup extends PureComponent {
     caption: PropTypes.string,
     number: PropTypes.number,
     onChange: PropTypes.func,
-    validation: PropTypes.string,
+    validator: PropTypes.string,
     icon: PropTypes.string
   }
 
@@ -17,7 +17,7 @@ export default class NumberFieldGroup extends PureComponent {
     caption: '',
     number: 0,
     onChange: () => { },
-    validation: '',
+    validator: '',
     icon: null
   }
 
@@ -26,25 +26,28 @@ export default class NumberFieldGroup extends PureComponent {
   }
 
   render() {
-    const invalid = this.props.validation !== '';
+    const invalid = this.props.validator !== '';
     const caption = this.props.caption !== '' ? this.props.caption : this.props.name;
+    const invalidMaybeClass = invalid ? ' pt-intent-danger' : '';
 
     return (
-      <div className={`pt-form-group pt-inline ${invalid && 'pt-intent-danger'}`}>
+      <div className={`pt-form-group pt-inline${invalidMaybeClass}`}>
         <label htmlFor={this.props.name} className={`pt-label pt-inline ${styles.label_text}`}>
           {caption}
         </label>
-        <div className={`pt-form-content ${invalid && 'pt-intent-danger'}`}>
+        <div className={`pt-form-content ${styles.fullWidth}${invalidMaybeClass}`}>
           <NumericInput
             id={this.props.name}
             allowNumericCharactersOnly
+            intent={invalid ? Intent.DANGER : Intent.NONE}
+            className={invalidMaybeClass}
             buttonPosition={'none'}
             leftIconName={this.props.icon}
             min={0}
             value={this.props.number}
             onValueChange={this.handleValueChange}
           />
-          {invalid && <div className="pt-form-helper-text">{this.props.validation}</div>}
+          {invalid && <div className="pt-form-helper-text">{this.props.validator}</div>}
         </div>
       </div>
     );
