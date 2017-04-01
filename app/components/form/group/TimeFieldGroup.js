@@ -30,7 +30,7 @@ export default class TimeFieldGroup extends PureComponent {
     const invalidMaybeClass = invalid ? ' pt-intent-danger' : '';
 
     return (
-      <div className={`pt-form-group pt-inline${invalidMaybeClass}`}>
+      <div className={`pt-form-group${invalidMaybeClass}`}>
         <label htmlFor={this.props.name} className={`pt-label pt-inline ${styles.label_text_short}`}>
           <span>{this.props.caption}</span>
         </label>

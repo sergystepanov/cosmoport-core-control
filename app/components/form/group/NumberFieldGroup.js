@@ -10,7 +10,8 @@ export default class NumberFieldGroup extends PureComponent {
     number: PropTypes.number,
     onChange: PropTypes.func,
     validator: PropTypes.string,
-    icon: PropTypes.string
+    icon: PropTypes.string,
+    inline: PropTypes.bool
   }
 
   static defaultProps = {
@@ -18,7 +19,8 @@ export default class NumberFieldGroup extends PureComponent {
     number: 0,
     onChange: () => { },
     validator: '',
-    icon: null
+    icon: null,
+    inline: false
   }
 
   handleValueChange = (valueAsNumber) => {
@@ -31,7 +33,7 @@ export default class NumberFieldGroup extends PureComponent {
     const invalidMaybeClass = invalid ? ' pt-intent-danger' : '';
 
     return (
-      <div className={`pt-form-group pt-inline${invalidMaybeClass}`}>
+      <div className={`pt-form-group ${this.props.inline ? 'pt-inline' : ''}${invalidMaybeClass} ${this.props.className}`}>
         <label htmlFor={this.props.name} className={`pt-label pt-inline ${styles.label_text}`}>
           {caption}
         </label>

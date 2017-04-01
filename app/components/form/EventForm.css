@@ -10,7 +10,7 @@
 .label_text, .label_text_short {
   text-transform: capitalize;
   display: inline-block;
-  width: 6.666em;
+  width: 20%;
 }
 
 .label_text_short {
@@ -29,6 +29,30 @@
   margin: 0 0 1em 5.3em;
 }
 
-.form-time-range {
+.formTimeRangeContainer {
+  flex-direction: row !important;
+}
+
+.formTimeRange {
   display: flex;
+  flex-direction: row !important;
+  align-items: center;
+  flex-wrap: wrap;
+  width: 84%;
+}
+
+.formTimeRange div {
+  margin: 0 .15em 0 0;
+}
+
+.timeLabel {
+  width: 19%;
+}
+
+.repeat {
+  width: 4em;
+}
+
+.totalTime {
+  padding-top: 2.3em;
 }

@@ -1,5 +1,4 @@
 import React, { Component, PropTypes } from 'react';
-import { DateInput } from '@blueprintjs/datetime';
 
 import EventTypePropType from '../../props/EventTypePropType';
 import EventDestinationPropType from '../../props/EventDestinationPropType';
@@ -10,8 +9,13 @@ import DateFiledGroup from './group/DateFieldGroup';
 import TimeFieldGroup from './group/TimeFieldGroup';
 import ListFieldGroup from './group/ListFieldGroup';
 import NumberFieldGroup from './group/NumberFieldGroup';
+import LabelFieldGroup from './group/LabelFieldGroup';
+import _date from '../date/_date';
 
 import styles from './EventForm.css';
+
+// TODO Make sure the props are changing (componentWill...)
+// TODO Add label and client-side time overlap
 
 /**
  * The class for event properties form.
@@ -48,12 +52,13 @@ export default class EventForm extends Component {
       destination: 0,
       gate: 0,
       status: 1,
-      cost: 1
+      cost: 1,
+      repeat_interval: 0
     };
 
     this.validators = {
-      time: () => (this.state.time >= this.state.duration ? 'The start time should be less than the end time.' : ''),
-      duration: () => (this.state.time + this.state.duration >= 24 * 60 ? 'End time should be less than 24 h in sum.' : ''),
+      time: () => (this.state.time + this.state.duration + this.state.repeat_interval >= 24 * 60 ?
+        'The event\'s duration time should be less than 24h in total.' : ''),
       type: () => (this.state.type === 0 ? 'Type is not selected.' : ''),
       status: () => (this.state.status === 0 ? 'Status is not selected.' : ''),
       gate: () => (this.state.gate === 0 ? 'Gate is not selected.' : ''),
@@ -89,6 +94,28 @@ export default class EventForm extends Component {
   }
 
   /**
+   * Handles a type selection with additional BS logic.
+   *
+   * @since 0.1.0
+   */
+  handleTypeChange = (name, value) => {
+    this.handleChange(name, value);
+
+    // get type's data from a repository
+    const eventTypeData = this.props.refs.types.find((type) => type.id === value);
+
+    // fill fields with default values
+    this.setState({
+      duration: eventTypeData.defaultDuration,
+      repeat_interval: eventTypeData.defaultRepeatInterval
+    });
+  }
+
+  handleWarningChange = (name, value) => {
+    this.handleChange(name, value);
+  }
+
+  /**
    * Handles the change event on an input field of <day> type.
    *
    * @param {Date} day The date value.
@@ -112,38 +139,53 @@ export default class EventForm extends Component {
   isValid = () => !Object.keys(this.validators).some(key => this.validators[key]() !== '')
 
   render() {
-    const statuses = this.props.refs.statuses.map(status =>
-      <option key={status.id} value={status.id}>
-        {this.l18n.findTranslationById(status, 'i18nStatus')}
+    const { destinations, types, statuses } = this.props.refs;
+    const { time, type, status, destination, gate, bought } = this.validators;
+
+    const statusOptions = statuses.map(op =>
+      <option key={op.id} value={op.id}>
+        {this.l18n.findTranslationById(op, 'i18nStatus')}
       </option>
     );
-    const destinations = this.props.refs.destinations.map(destination =>
-      <option key={destination.id} value={destination.id}>
-        {this.l18n.findTranslationById(destination, 'i18nEventDestinationName')}
+    const destinationOptions = destinations.map(op =>
+      <option key={op.id} value={op.id}>
+        {this.l18n.findTranslationById(op, 'i18nEventDestinationName')}
       </option>
     );
-    const types = this.props.refs.types.map(type =>
-      <option key={type.id} value={type.id}>
-        {this.l18n.findTranslationById(type, 'i18nEventTypeName')}&nbsp;/&nbsp;{this.l18n.findTranslationById(type, 'i18nEventTypeSubname')}
+    const typeOptions = types.map(op =>
+      <option key={op.id} value={op.id}>
+        {this.l18n.findTranslationById(op, 'i18nEventTypeName')}&nbsp;/&nbsp;{this.l18n.findTranslationById(op, 'i18nEventTypeSubname')}
       </option>
     );
-    const { time, duration, type, status, destination, gate, bought } = this.validators;
+
+    const timeRange = this.state.time + this.state.duration;
+    const invalidTimeRange = time() !== '';
+    const invalidTimeRangeMaybeClass = invalidTimeRange ? ' pt-intent-danger' : '';
+    const totalTime = _date.minutesToHm(timeRange);
 
     return (
       <div>
         <DateFiledGroup name="date" caption="day" date={this.state.date} onChange={this.handleChange} />
 
-        <ListFieldGroup name="type" index={this.state.type} validator={type()} onChange={this.handleChange}>
-          {types}
+        <ListFieldGroup name="type" index={this.state.type} validator={type()} onChange={this.handleTypeChange}>
+          {typeOptions}
         </ListFieldGroup>
 
-        <div className="form-time-range">
-          <TimeFieldGroup name="time" caption="Start" minutes={this.state.time} onChange={this.handleChange} validator={time()} />
-          <TimeFieldGroup name="duration" caption="End" minutes={this.state.duration} onChange={this.handleChange} validator={duration()} />
+        <div className={`pt-form-group ${styles.formTimeRangeContainer}${invalidTimeRangeMaybeClass}`}>
+          <label htmlFor="time-range" className={`pt-label pt-inline ${styles.label_text} ${styles.timeLabel}`}>
+            <span>Time</span>
+          </label>
+          <div className={`pt-form-content ${styles.formTimeRange}${invalidTimeRangeMaybeClass}`}>
+            <TimeFieldGroup name="time" caption="Start" minutes={this.state.time} onChange={this.handleChange} />
+            <TimeFieldGroup name="duration" caption="Duration" minutes={this.state.duration} onChange={this.handleChange} />
+            <NumberFieldGroup name="repeat_interval" className={styles.repeat} caption="Repeat" number={this.state.repeat_interval} onChange={this.handleWarningChange} />
+            <LabelFieldGroup className={styles.totalTime} value={totalTime} />
+            {invalidTimeRange && <div className="pt-form-helper-text">{time()}</div>}
+          </div>
         </div>
 
         <ListFieldGroup name="status" index={this.state.status} validator={status()} onChange={this.handleChange}>
-          {statuses}
+          {statusOptions}
         </ListFieldGroup>
 
         <ListFieldGroup name="gate" index={this.state.gate} validator={gate()} onChange={this.handleChange}>
@@ -154,14 +196,14 @@ export default class EventForm extends Component {
         </ListFieldGroup>
 
         <ListFieldGroup name="destination" index={this.state.destination} validator={destination()} onChange={this.handleChange}>
-          {destinations}
+          {destinationOptions}
         </ListFieldGroup>
 
-        <NumberFieldGroup name="cost" number={this.state.cost} icon={'euro'} onChange={this.handleChange} />
+        <NumberFieldGroup name="cost" number={this.state.cost} icon={'euro'} onChange={this.handleChange} inline />
 
-        <NumberFieldGroup name="limit" number={this.state.limit} onChange={this.handleChange} />
+        <NumberFieldGroup name="limit" number={this.state.limit} onChange={this.handleChange} inline />
 
-        <NumberFieldGroup name="bought" number={this.state.bought} validator={bought()} onChange={this.handleChange} />
+        <NumberFieldGroup name="bought" number={this.state.bought} validator={bought()} onChange={this.handleChange} inline />
       </div>
     );
   }

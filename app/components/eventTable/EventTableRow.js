@@ -1,5 +1,5 @@
-import React, {PropTypes, Component} from 'react';
-import {Button} from '@blueprintjs/core';
+import React, { PropTypes, Component } from 'react';
+import { Button } from '@blueprintjs/core';
 
 import EventPropType from '../../props/EventPropType';
 import EventTypePropType from '../../props/EventTypePropType';
@@ -8,6 +8,7 @@ import EventStatusPropType from '../../props/EventStatusPropType';
 import LocalePropType from '../../props/LocalePropType';
 
 import L18n from '../l18n/L18n';
+import _date from '../date/_date';
 
 /*
  * The class for rendering event table row.
@@ -20,42 +21,22 @@ export default class EventTableRow extends Component {
     event: EventPropType.isRequired,
     refs: PropTypes
       .shape({
-      destinations: PropTypes
-        .arrayOf(EventDestinationPropType)
-        .isRequired,
-      statuses: PropTypes
-        .arrayOf(EventStatusPropType)
-        .isRequired,
-      types: PropTypes
-        .arrayOf(EventTypePropType)
-        .isRequired
-    })
+        destinations: PropTypes
+          .arrayOf(EventDestinationPropType)
+          .isRequired,
+        statuses: PropTypes
+          .arrayOf(EventStatusPropType)
+          .isRequired,
+        types: PropTypes
+          .arrayOf(EventTypePropType)
+          .isRequired
+      })
       .isRequired,
     locale: LocalePropType.isRequired
   }
 
   static defaultProps = {
-    callback: () => {}
-  }
-
-  /**
-   * Converts the number of minutes into hh:mm format.
-   *
-   * @param {number} minutes
-   */
-  static minutesToHm(minutes) {
-    if (minutes < 1) {
-      return '00:00';
-    }
-
-    const h = Math.trunc(minutes / 60);
-    const m = minutes % 60;
-
-    return `${h < 10
-      ? `0${h}`
-      : h}:${m < 10
-        ? `0${m}`
-        : m}`;
+    callback: () => { }
   }
 
   constructor(props) {
@@ -86,8 +67,8 @@ export default class EventTableRow extends Component {
       ? `${this
         .l18n
         .findTranslationById(type, 'i18nEventTypeName')} / ${this
-        .l18n
-        .findTranslationById(type, 'i18nEventTypeSubname')}`
+          .l18n
+          .findTranslationById(type, 'i18nEventTypeSubname')}`
       : id;
   }
 
@@ -136,12 +117,10 @@ export default class EventTableRow extends Component {
     return (
       <tr className={name}>
         <td>{`${this
-            .props
-            .event
-            .eventDate}
-          ${this
-            .constructor
-            .minutesToHm(this.props.event.startTime)}`}</td>
+          .props
+          .event
+          .eventDate}
+          ${_date.minutesToHm(this.props.event.startTime)}`}</td>
         <td>
           <span className="type-name">
             {this.renderTypeCol(this.props.event.eventTypeId, this.props.refs.types)}
@@ -157,7 +136,7 @@ export default class EventTableRow extends Component {
           className="pt-minimal"
           iconName="remove"
           {...myAttr}
-          onClick={this.passClick}/></td>
+          onClick={this.passClick} /></td>
       </tr>
     );
   }

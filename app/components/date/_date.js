@@ -20,8 +20,30 @@ export default class _date {
    * Adds given value of minutes to a date.
    *
    * @param {Number} minutes The number of minutes to add.
+   * @returns {Date} The date object.
    */
   static toDate(minutes) {
     return moment('1945-05-09').add(minutes, 'minutes').toDate();
+  }
+
+  /**
+   * Converts the number of minutes into hh:mm format.
+   *
+   * @param {number} minutes The total number of minutes.
+   * @returns {string} The formated string (hh:mm).
+   */
+  static minutesToHm(minutes) {
+    if (minutes < 1) {
+      return '00:00';
+    }
+
+    const h = Math.trunc(minutes / 60);
+    const m = minutes % 60;
+
+    return `${h < 10
+      ? `0${h}`
+      : h}:${m < 10
+        ? `0${m}`
+        : m}`;
   }
 }
