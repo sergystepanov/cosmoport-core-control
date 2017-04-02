@@ -56,3 +56,9 @@
 .totalTime {
   padding-top: 2.3em;
 }
+
+.warningBlock {
+  color: #bf7326;
+  margin-top: 5px;
+  font-size: 12px;
+}

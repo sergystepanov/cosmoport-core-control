@@ -45,7 +45,7 @@ export default class EventForm extends Component {
       // Start minute of the event (in minutes)
       time: 0,
       // Duration of the event (in minutes)
-      duration: 30,
+      duration: 0,
       limit: 1,
       bought: 0,
       type: 0,
@@ -53,7 +53,9 @@ export default class EventForm extends Component {
       gate: 0,
       status: 1,
       cost: 1,
-      repeat_interval: 0
+      repeat_interval: 0,
+      default_duration: 0,
+      default_repeat_interval: 0
     };
 
     this.validators = {
@@ -64,6 +66,11 @@ export default class EventForm extends Component {
       gate: () => (this.state.gate === 0 ? 'Gate is not selected.' : ''),
       destination: () => (this.state.destination === 0 ? 'Destination is not selected.' : ''),
       bought: () => (this.state.bought > this.state.limit ? 'Beyond the tickets limit.' : '')
+    };
+
+    this.warnings = {
+      duration: () => (this.state.duration !== this.state.default_duration ? 'You have selected not default duration value.' : ''),
+      repeat_interval: () => (this.state.repeat_interval !== this.state.default_repeat_interval ? 'You have selected not default repeat interval value.' : '')
     };
   }
 
@@ -107,12 +114,10 @@ export default class EventForm extends Component {
     // fill fields with default values
     this.setState({
       duration: eventTypeData.defaultDuration,
-      repeat_interval: eventTypeData.defaultRepeatInterval
+      repeat_interval: eventTypeData.defaultRepeatInterval,
+      default_duration: eventTypeData.defaultDuration,
+      default_repeat_interval: eventTypeData.defaultRepeatInterval,
     });
-  }
-
-  handleWarningChange = (name, value) => {
-    this.handleChange(name, value);
   }
 
   /**
@@ -138,6 +143,30 @@ export default class EventForm extends Component {
    */
   isValid = () => !Object.keys(this.validators).some(key => this.validators[key]() !== '')
 
+  renderWarnings = () => {
+    const warnings = [];
+
+    Object.keys(this.warnings).forEach((warning) => {
+      const check = this.warnings[warning]();
+      if (check !== '') {
+        warnings.push({ name: warning, message: check });
+      }
+    });
+
+    if (warnings.length === 0) {
+      return null;
+    }
+
+    return (
+      <div className={styles.warningBlock}>
+        {warnings.map((warning) => (<div key={warning.name}>
+          <span className="pt-icon-standard pt-icon-warning-sign" />
+          <span>{warning.message}</span></div>)
+        )}
+      </div>
+    );
+  }
+
   render() {
     const { destinations, types, statuses } = this.props.refs;
     const { time, type, status, destination, gate, bought } = this.validators;
@@ -162,6 +191,7 @@ export default class EventForm extends Component {
     const invalidTimeRange = time() !== '';
     const invalidTimeRangeMaybeClass = invalidTimeRange ? ' pt-intent-danger' : '';
     const totalTime = _date.minutesToHm(timeRange);
+    const warnings = this.renderWarnings();
 
     return (
       <div>
@@ -178,9 +208,10 @@ export default class EventForm extends Component {
           <div className={`pt-form-content ${styles.formTimeRange}${invalidTimeRangeMaybeClass}`}>
             <TimeFieldGroup name="time" caption="Start" minutes={this.state.time} onChange={this.handleChange} />
             <TimeFieldGroup name="duration" caption="Duration" minutes={this.state.duration} onChange={this.handleChange} />
-            <NumberFieldGroup name="repeat_interval" className={styles.repeat} caption="Repeat" number={this.state.repeat_interval} onChange={this.handleWarningChange} />
+            <NumberFieldGroup name="repeat_interval" className={styles.repeat} caption="Repeat" number={this.state.repeat_interval} onChange={this.handleChange} />
             <LabelFieldGroup className={styles.totalTime} value={totalTime} />
             {invalidTimeRange && <div className="pt-form-helper-text">{time()}</div>}
+            {warnings && warnings}
           </div>
         </div>
 
