@@ -1,79 +1,46 @@
-import React, {Component} from 'react';
+import React, { Component, PropTypes } from 'react';
 import Sound from 'react-sound';
 
 import PlayerControls from './PlayerControls';
-//import SongSelector from './SongSelector';
 
 import styles from './Player.css';
 
-const {app} = require('electron').remote;
+const { app } = require('electron').remote;
+
+const shrink = (text, length) => `${text.substring(0, length)}...${text.substring(text.length - length)}`;
+const buildUrl = (file) => `file:///${app.getPath('music')}/${file}`;
 
 export default class Player extends Component {
+  static propTypes = {
+    music: PropTypes.arrayOf(PropTypes.string)
+  }
+
+  static defaultProps = {
+    music: []
+  }
+
   constructor(props) {
     super(props);
 
     this.state = {
-      track: 0,
+      track: '',
       position: 0,
       volume: 20,
       // Played / Stoped
       playStatus: Sound.status.STOPPED
     };
+
+    this.candidates = [];
   }
 
-  render() {
-    const {volume} = this.state;
-
-    return (
-      <div className={styles.centred}>
-        <PlayerControls
-          playStatus={this.state.playStatus}
-          onNext={this.handleNext}
-          onBack={this.handleBack}
-          onPlay={() => this.setState({playStatus: Sound.status.PLAYING})}
-          onPause={() => this.setState({playStatus: Sound.status.PAUSED})}
-          onStop={() => this.setState({playStatus: Sound.status.STOPPED, position: 0})}
-          onSeek={position => this.setState({position})}
-          onVolumeUp={() => this.setState({
-          volume: volume >= 100
-            ? volume
-            : volume + 10
-        })}
-          onVolumeDown={() => this.setState({
-          volume: volume <= 0
-            ? volume
-            : volume - 10
-        })}
-          duration={0}
-          position={this.state.position}/> {this.hasTrack() && <Sound
-          url={this.buildUrl(this.getTrack(this.state.track))}
-          playStatus={this.state.playStatus}
-          playFromPosition={this.state.position}
-          volume={this.state.volume}
-          onLoading={({bytesLoaded, bytesTotal}) => console.log(`${bytesLoaded / bytesTotal * 100}% loaded`)}
-          onFinishedPlaying={this.handleFinish}/>}
-        {this.renderCurrentSong()}
-      </div>
-    );
+  componentWillReceiveProps(nextProps) {
+    if (this.props !== nextProps) {
+      this.candidates = nextProps.music.slice(0);
+      this.randomTrack();
+    }
   }
 
-  handleNext = () => {
-    this.shiftPlayTrack(1);
-  }
-
-  handleBack = () => {
-    this.shiftPlayTrack(-1);
-  }
-
-  buildUrl(file) {
-    return `file:///${app.getPath('music')}/${file}`;
-  }
-
-  hasTrack() {
-    return this.state.track > -1 && this.props.music.length > 0;
-  }
-
-  getStatus() {
+  getStatus = () => {
     switch (this.state.playStatus) {
       case Sound.status.PLAYING:
         return 'playing';
@@ -86,34 +53,46 @@ export default class Player extends Component {
     }
   }
 
-  getTrack(index) {
-    return this.props.music[index];
+  randomTrack = () => {
+    // reload tracks
+    if (this.candidates.length === 0) {
+      this.candidates = this.props.music.slice(0);
+    }
+
+    const name = this.candidates.splice(Math.floor(Math.random() * this.candidates.length), 1);
+
+    this.setState({ track: name, position: 0 });
   }
 
-  shiftPlayTrack(shift) {
-    const tracks = this.props.music;
-
-    this.setState({
-      track: (this.state.track + shift) % this.props.music.length,
-      position: 0
-    });
-  }
-
-  handleFinish = () => {
-    // this.setState({playStatus: Sound.status.STOPPED})}
-    this.shiftPlayTrack(1);
-  }
-
-  cropMiddle(text, length) {
-    return `${text.substring(0, length)}...${text.substring(text.length - length)}`;
-  }
-
-  renderCurrentSong() {
-    const track = this.getTrack(this.state.track);
-    const text = this.cropMiddle(`Track ${track} is ${this.getStatus()}`, 17);
+  render() {
+    const { volume, playStatus, position, track } = this.state;
+    const hasTrack = track !== '' && this.props.music.length > 0;
 
     return (
-      <div title={track} className={`${styles.centred} ${styles.player}`}>{text}</div>
+      <div className={styles.centred}>
+        <PlayerControls
+          playStatus={playStatus}
+          onNext={this.randomTrack}
+          onPlay={() => this.setState({ playStatus: Sound.status.PLAYING })}
+          onPause={() => this.setState({ playStatus: Sound.status.PAUSED })}
+          onStop={() => this.setState({ playStatus: Sound.status.STOPPED, position: 0 })}
+          onSeek={pos => this.setState({ pos })}
+          onVolumeUp={() => this.setState({ volume: volume >= 100 ? volume : volume + 10 })}
+          onVolumeDown={() => this.setState({ volume: volume <= 0 ? volume : volume - 10 })}
+          duration={0}
+          position={position}
+        />
+        {hasTrack && <Sound
+          url={buildUrl(track)}
+          playStatus={playStatus}
+          playFromPosition={position}
+          volume={volume}
+          onFinishedPlaying={this.randomTrack}
+        />}
+        {hasTrack && <div title={track} className={`${styles.centred} ${styles.player}`}>
+          {shrink(`Track ${track} is ${this.getStatus()}`, 15)}
+        </div>}
+      </div>
     );
   }
 }
