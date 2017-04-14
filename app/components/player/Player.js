@@ -26,6 +26,7 @@ export default class Player extends Component {
       track: '',
       position: 0,
       volume: 20,
+      period: 1,
       // Played / Stoped
       playStatus: Sound.status.STOPPED
     };
@@ -34,10 +35,18 @@ export default class Player extends Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    if (this.props !== nextProps) {
+    if (this.props.music !== nextProps.music) {
       this.candidates = nextProps.music.slice(0);
       this.randomTrack();
     }
+  }
+
+  shouldComponentUpdate(nextProps, nextState) {
+    return nextProps.music !== this.props.music || nextState !== this.state;
+  }
+
+  componentWillUnmount() {
+    clearTimeout(this.timeout);
   }
 
   getStatus = () => {
@@ -64,6 +73,26 @@ export default class Player extends Component {
     this.setState({ track: name, position: 0 });
   }
 
+  handlePeriodChange = (value) => {
+    if (this.state.period !== value) {
+      this.setState({ period: value });
+    }
+  }
+
+  handleTrackFinish = () => {
+    if (this.state === Sound.status.STOPPED) {
+      return;
+    }
+
+    // wait some time
+    this.setState({ playStatus: Sound.status.STOPPED }, () => {
+      this.randomTrack();
+      this.timeout = setTimeout(() => {
+        this.setState({ playStatus: Sound.status.PLAYING });
+      }, this.state.period * 1000 * 60);
+    });
+  }
+
   render() {
     const { volume, playStatus, position, track } = this.state;
     const hasTrack = track !== '' && this.props.music.length > 0;
@@ -81,13 +110,15 @@ export default class Player extends Component {
           onVolumeDown={() => this.setState({ volume: volume <= 0 ? volume : volume - 10 })}
           duration={0}
           position={position}
+          period={this.state.period}
+          onPeriodChange={this.handlePeriodChange}
         />
         {hasTrack && <Sound
           url={buildUrl(track)}
           playStatus={playStatus}
           playFromPosition={position}
           volume={volume}
-          onFinishedPlaying={this.randomTrack}
+          onFinishedPlaying={this.handleTrackFinish}
         />}
         {hasTrack && <div title={track} className={`${styles.centred} ${styles.player}`}>
           {shrink(`Track ${track} is ${this.getStatus()}`, 15)}
