@@ -6,7 +6,7 @@ import Message from '../components/messages/Message';
 import Translation from '../components/translation/Translation';
 import TranslationTable from '../components/translation/TranslationTable';
 import LocaleAddDialog from '../components/dialog/LocaleAddDialog';
-import Api from '../containers/ApiV11';
+import Api from '../../lib/core-api-client/ApiV1';
 
 const API = new Api();
 

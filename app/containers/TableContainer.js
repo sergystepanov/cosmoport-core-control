@@ -3,7 +3,7 @@ import React, { Component } from 'react';
 
 import Message from '../components/messages/Message';
 import Table from '../components/table/Table';
-import Api from '../containers/ApiV11';
+import Api from '../../lib/core-api-client/ApiV1';
 
 const API = new Api();
 

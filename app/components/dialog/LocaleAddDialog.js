@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {Dialog, Button, Intent} from "@blueprintjs/core";
+import {Dialog, Button, Intent} from '@blueprintjs/core';
 
 import LocaleForm from '../form/locale/LocaleForm';
 

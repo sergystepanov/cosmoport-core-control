@@ -1,6 +1,6 @@
 // @flow
-import React, {Component} from 'react';
-import {EditableText, Tag, Intent} from '@blueprintjs/core';
+import React, { Component } from 'react';
+import { EditableText, Tag, Intent } from '@blueprintjs/core';
 
 export default class TranslationTable extends Component {
   constructor(props) {
@@ -51,8 +51,8 @@ export default class TranslationTable extends Component {
               maxLines={12}
               defaultValue={dat.text}
               onConfirm={this
-            .handleTextChange
-            .bind(this, dat.id)}/></td>
+                .handleTextChange
+                .bind(this, dat.id)} /></td>
             <td>{dat.i18n.description}</td>
             <td>
               <Tag className="pt-minimal">{dat.i18n.tag}</Tag>
@@ -66,10 +66,12 @@ export default class TranslationTable extends Component {
       return (
         <table className="pt-table">
           <thead>
-            <th>#</th>
-            <th>Text</th>
-            <th>Description</th>
-            <th>Tags</th>
+            <tr>
+              <th>#</th>
+              <th>Text</th>
+              <th>Description</th>
+              <th>Tags</th>
+            </tr>
           </thead>
           <tbody>
             {rows}

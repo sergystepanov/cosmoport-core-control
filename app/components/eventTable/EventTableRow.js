@@ -38,7 +38,6 @@ export default class EventTableRow extends Component {
    */
   passClick = (event) => this.props.callback(event.target.getAttribute('data-row-id'))
 
-
   renderL18nCell = (id, translations, custom) => {
     const l18nRecords = translations || [];
     const l18nId = l18nRecords.find(record => record.id === id);
@@ -72,7 +71,7 @@ export default class EventTableRow extends Component {
    * @param {Array} statuses
    */
   renderStatusCol = (id, statuses) => this.renderL18nCell(id, statuses, (l18nId, l18n) =>
-    l18n.findTranslationById(status, 'i18nStatus'))
+    l18n.findTranslationById(l18nId, 'i18nStatus'))
 
   render() {
     const { event, refs } = this.props;

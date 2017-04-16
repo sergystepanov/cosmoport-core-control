@@ -4,7 +4,7 @@ import { ipcRenderer } from 'electron';
 
 import NavigationBar from '../components/navigation/NavigationBar';
 import styles from './App.css';
-import Api from '../containers/ApiV11';
+import Api from '../../lib/core-api-client/ApiV1';
 import WebSocketWrapper from '../../lib/core-api-client/WebSocketWrapper';
 
 const API = new Api();

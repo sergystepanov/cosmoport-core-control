@@ -5,7 +5,7 @@ import { Button } from '@blueprintjs/core';
 import Message from '../../components/messages/Message';
 import EventAddDialog from '../dialog/EventAddDialog';
 import EventTable from '../eventTable/EventTable';
-import Api from '../../containers/ApiV11';
+import Api from '../../../lib/core-api-client/ApiV1';
 
 const API = new Api();
 const mapEvent = (data) => ({
