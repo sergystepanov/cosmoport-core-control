@@ -1,11 +1,13 @@
 // @flow
-import React, {Component} from 'react';
-import {ipcRenderer} from 'electron';
+import React, { Component } from 'react';
+import { ipcRenderer } from 'electron';
 
 import NavigationBar from '../components/navigation/NavigationBar';
 import styles from './App.css';
-import ApiV1 from './ApiV11';
+import Api from '../containers/ApiV11';
 import WebSocketWrapper from '../../lib/core-api-client/WebSocketWrapper';
+
+const API = new Api();
 
 export default class App extends Component {
   constructor(props) {
@@ -21,29 +23,26 @@ export default class App extends Component {
     };
 
     ipcRenderer.on('audio', this.handleSetAudio);
-
-    this.api = new ApiV1();
   }
 
   componentDidMount() {
-    this
-      .api
-      .fetchTime((data) => {
-        this.setState({timestamp: data.timestamp});
-      }, () => {});
+    API
+      .fetchTime()
+      .then(data => this.setState({ timestamp: data.timestamp }))
+      .catch();
+
     this.trySocket(this);
   }
 
   getNodes() {
-    this
-      .api
-      .fetchNodes((data) => {
-        this.setState({nodes: data});
-      }, () => {});
+    API
+      .fetchNodes()
+      .then(data => this.setState({ nodes: data }))
+      .catch();
   }
 
   handleSetAudio = (event, files) => {
-    this.setState({audio: files});
+    this.setState({ audio: files });
   }
 
   trySocket = (self) => {
@@ -74,7 +73,7 @@ export default class App extends Component {
     });
   }
 
-  props : {
+  props: {
     children: HTMLElemen
   };
 
@@ -82,7 +81,7 @@ export default class App extends Component {
     return (
       <div className="pt-ui-text">
         <div className={styles.container}>
-          <NavigationBar timestamp={this.state.timestamp} nodes={this.state.nodes} audio={this.state.audio}/>
+          <NavigationBar timestamp={this.state.timestamp} nodes={this.state.nodes} audio={this.state.audio} />
 
           <div className={styles.content}>
             {this.props.children}

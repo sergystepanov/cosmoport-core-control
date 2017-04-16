@@ -30,8 +30,8 @@ export default class L18n {
   }
 
   findTranslationById(ref, name) {
-    return ref
-      ? this.locale[ref[name]].values[0]
-      : name;
+    const data = this.locale[ref[name]];
+
+    return ref && data ? data.values[0] : name;
   }
 }

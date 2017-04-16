@@ -1,22 +1,20 @@
 // @flow
-import React, {Component} from 'react';
-import {Button, Intent} from '@blueprintjs/core';
+import React, { Component } from 'react';
+import { Button } from '@blueprintjs/core';
 
-import {Message} from '../components/messages/Message';
+import Message from '../components/messages/Message';
 import Translation from '../components/translation/Translation';
 import TranslationTable from '../components/translation/TranslationTable';
 import LocaleAddDialog from '../components/dialog/LocaleAddDialog';
-import Api from '../../lib/core-api-client/ApiV1';
+import Api from '../containers/ApiV11';
+
+const API = new Api();
 
 export default class TranslationContainer extends Component {
   constructor(props) {
     super(props);
 
-    this.state = {
-      locales: [],
-      translations: {},
-      currentTranslation: ''
-    };
+    this.state = { locales: [], translations: {}, currentTranslation: '' };
   }
 
   componentDidMount() {
@@ -24,84 +22,60 @@ export default class TranslationContainer extends Component {
   }
 
   fetchLocales = () => {
-    const api = new Api();
-
-    api.fetchLocales((data) => {
-      this.setState({locales: data});
-      Message.show({message: 'Locales data has been fetched from the server successfully.'});
-    }, (error) => {
-      Message.show({message: `Couldn't fetch locales data from the server, ${error}`, intent: Intent.DANGER});
-    });
+    API
+      .fetchLocales()
+      .then(data => this.setState({ locales: data }))
+      .then(Message.show('Locales data has been fetched from the server successfully.'))
+      .catch(error => Message.show(`Couldn't fetch locales data from the server, ${error}`, 'error'));
   }
 
   handleLocaleSelect = (locale) => {
-    const api = new Api();
-
-    api.fetchTranslationsForLocale(locale, (data) => {
-      this.setState({translations: data, currentTranslation: locale});
-      Message.show({message: 'Translations data has been fetched from the server successfully.'});
-    }, (error) => {
-      Message.show({message: `Couldn't fetch translations data from the server, ${error}`, intent: Intent.DANGER});
-    });
+    API
+      .fetchTranslationsForLocale(locale)
+      .then(data => this.setState({ translations: data, currentTranslation: locale }))
+      .then(Message.show('Translations data has been fetched from the server successfully.'))
+      .catch(error => Message.show(`Couldn't fetch translations data from the server, ${error}`, 'error'));
   }
 
   handleTextChange = (id, value, okCallback, notOkCallback) => {
-    const api = new Api();
+    const valueObject = { text: value };
 
-    const valueObject = {
-      text: value
-    };
-    console.log(id, value, okCallback, notOkCallback);
-
-    api.updateTranslationTextForId(id, valueObject, (data) => {
-      Message.show({message: 'Translation value has been saved successfully.'});
-      okCallback();
-    }, (error) => {
-      Message.show({message: `Couldn't save translation value, ${error}`, intent: Intent.DANGER});
-      notOkCallback();
-    });
+    API
+      .updateTranslationTextForId(id, valueObject)
+      .then(Message.show('Translation value has been saved successfully.'))
+      .then(okCallback)
+      .catch(error => {
+        Message.show(`Couldn't save translation value, ${error}`, 'error');
+        notOkCallback();
+      });
   }
 
-  handleAddClick = (e) => {
-    this
-      .refs
-      .locale_add_dialog
-      .toggleDialog();
+  handleAddClick = () => {
+    this.refs.locale_add_dialog.toggleDialog();
   }
 
   handleLocaleCreate = (data) => {
-    const api = new Api();
-
-    api.createLocale({
-      code: data.code,
-      locale_description: data.description
-    }, (data) => {
-      Message.show({message: 'Locale has been created.'});
-      this
-        .refs
-        .locale_add_dialog
-        .toggleDialog();
-
-      this.fetchLocales();
-    }, (error) => {
-      Message.show({
-        message: "An error occured, " + error,
-        intent: Intent.DANGER
-      });
-    });
+    API
+      .createLocale({ code: data.code, locale_description: data.description })
+      .then(Message.show('Locale has been created.'))
+      .then(this.refs.locale_add_dialog.toggleDialog)
+      .then(this.fetchLocales)
+      .catch(error => Message.show(`An error occured, ${error}`, 'error'));
   }
 
   render() {
     return (
       <div>
-        <LocaleAddDialog ref="locale_add_dialog" callback={this.handleLocaleCreate}/>
+        <LocaleAddDialog ref="locale_add_dialog" callback={this.handleLocaleCreate} />
         <Translation
           locales={this.state.locales}
-          onLocaleSelect={this.handleLocaleSelect}/>
-        <Button className="pt-minimal" iconName="add" onClick={this.handleAddClick}/>
+          onLocaleSelect={this.handleLocaleSelect}
+        />
+        <Button className="pt-minimal" iconName="add" onClick={this.handleAddClick} />
         <TranslationTable
           translation={this.state.translations}
-          onTextChange={this.handleTextChange}/>
+          onTextChange={this.handleTextChange}
+        />
       </div>
     );
   }

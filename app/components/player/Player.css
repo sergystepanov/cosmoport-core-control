@@ -3,6 +3,11 @@
   text-align: center;
 }
 
+.overlay {
+  background-color: white;
+  padding: .5em;
+}
+
 .player {
   font-size: 85%;
   cursor: default;

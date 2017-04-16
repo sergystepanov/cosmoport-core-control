@@ -28,7 +28,8 @@ export default class Player extends Component {
       volume: 20,
       period: 1,
       // Played / Stoped
-      playStatus: Sound.status.STOPPED
+      playStatus: Sound.status.STOPPED,
+      isWaiting: false
     };
 
     this.candidates = [];
@@ -50,6 +51,10 @@ export default class Player extends Component {
   }
 
   getStatus = () => {
+    if (this.state.isWaiting) {
+      return `is waiting (${this.state.period} m)`;
+    }
+
     switch (this.state.playStatus) {
       case Sound.status.PLAYING:
         return 'playing';
@@ -85,10 +90,10 @@ export default class Player extends Component {
     }
 
     // wait some time
-    this.setState({ playStatus: Sound.status.STOPPED }, () => {
+    this.setState({ playStatus: Sound.status.STOPPED, isWaiting: true }, () => {
       this.randomTrack();
       this.timeout = setTimeout(() => {
-        this.setState({ playStatus: Sound.status.PLAYING });
+        this.setState({ playStatus: Sound.status.PLAYING, isWaiting: false });
       }, this.state.period * 1000 * 60);
     });
   }
@@ -98,13 +103,14 @@ export default class Player extends Component {
     const hasTrack = track !== '' && this.props.music.length > 0;
 
     return (
-      <div className={styles.centred}>
+      <div className={`${styles.centred} ${styles.overlay}`}>
         <PlayerControls
-          playStatus={playStatus}
+          isPlaying={playStatus === Sound.status.PLAYING}
           onNext={this.randomTrack}
           onPlay={() => this.setState({ playStatus: Sound.status.PLAYING })}
-          onPause={() => this.setState({ playStatus: Sound.status.PAUSED })}
-          onStop={() => this.setState({ playStatus: Sound.status.STOPPED, position: 0 })}
+          onPause={() => this.setState({ playStatus: Sound.status.PAUSE })}
+          onStop={() => this.setState(
+            { playStatus: Sound.status.STOPPED, position: 0, isWaiting: false })}
           onSeek={pos => this.setState({ pos })}
           onVolumeUp={() => this.setState({ volume: volume >= 100 ? volume : volume + 10 })}
           onVolumeDown={() => this.setState({ volume: volume <= 0 ? volume : volume - 10 })}

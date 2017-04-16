@@ -10,7 +10,6 @@ export default class Calendar extends Component {
   constructor(props) {
     super(props);
 
-    this.l18n = new L18n(this.props.locale, this.props.refs);
     this.events = [];
   }
 

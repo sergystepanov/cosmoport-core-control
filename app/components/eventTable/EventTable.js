@@ -1,30 +1,27 @@
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 
 import EventTableRow from './EventTableRow';
+import L18n from '../l18n/L18n';
 
 import styles from './EventTable.css';
 
 export default class EventTable extends Component {
-  handleRemove = (id) => {
-    this
-      .props
-      .callback(id);
-  }
+  handleRemove = (id) => this.props.callback(id)
 
   render() {
     let rows = [];
     let i = 1;
+    const l18n = new L18n(this.props.locale, this.props.refs);
 
-    this
-      .props
-      .events
+    this.props.events
       .forEach(function (event) {
         rows.push(<EventTableRow
           event={event}
           refs={this.props.refs}
-          locale={this.props.locale}
+          l18n={l18n}
           key={i}
-          callback={this.handleRemove}/>);
+          callback={this.handleRemove}
+        />);
         i++;
       }, this);
 
@@ -52,7 +49,7 @@ export default class EventTable extends Component {
       result = (
         <div className="pt-non-ideal-state">
           <div className="pt-non-ideal-state-visual pt-non-ideal-state-icon">
-            <span className="pt-icon pt-icon-offline"/>
+            <span className="pt-icon pt-icon-offline" />
           </div>
           <h4 className="pt-non-ideal-state-title">Nothing here</h4>
           <div className="pt-non-ideal-state-description">

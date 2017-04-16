@@ -1,59 +1,71 @@
 // @flow
-import React, {Component} from 'react';
-import {Button, Intent} from '@blueprintjs/core';
+import React, { Component } from 'react';
+import { Button } from '@blueprintjs/core';
 
+import Message from '../../components/messages/Message';
 import EventAddDialog from '../dialog/EventAddDialog';
 import EventTable from '../eventTable/EventTable';
+import Api from '../../containers/ApiV11';
+
+const API = new Api();
+const mapEvent = (data) => ({
+  id: 0,
+  contestants: data.bought,
+  cost: data.cost,
+  event_date: data.date,
+  event_destination_id: data.destination,
+  duration_time: data.duration,
+  gate_id: data.gate,
+  people_limit: data.limit,
+  repeat_interval: data.repeat_interval,
+  event_status_id: data.status,
+  start_time: data.time,
+  event_type_id: data.type
+});
+const errorMessage = (error) => Message.show(`Error #${error.code || '000'}: ${error.message}`, 'error');
 
 export default class Table extends Component {
-
   handleCreate = (formData) => {
-    console.log(formData);
+    if (!formData.valid) {
+      Message.show('Please check the form data.', 'error');
+      return;
+    }
 
-    // TODO Post validation of values from db
-
-    // this   .api   .addEvent(formData, (data) => {     Message.show({message:
-    // "Event has been saved."});     this       .refs       .event_add_dialog
-    // .toggleDialog();     this.getTableData();   }, (error) => { Message.show({
-    // message: "An error occured, " + error,       intent: Intent.DANGER     }) });
+    API
+      .createEvent(mapEvent(formData))
+      .then(result => Message.show(`Event has been created [${result.id}].`))
+      .then(() => this.props.onRefresh())
+      .catch(error => errorMessage(error));
   }
 
   handleAddClick = () => {
-    // this.setState({isItOpen: true});
-
-    this
-      .refs
-      .event_add_dialog
-      .toggleDialog();
+    this.refs.event_add_dialog.toggleDialog();
   }
 
-  handleRefreshClick = () => {
-    this.getReferenceData();
+  handleRefresh = () => {
+    this.props.onRefresh();
   }
 
-  handleRowRemove = (id) => {
-    // this   .api   .deleteEvent(id, (data) => {     Message.show({message: "The
-    // event has been deleted."});     this.getTableData();   }, () =>
-    // Message.show({message: "Couldn't delete the event.", intent: Intent.DANGER}));
+  handleDelete = (id) => {
+    API
+      .deleteEvent(id)
+      .then((result) => Message.show(`Deleted ${result.deleted}.`))
+      .then(() => this.props.onRefresh())
+      .catch(error => errorMessage(error));
   }
 
-  render() {
-    return (
+  render = () =>
+    <div>
+      <EventAddDialog ref="event_add_dialog" callback={this.handleCreate} refs={this.props.refs} locale={this.props.locale} />
       <div>
-        <EventAddDialog ref="event_add_dialog" callback={this.handleCreate} refs={this.props.refs} locale={this.props.locale}/>
-        <div>
-          <Button className="pt-minimal" iconName="add" onClick={this.handleAddClick}/>
-          <Button
-            className="pt-minimal"
-            iconName="refresh"
-            onClick={this.handleRefreshClick}/>
-        </div>
-        <EventTable
-          callback={this.handleRowRemove}
-          refs={this.props.refs}
-          locale={this.props.locale}
-          events={this.props.events}/>
+        <Button className="pt-minimal" iconName="add" onClick={this.handleAddClick} />
+        <Button className="pt-minimal" iconName="refresh" onClick={this.handleRefresh} />
       </div>
-    );
-  }
+      <EventTable
+        callback={this.handleDelete}
+        refs={this.props.refs}
+        locale={this.props.locale}
+        events={this.props.events}
+      />
+    </div>
 }

@@ -5,10 +5,9 @@ import EventPropType from '../../props/EventPropType';
 import EventTypePropType from '../../props/EventTypePropType';
 import EventDestinationPropType from '../../props/EventDestinationPropType';
 import EventStatusPropType from '../../props/EventStatusPropType';
-import LocalePropType from '../../props/LocalePropType';
 
-import L18n from '../l18n/L18n';
 import _date from '../date/_date';
+import L18n from '../l18n/L18n';
 
 /*
  * The class for rendering event table row.
@@ -32,27 +31,17 @@ export default class EventTableRow extends Component {
           .isRequired
       })
       .isRequired,
-    locale: LocalePropType.isRequired
+    l18n: PropTypes.instanceOf(L18n).isRequired
   }
 
   static defaultProps = {
     callback: () => { }
   }
 
-  constructor(props) {
-    super(props);
-
-    this.l18n = new L18n(this.props.locale, this.props.refs);
-  }
-
   /**
    * Passes on click event the row id to the parent using its callback.
    */
-  passClick = (event) => {
-    this
-      .props
-      .callback(event.target.getAttribute('data-row-id'));
-  }
+  passClick = (event) => this.props.callback(event.target.getAttribute('data-row-id'))
 
   /**
    * Renders the type column.
@@ -62,13 +51,10 @@ export default class EventTableRow extends Component {
    */
   renderTypeCol(id, types) {
     const type = types.find(type_ => type_.id === id);
+    const l18n = this.props.l18n;
 
-    return type
-      ? `${this
-        .l18n
-        .findTranslationById(type, 'i18nEventTypeName')} / ${this
-          .l18n
-          .findTranslationById(type, 'i18nEventTypeSubname')}`
+    return type ?
+      `${l18n.findTranslationById(type, 'i18nEventTypeName')} / ${l18n.findTranslationById(type, 'i18nEventTypeSubname')}`
       : id;
   }
 
@@ -82,10 +68,7 @@ export default class EventTableRow extends Component {
     const destination = destinations.find(destination_ => destination_.id === id);
 
     return destination
-      ? this
-        .l18n
-        .findTranslationById(destination, 'i18nEventDestinationName')
-      : id;
+      ? this.props.l18n.findTranslationById(destination, 'i18nEventDestinationName') : id;
   }
 
   /**
@@ -97,22 +80,14 @@ export default class EventTableRow extends Component {
   renderStatusCol(id, statuses) {
     const status = statuses.find(status_ => status_.id === id);
 
-    return status
-      ? this
-        .l18n
-        .findTranslationById(status, 'i18nStatus')
-      : id;
+    return status ? this.props.l18n.findTranslationById(status, 'i18nStatus') : id;
   }
 
   render() {
-    const name = this.props.event.status === 'inactive'
-      ? 'canceled'
-      : '';
+    const name = this.props.event.status === 'inactive' ? 'canceled' : '';
 
     // An attribute to store the row id
-    const myAttr = {
-      'data-row-id': this.props.event.id
-    };
+    const myAttr = { 'data-row-id': this.props.event.id };
 
     return (
       <tr className={name}>
@@ -132,11 +107,7 @@ export default class EventTableRow extends Component {
         <td>{`${this.props.event.durationTime} min`}</td>
         <td>{this.renderStatusCol(this.props.event.eventStatusId, this.props.refs.statuses)}</td>
         <td>{`${this.props.event.contestants}/${this.props.event.peopleLimit}`}</td>
-        <td><Button
-          className="pt-minimal"
-          iconName="remove"
-          {...myAttr}
-          onClick={this.passClick} /></td>
+        <td><Button className="pt-minimal" iconName="remove" {...myAttr} onClick={this.passClick} /></td>
       </tr>
     );
   }

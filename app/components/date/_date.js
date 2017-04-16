@@ -40,10 +40,26 @@ export default class _date {
     const h = Math.trunc(minutes / 60);
     const m = minutes % 60;
 
-    return `${h < 10
-      ? `0${h}`
-      : h}:${m < 10
-        ? `0${m}`
-        : m}`;
+    return `${h < 10 ? `0${h}` : h}:${m < 10 ? `0${m}` : m}`;
+  }
+
+  /**
+   * Converts a formated string into date object.
+   *
+   * @param {string} value The fromated date to convert.
+   * @returns {Date} The date object.
+   */
+  static fromYmd(value) {
+    return moment(value, 'YYYY-MM-DD').toDate();
+  }
+
+  /**
+   * Converts the date into YYYY-MM-DD format.
+   *
+   * @param {Date} Date to convert.
+   * @returns {string} The formated date string.
+   */
+  static toYmd(date) {
+    return moment(date).format('YYYY-MM-DD');
   }
 }

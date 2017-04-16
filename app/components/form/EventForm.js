@@ -37,11 +37,9 @@ export default class EventForm extends Component {
   constructor(props) {
     super(props);
 
-    this.l18n = new L18n(this.props.locale, this.props.refs);
-
     this.state = {
       // The day of the event
-      date: new Date(),
+      date: _date.toYmd(new Date()),
       // Start minute of the event (in minutes)
       time: 0,
       // Duration of the event (in minutes)
@@ -80,7 +78,8 @@ export default class EventForm extends Component {
    * @return {Object} The form field values.
    * @since 0.1.0
    */
-  getFormData = () => Object.assign(this.state, { valid: this.isValid() });
+  getFormData = () => Object.assign(
+    this.state, { date: _date.toYmd(this.state.date), valid: this.isValid() });
 
   /**
    * Handles a change event on an input component.
@@ -130,7 +129,7 @@ export default class EventForm extends Component {
   handleDayChange = (day) => {
     // It can be null if user selects same date - skip the state change in that case
     if (day) {
-      this.setState({ date: day });
+      this.setState({ date: _date.toYmd(day) });
     }
   }
 
@@ -170,23 +169,25 @@ export default class EventForm extends Component {
   render() {
     const { destinations, types, statuses } = this.props.refs;
     const { time, type, status, destination, gate, bought } = this.validators;
+    const l18n = new L18n(this.props.locale, this.props.refs);
 
     const statusOptions = statuses.map(op =>
       <option key={op.id} value={op.id}>
-        {this.l18n.findTranslationById(op, 'i18nStatus')}
+        {l18n.findTranslationById(op, 'i18nStatus')}
       </option>
     );
     const destinationOptions = destinations.map(op =>
       <option key={op.id} value={op.id}>
-        {this.l18n.findTranslationById(op, 'i18nEventDestinationName')}
+        {l18n.findTranslationById(op, 'i18nEventDestinationName')}
       </option>
     );
     const typeOptions = types.map(op =>
       <option key={op.id} value={op.id}>
-        {this.l18n.findTranslationById(op, 'i18nEventTypeName')}&nbsp;/&nbsp;{this.l18n.findTranslationById(op, 'i18nEventTypeSubname')}
+        {l18n.findTranslationById(op, 'i18nEventTypeName')}&nbsp;/&nbsp;{l18n.findTranslationById(op, 'i18nEventTypeSubname')}
       </option>
     );
 
+    const date = _date.fromYmd(this.state.date);
     const timeRange = this.state.time + this.state.duration;
     const invalidTimeRange = time() !== '';
     const invalidTimeRangeMaybeClass = invalidTimeRange ? ' pt-intent-danger' : '';
@@ -195,7 +196,7 @@ export default class EventForm extends Component {
 
     return (
       <div>
-        <DateFiledGroup name="date" caption="day" date={this.state.date} onChange={this.handleChange} />
+        <DateFiledGroup name="date" caption="day" date={date} onChange={this.handleChange} />
 
         <ListFieldGroup name="type" index={this.state.type} validator={type()} onChange={this.handleTypeChange}>
           {typeOptions}
