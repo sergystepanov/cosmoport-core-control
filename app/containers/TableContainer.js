@@ -19,36 +19,22 @@ export default class TableContainer extends Component {
   }
 
   getData() {
-    this.getReferenceData();
-  }
-
-  getEvents = () => {
-    API
-      .fetchEvents()
-      .then(data => this.setState({ events: data }))
+    Promise.all([
+      API
+        .fetchReferenceData()
+        .then(data => this.setState({ refs: data })),
+      API
+        .fetchTranslations()
+        .then(translations => this.setState({ locale: translations.en })),
+      API
+        .fetchTimetable()
+        .then(data => this.setState({ events: data })),
+      API
+        .fetchEvents()
+        .then(data => this.setState({ events: data }))
+    ])
       .then(Message.show('Data has been fetched from the server successfully.'))
       .catch(error => Message.show(`Couldn't fetch data from the server, ${error}`, 'error'));
-  }
-
-  getReferenceData = () => {
-    API
-      .fetchReferenceData()
-      .then(data => this.setState({ refs: data }))
-      .then(() => this.getTranslationData())
-      .catch(error => console.error(`[refs] fetch, ${error}`));
-  }
-
-  getTranslationData = () => {
-    API
-      .fetchTranslations()
-      .then(translations => this.setState({ locale: translations.en }))
-      .then(API
-        .fetchTimetable()
-        .then(data => this.setState({ events: data }))
-        .then(() => this.getEvents())
-        .catch(error => console.error(`[data] fetch, ${error}`))
-      )
-      .catch(error => console.error(`[translations] fetch, ${error}`));
   }
 
   handleRefresh = () => this.getData()

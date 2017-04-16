@@ -16,26 +16,21 @@ import L18n from '../l18n/L18n';
  */
 export default class EventTableRow extends Component {
   static propTypes = {
-    callback: PropTypes.func.isRequired,
-    event: EventPropType.isRequired,
-    refs: PropTypes
-      .shape({
-        destinations: PropTypes
-          .arrayOf(EventDestinationPropType)
-          .isRequired,
-        statuses: PropTypes
-          .arrayOf(EventStatusPropType)
-          .isRequired,
-        types: PropTypes
-          .arrayOf(EventTypePropType)
-          .isRequired
-      })
-      .isRequired,
-    l18n: PropTypes.instanceOf(L18n).isRequired
+    callback: PropTypes.func,
+    event: EventPropType,
+    refs: PropTypes.shape({
+      destinations: PropTypes.arrayOf(EventDestinationPropType),
+      statuses: PropTypes.arrayOf(EventStatusPropType),
+      types: PropTypes.arrayOf(EventTypePropType)
+    }),
+    l18n: PropTypes.instanceOf(L18n)
   }
 
   static defaultProps = {
-    callback: () => { }
+    callback: () => { },
+    event: {},
+    refs: { destinations: [], statuses: [], types: [] },
+    l18n: {}
   }
 
   /**
@@ -43,20 +38,23 @@ export default class EventTableRow extends Component {
    */
   passClick = (event) => this.props.callback(event.target.getAttribute('data-row-id'))
 
+
+  renderL18nCell = (id, translations, custom) => {
+    const l18nRecords = translations || [];
+    const l18nId = l18nRecords.find(record => record.id === id);
+    const l18n = this.props.l18n;
+
+    return l18nId ? custom(l18nId, l18n) : id;
+  }
+
   /**
    * Renders the type column.
    *
    * @param {number} id
    * @param {Array} types @see EventTypePropType
    */
-  renderTypeCol(id, types) {
-    const type = types.find(type_ => type_.id === id);
-    const l18n = this.props.l18n;
-
-    return type ?
-      `${l18n.findTranslationById(type, 'i18nEventTypeName')} / ${l18n.findTranslationById(type, 'i18nEventTypeSubname')}`
-      : id;
-  }
+  renderTypeCol = (id, types) => this.renderL18nCell(id, types, (l18nId, l18n) =>
+    `${l18n.findTranslationById(l18nId, 'i18nEventTypeName')} / ${l18n.findTranslationById(l18nId, 'i18nEventTypeSubname')}`)
 
   /**
    * Renders the destination column.
@@ -64,12 +62,8 @@ export default class EventTableRow extends Component {
    * @param {number} id
    * @param {Array} destinations @see EventDestinationPropType
    */
-  renderDestCol(id, destinations) {
-    const destination = destinations.find(destination_ => destination_.id === id);
-
-    return destination
-      ? this.props.l18n.findTranslationById(destination, 'i18nEventDestinationName') : id;
-  }
+  renderDestCol = (id, destinations) => this.renderL18nCell(id, destinations, (l18nId, l18n) =>
+    l18n.findTranslationById(l18nId, 'i18nEventDestinationName'))
 
   /**
    * Renders the status column.
@@ -77,38 +71,38 @@ export default class EventTableRow extends Component {
    * @param {number} id
    * @param {Array} statuses
    */
-  renderStatusCol(id, statuses) {
-    const status = statuses.find(status_ => status_.id === id);
-
-    return status ? this.props.l18n.findTranslationById(status, 'i18nStatus') : id;
-  }
+  renderStatusCol = (id, statuses) => this.renderL18nCell(id, statuses, (l18nId, l18n) =>
+    l18n.findTranslationById(status, 'i18nStatus'))
 
   render() {
-    const name = this.props.event.status === 'inactive' ? 'canceled' : '';
+    const { event, refs } = this.props;
+
+    if (event === undefined || refs === undefined) {
+      return null;
+    }
+
+    const name = event.status === 'inactive' ? 'canceled' : '';
 
     // An attribute to store the row id
-    const myAttr = { 'data-row-id': this.props.event.id };
+    const myAttr = { 'data-row-id': event.id };
 
     return (
-      <tr className={name}>
-        <td>{`${this
-          .props
-          .event
-          .eventDate}
-          ${_date.minutesToHm(this.props.event.startTime)}`}</td>
+      <tr className={name} >
+        <td>{`${event.eventDate}
+          ${_date.minutesToHm(event.startTime)}`}</td>
         <td>
           <span className="type-name">
-            {this.renderTypeCol(this.props.event.eventTypeId, this.props.refs.types)}
+            {this.renderTypeCol(event.eventTypeId, refs.types)}
           </span>
-          {this.props.event.type}
+          {event.type}
         </td>
-        <td>{this.renderDestCol(this.props.event.eventDestinationId, this.props.refs.destinations)}</td>
-        <td>{`${this.props.event.cost} €`}</td>
-        <td>{`${this.props.event.durationTime} min`}</td>
-        <td>{this.renderStatusCol(this.props.event.eventStatusId, this.props.refs.statuses)}</td>
-        <td>{`${this.props.event.contestants}/${this.props.event.peopleLimit}`}</td>
+        <td>{this.renderDestCol(event.eventDestinationId, refs.destinations)}</td>
+        <td>{`${event.cost} €`}</td>
+        <td>{`${event.durationTime} min`}</td>
+        <td>{this.renderStatusCol(event.eventStatusId, refs.statuses)}</td>
+        <td>{`${event.contestants}/${event.peopleLimit}`}</td>
         <td><Button className="pt-minimal" iconName="remove" {...myAttr} onClick={this.passClick} /></td>
-      </tr>
+      </tr >
     );
   }
 }
