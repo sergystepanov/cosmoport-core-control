@@ -42,15 +42,11 @@ export default class EventAddDialog extends Component {
   }
 
   passState = () => {
-    this
-      .props
-      .callback(this.form.getFormData());
+    this.props.callback(this.form.getFormData());
   }
 
   toggleDialog = () => {
-    this.setState({
-      isOpen: !this.state.isOpen
-    });
+    this.setState({ isOpen: !this.state.isOpen });
   }
 
   render() {

@@ -4,6 +4,7 @@ import { Button } from '@blueprintjs/core';
 
 import Message from '../../components/messages/Message';
 import EventAddDialog from '../dialog/EventAddDialog';
+import EventDeleteAlert from '../dialog/EventDeleteAlert';
 import EventTable from '../eventTable/EventTable';
 import Api from '../../../lib/core-api-client/ApiV1';
 
@@ -46,6 +47,10 @@ export default class Table extends Component {
     this.props.onRefresh();
   }
 
+  handlePreDelete = (id) => {
+    this.refs.delete_alert.open(id);
+  }
+
   handleDelete = (id) => {
     API
       .deleteEvent(id)
@@ -56,13 +61,14 @@ export default class Table extends Component {
 
   render = () =>
     <div>
+      <EventDeleteAlert ref="delete_alert" onConfirm={this.handleDelete} />
       <EventAddDialog ref="event_add_dialog" callback={this.handleCreate} refs={this.props.refs} locale={this.props.locale} />
       <div>
         <Button className="pt-minimal" iconName="add" onClick={this.handleAddClick} />
         <Button className="pt-minimal" iconName="refresh" onClick={this.handleRefresh} />
       </div>
       <EventTable
-        callback={this.handleDelete}
+        callback={this.handlePreDelete}
         refs={this.props.refs}
         locale={this.props.locale}
         events={this.props.events}
