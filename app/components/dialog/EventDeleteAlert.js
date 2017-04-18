@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Alert } from '@blueprintjs/core';
+import { Alert, Intent } from '@blueprintjs/core';
 
 export default class EventDeleteAlert extends Component {
   constructor(props) {
@@ -21,6 +21,7 @@ export default class EventDeleteAlert extends Component {
 
   render() {
     return (<Alert
+      intent={Intent.PRIMARY}
       isOpen={this.state.isOpen}
       confirmButtonText="Delete"
       cancelButtonText="Cancel"

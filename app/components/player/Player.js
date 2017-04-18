@@ -7,7 +7,17 @@ import styles from './Player.css';
 
 const { app } = require('electron').remote;
 
-const shrink = (text, length) => `${text.substring(0, length)}...${text.substring(text.length - length)}`;
+const shrink = (text, length) => {
+  if (text.length <= length) {
+    return text;
+  }
+
+  const separator = '...';
+  const charsToShow = length - separator.length;
+
+  return text.substr(0, Math.ceil(charsToShow / 2)) +
+    separator + text.substr(text.length - Math.floor(charsToShow / 2));
+};
 const buildUrl = (file) => `file:///${app.getPath('music')}/${file}`;
 
 export default class Player extends Component {
@@ -52,7 +62,7 @@ export default class Player extends Component {
 
   getStatus = () => {
     if (this.state.isWaiting) {
-      return `is waiting (${this.state.period} m)`;
+      return `waiting (${this.state.period} m)`;
     }
 
     switch (this.state.playStatus) {
@@ -75,7 +85,7 @@ export default class Player extends Component {
 
     const name = this.candidates.splice(Math.floor(Math.random() * this.candidates.length), 1);
 
-    this.setState({ track: name, position: 0 });
+    this.setState({ track: name.length > 0 ? name[0] : '', position: 0 });
   }
 
   handlePeriodChange = (value) => {
@@ -98,20 +108,33 @@ export default class Player extends Component {
     });
   }
 
+  handlePlay = () => {
+    this.setState({ playStatus: Sound.status.PLAYING, isWaiting: false });
+  }
+
+  handleStop = () => {
+    clearTimeout(this.timeout);
+    this.setState({ playStatus: Sound.status.STOPPED, position: 0, isWaiting: false });
+  }
+
+  handlePause = () => {
+    clearTimeout(this.timeout);
+    this.setState({ playStatus: Sound.status.PAUSE, isWaiting: false });
+  }
+
   render() {
     const { volume, playStatus, position, track } = this.state;
     const hasTrack = track !== '' && this.props.music.length > 0;
+    const trackInfo = `Track ${shrink(track, 21)} is ${this.getStatus()}`;
 
     return (
       <div className={`${styles.centred} ${styles.overlay}`}>
         <PlayerControls
           isPlaying={playStatus === Sound.status.PLAYING}
           onNext={this.randomTrack}
-          onPlay={() => this.setState({ playStatus: Sound.status.PLAYING })}
-          onPause={() => this.setState({ playStatus: Sound.status.PAUSE })}
-          onStop={() => this.setState(
-            { playStatus: Sound.status.STOPPED, position: 0, isWaiting: false })}
-          onSeek={pos => this.setState({ pos })}
+          onPlay={this.handlePlay}
+          onPause={this.handlePause}
+          onStop={this.handleStop}
           onVolumeUp={() => this.setState({ volume: volume >= 100 ? volume : volume + 10 })}
           onVolumeDown={() => this.setState({ volume: volume <= 0 ? volume : volume - 10 })}
           duration={0}
@@ -127,7 +150,7 @@ export default class Player extends Component {
           onFinishedPlaying={this.handleTrackFinish}
         />}
         {hasTrack && <div title={track} className={`${styles.centred} ${styles.player}`}>
-          {shrink(`Track ${track} is ${this.getStatus()}`, 15)}
+          {trackInfo}
         </div>}
       </div>
     );

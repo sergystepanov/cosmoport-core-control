@@ -17,6 +17,10 @@ body {
   color: #ff0000;
 }
 
+button:focus {
+  outline: none;
+}
+
 .app-caption {
   margin-right: 2em;
 }

@@ -15,7 +15,6 @@ import _date from '../date/_date';
 import styles from './EventForm.css';
 
 // TODO Make sure the props are changing (componentWill...)
-// TODO Add label and client-side time overlap
 
 /**
  * The class for event properties form.
@@ -58,7 +57,7 @@ export default class EventForm extends Component {
 
     this.validators = {
       time: () => (this.state.time + this.state.duration + this.state.repeat_interval >= 24 * 60 ?
-        'The event\'s duration time should be less than 24h in total.' : ''),
+        'The total event\'s duration time should be less than 24 h.' : ''),
       type: () => (this.state.type === 0 ? 'Type is not selected.' : ''),
       status: () => (this.state.status === 0 ? 'Status is not selected.' : ''),
       gate: () => (this.state.gate === 0 ? 'Gate is not selected.' : ''),
