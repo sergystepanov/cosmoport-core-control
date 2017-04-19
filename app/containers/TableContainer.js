@@ -28,9 +28,6 @@ export default class TableContainer extends Component {
         .then(translations => this.setState({ locale: translations.en })),
       API
         .fetchTimetable()
-        .then(data => this.setState({ events: data })),
-      API
-        .fetchEvents()
         .then(data => this.setState({ events: data }))
     ])
       .then(Message.show('Data has been fetched from the server successfully.'))
