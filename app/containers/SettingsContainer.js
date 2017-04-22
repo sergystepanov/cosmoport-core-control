@@ -7,6 +7,14 @@ import Message from '../components/messages/Message';
 import Api from '../../lib/core-api-client/ApiV1';
 
 const API = new Api();
+const mapEvent = (data) => ({
+  default_duration: data.default_duration,
+  default_repeat_interval: data.default_repeat_interval,
+  description: data.description,
+  name: data.name,
+  subname: data.subname
+});
+const errorMessage = (error) => Message.show(`Error #${error.code || '000'}: ${error.message}`, 'error');
 
 export default class SettingsContainer extends Component {
   constructor(props) {
@@ -14,6 +22,14 @@ export default class SettingsContainer extends Component {
 
     this.state = { locales: [] };
   }
+
+  componentDidMount() {
+    API
+      .fetchLocales()
+      .then(data => this.setState({ locales: data }))
+      .catch(error => console.error(`Couldn't fetch locales data from the server, ${error}`, 'error'));
+  }
+
 
   handleCreateEventType = () => {
     this.eventTypeAddDialog.toggleDialog();
@@ -25,19 +41,11 @@ export default class SettingsContainer extends Component {
       return;
     }
 
-    // API
-    //   .createEvent(mapEvent(formData))
-    //   .then(result => Message.show(`Event has been created [${result.id}].`))
-    //   .then(() => this.props.onRefresh())
-    //   .catch(error => errorMessage(error));
-  }
-
-
-  componentDidMount() {
     API
-      .fetchLocales()
-      .then(data => this.setState({ locales: data }))
-      .catch(error => console.error(`Couldn't fetch locales data from the server, ${error}`, 'error'));
+      .createEventType(mapEvent(formData))
+      .then(result => Message.show(`Event type has been created [${result.id}].`))
+      // .then(() => this.props.onRefresh())
+      .catch(error => errorMessage(error));
   }
 
   render() {
