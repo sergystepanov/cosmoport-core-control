@@ -30,6 +30,13 @@ export default class EventTypeAddDialog extends Component {
     return (
       <Dialog isOpen={this.state.isOpen} onClose={this.toggleDialog} canOutsideClickClose={false} title="Create new event type">
         <div className="pt-dialog-body">
+          <div className="pt-callout">
+            You should fill the fields with a text of default locale.
+            After the save the text will be copied to other locales
+            and don&apos;t forget to translate it later in the dedicated translation
+            interfase of the application (<span className="pt-icon-translate" />).
+          </div>
+          <p>&nbsp;</p>
           <EventTypeForm ref={(c) => { this.form = c; }} />
         </div>
         <div className="pt-dialog-footer">

@@ -2,11 +2,14 @@
 import React, { Component } from 'react';
 import { Button } from '@blueprintjs/core';
 
+import PageCaption from '../components/page/PageCaption';
 import Message from '../components/messages/Message';
 import Translation from '../components/translation/Translation';
 import TranslationTable from '../components/translation/TranslationTable';
 import LocaleAddDialog from '../components/dialog/LocaleAddDialog';
 import Api from '../../lib/core-api-client/ApiV1';
+
+import styles from './App.css';
 
 const API = new Api();
 
@@ -25,7 +28,6 @@ export default class TranslationContainer extends Component {
     API
       .fetchLocales()
       .then(data => this.setState({ locales: data }))
-      .then(Message.show('Locales data has been fetched from the server successfully.'))
       .catch(error => Message.show(`Couldn't fetch locales data from the server, ${error}`, 'error'));
   }
 
@@ -33,7 +35,6 @@ export default class TranslationContainer extends Component {
     API
       .fetchTranslationsForLocale(locale)
       .then(data => this.setState({ translations: data, currentTranslation: locale }))
-      .then(Message.show('Translations data has been fetched from the server successfully.'))
       .catch(error => Message.show(`Couldn't fetch translations data from the server, ${error}`, 'error'));
   }
 
@@ -66,12 +67,15 @@ export default class TranslationContainer extends Component {
   render() {
     return (
       <div>
+        <PageCaption text="04 Translations" />
         <LocaleAddDialog ref="locale_add_dialog" callback={this.handleLocaleCreate} />
-        <Translation
-          locales={this.state.locales}
-          onLocaleSelect={this.handleLocaleSelect}
-        />
-        <Button className="pt-minimal" iconName="add" onClick={this.handleAddClick} />
+        <div className={styles.inlineContainer}>
+          <Translation
+            locales={this.state.locales}
+            onLocaleSelect={this.handleLocaleSelect}
+          />
+          <Button className="pt-minimal" iconName="add" onClick={this.handleAddClick} />
+        </div>
         <TranslationTable
           translation={this.state.translations}
           onTextChange={this.handleTextChange}

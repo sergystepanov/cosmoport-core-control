@@ -16,8 +16,7 @@ export default class EventTypeForm extends Component {
     };
 
     this.validators = {
-      name: () => (this.state.name === '' ? 'Name field shouldn\'t be empty.' : ''),
-      subname: () => (this.state.subname === '' ? 'Subname field shouldn\'t be empty.' : '')
+      notEmpty: (field) => (this.state[field] === '' ? 'Field shouldn\'t be empty.' : '')
     };
   }
 
@@ -48,12 +47,13 @@ export default class EventTypeForm extends Component {
   }
 
   render() {
-    const { name, subname } = this.validators;
+    const { notEmpty } = this.validators;
+
     return (
       <div>
-        <TextFieldGroup name="name" value={this.state.name} validator={name()} onChange={this.handleChange} inline />
-        <TextFieldGroup name="subname" value={this.state.subname} validator={subname()} onChange={this.handleChange} inline />
-        <TextFieldGroup name="description" value={this.state.description} onChange={this.handleChange} inline />
+        <TextFieldGroup name="name" value={this.state.name} validator={notEmpty('name')} onChange={this.handleChange} inline />
+        <TextFieldGroup name="subname" value={this.state.subname} validator={notEmpty('subname')} onChange={this.handleChange} inline />
+        <TextFieldGroup name="description" value={this.state.description} validator={notEmpty('description')} onChange={this.handleChange} inline />
         <NumberFieldGroup name="default_duration" caption="Duration" number={this.state.default_duration} onChange={this.handleChange} inline />
         <NumberFieldGroup name="default_repeat_interval" caption="Repeat" number={this.state.default_repeat_interval} onChange={this.handleChange} inline />
       </div>

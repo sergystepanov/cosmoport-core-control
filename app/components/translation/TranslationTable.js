@@ -3,20 +3,6 @@ import React, { Component } from 'react';
 import { EditableText, Tag, Intent } from '@blueprintjs/core';
 
 export default class TranslationTable extends Component {
-  constructor(props) {
-    super(props);
-
-    this.renderTable = this
-      .renderTable
-      .bind(this);
-  }
-
-  handleTextChange = (id, value) => {
-    this
-      .props
-      .onTextChange(id, value, this.onSaveOk, this.onSaveFail);
-  }
-
   onSaveOk = () => {
     console.log('ok');
   }
@@ -25,7 +11,15 @@ export default class TranslationTable extends Component {
     console.log('not ok');
   }
 
-  renderTable(tr) {
+  handleTextChange = (id, oldValue, value) => {
+    if (value === oldValue) {
+      return;
+    }
+
+    this.props.onTextChange(id, value, this.onSaveOk, this.onSaveFail);
+  }
+
+  renderTable = (tr) => {
     if (tr !== undefined && tr.length > 0) {
       let rows = [];
 
@@ -45,14 +39,15 @@ export default class TranslationTable extends Component {
         rows.push(
           <tr key={dat.id}>
             <td>{dat.id}</td>
-            <td><EditableText
-              multiline
-              minLines={3}
-              maxLines={12}
-              defaultValue={dat.text}
-              onConfirm={this
-                .handleTextChange
-                .bind(this, dat.id)} /></td>
+            <td>
+              <EditableText
+                multiline
+                minLines={3}
+                maxLines={12}
+                defaultValue={dat.text}
+                onConfirm={this.handleTextChange.bind(this, dat.id, dat.text)}
+              />
+            </td>
             <td>{dat.i18n.description}</td>
             <td>
               <Tag className="pt-minimal">{dat.i18n.tag}</Tag>
@@ -82,8 +77,6 @@ export default class TranslationTable extends Component {
   }
 
   render() {
-    return (
-      <div>{this.renderTable(this.props.translation)}</div>
-    );
+    return (<div>{this.renderTable(this.props.translation)}</div>);
   }
 }

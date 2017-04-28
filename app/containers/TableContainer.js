@@ -1,6 +1,7 @@
 // @flow
 import React, { Component } from 'react';
 
+import PageCaption from '../components/page/PageCaption';
 import Message from '../components/messages/Message';
 import Table from '../components/table/Table';
 import Api from '../../lib/core-api-client/ApiV1';
@@ -38,12 +39,10 @@ export default class TableContainer extends Component {
 
   render() {
     return (
-      <Table
-        events={this.state.events}
-        refs={this.state.refs}
-        locale={this.state.locale}
-        onRefresh={this.handleRefresh}
-      />
+      <div>
+        <PageCaption text="03 Timetable" />
+        <Table events={this.state.events} refs={this.state.refs} locale={this.state.locale} onRefresh={this.handleRefresh} />
+      </div>
     );
   }
 }

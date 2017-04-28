@@ -7,3 +7,8 @@
   margin: 1em;
 }
 
+.inlineContainer {
+  display: flex;
+  align-items: center;
+}
+
