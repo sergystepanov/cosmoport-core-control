@@ -1,4 +1,3 @@
-// @flow
 import React, { Component } from 'react';
 
 import PageCaption from '../components/page/PageCaption';
@@ -31,7 +30,6 @@ export default class TableContainer extends Component {
         .fetchTimetable()
         .then(data => this.setState({ events: data }))
     ])
-      .then(Message.show('Data has been fetched from the server successfully.'))
       .catch(error => Message.show(`Couldn't fetch data from the server, ${error}`, 'error'));
   }
 
@@ -41,7 +39,12 @@ export default class TableContainer extends Component {
     return (
       <div>
         <PageCaption text="03 Timetable" />
-        <Table events={this.state.events} refs={this.state.refs} locale={this.state.locale} onRefresh={this.handleRefresh} />
+        <Table
+          events={this.state.events}
+          refs={this.state.refs}
+          locale={this.state.locale}
+          onRefresh={this.handleRefresh}
+        />
       </div>
     );
   }

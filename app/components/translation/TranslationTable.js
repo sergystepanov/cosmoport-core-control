@@ -1,8 +1,33 @@
-// @flow
-import React, { Component } from 'react';
-import { EditableText, Tag, Intent } from '@blueprintjs/core';
+import React, { Component, PropTypes } from 'react';
+import { Tag, Intent } from '@blueprintjs/core';
+
+import TextEditor from './TextEditor';
 
 export default class TranslationTable extends Component {
+  static propTypes = {
+    translations: PropTypes.arrayOf(
+      PropTypes.shape({
+        i18nId: PropTypes.number,
+        id: PropTypes.number,
+        localeId: PropTypes.number,
+        text: PropTypes.string,
+        i18n: PropTypes.shape({
+          description: PropTypes.string,
+          external: PropTypes.bool,
+          id: PropTypes.number,
+          params: PropTypes.string,
+          tag: PropTypes.string
+        })
+      })
+    ),
+    onTextChange: PropTypes.func
+  }
+
+  static defaultProps = {
+    translations: {},
+    onTextChange: () => { }
+  }
+
   onSaveOk = () => {
     console.log('ok');
   }
@@ -11,7 +36,7 @@ export default class TranslationTable extends Component {
     console.log('not ok');
   }
 
-  handleTextChange = (id, oldValue, value) => {
+  handleTextChange = (id, value, oldValue) => {
     if (value === oldValue) {
       return;
     }
@@ -19,46 +44,37 @@ export default class TranslationTable extends Component {
     this.props.onTextChange(id, value, this.onSaveOk, this.onSaveFail);
   }
 
-  renderTable = (tr) => {
-    if (tr !== undefined && tr.length > 0) {
-      let rows = [];
+  render() {
+    const { translations } = this.props;
 
-      const renderExternalTag = function (isExternal) {
-        if (isExternal) {
-          return <Tag className="pt-minimal">external</Tag>;
-        }
-      };
+    const records = translations.map(record => (
+      <tr key={record.id}>
+        <td>{record.id}</td>
+        <td>
+          <TextEditor id={record.id} text={record.text} onConfirm={this.handleTextChange} />
+        </td>
+        <td>
+          {record.i18n ? record.i18n.description : null}
+        </td>
+        <td>
+          {record.i18n && record.i18n.tag ? <Tag className="pt-minimal">{record.i18n.tag}</Tag> : null}
+          {record.i18n && record.i18n.params ? <Tag intent={Intent.WARNING} className="pt-minimal">{record.i18n.params}</Tag> : null}
+          {record.i18n && record.i18n.external ? <Tag className="pt-minimal">external</Tag> : null}
+        </td>
+      </tr>
+    ));
 
-      const renderParamsTag = function (params) {
-        if (params) {
-          return <Tag intent={Intent.WARNING} className="pt-minimal">{params}</Tag>;
-        }
-      };
-
-      tr.forEach((dat) => {
-        rows.push(
-          <tr key={dat.id}>
-            <td>{dat.id}</td>
-            <td>
-              <EditableText
-                multiline
-                minLines={3}
-                maxLines={12}
-                defaultValue={dat.text}
-                onConfirm={this.handleTextChange.bind(this, dat.id, dat.text)}
-              />
-            </td>
-            <td>{dat.i18n.description}</td>
-            <td>
-              <Tag className="pt-minimal">{dat.i18n.tag}</Tag>
-              {renderParamsTag(dat.i18n.params)}
-              {renderExternalTag(dat.i18n.external)}
-            </td>
-          </tr>
-        );
-      }, this);
-
+    if (translations.length < 1) {
       return (
+        <div>
+          <p>&nbsp;</p>
+          <div className="pt-callout">Select any locale up above or create new.</div>
+        </div>
+      );
+    }
+
+    return (
+      <div>
         <table className="pt-table">
           <thead>
             <tr>
@@ -69,14 +85,10 @@ export default class TranslationTable extends Component {
             </tr>
           </thead>
           <tbody>
-            {rows}
+            {records}
           </tbody>
         </table>
-      );
-    }
-  }
-
-  render() {
-    return (<div>{this.renderTable(this.props.translation)}</div>);
+      </div>
+    );
   }
 }

@@ -1,4 +1,3 @@
-// @flow
 import React, { Component } from 'react';
 import { Button } from '@blueprintjs/core';
 
@@ -12,12 +11,13 @@ import Api from '../../lib/core-api-client/ApiV1';
 import styles from './App.css';
 
 const API = new Api();
+const errorMessage = (error) => Message.show(`Error #${error.code || '000'}: ${error.message}`, 'error');
 
 export default class TranslationContainer extends Component {
   constructor(props) {
     super(props);
 
-    this.state = { locales: [], translations: {}, currentTranslation: '' };
+    this.state = { locales: [], translations: [], currentTranslation: '' };
   }
 
   componentDidMount() {
@@ -43,41 +43,53 @@ export default class TranslationContainer extends Component {
 
     API
       .updateTranslationTextForId(id, valueObject)
-      .then(Message.show('Translation value has been saved successfully.'))
-      .then(okCallback)
+      .then(() => Message.show('Translation value has been saved successfully.'))
+      .then(() => this.updateTranslationStateById(id, value))
+      .then(() => okCallback)
       .catch(error => {
-        Message.show(`Couldn't save translation value, ${error}`, 'error');
+        errorMessage(error);
         notOkCallback();
       });
   }
 
   handleAddClick = () => {
-    this.refs.locale_add_dialog.toggleDialog();
+    this.addDialog.toggleDialog();
   }
 
   handleLocaleCreate = (data) => {
     API
       .createLocale({ code: data.code, locale_description: data.description })
-      .then(Message.show('Locale has been created.'))
-      .then(this.refs.locale_add_dialog.toggleDialog)
-      .then(this.fetchLocales)
-      .catch(error => Message.show(`An error occured, ${error}`, 'error'));
+      .then(() => Message.show('Locale has been created.'))
+      .then(() => this.addDialog.toggleDialog())
+      .then(() => this.fetchLocales())
+      .catch(error => errorMessage(error));
+  }
+
+  updateTranslationStateById = (id, value) => {
+    const ts = this.state.translations;
+    const i = ts.findIndex(el => el.id === id);
+
+    if (i > -1) {
+      ts[i].text = value;
+      this.setState({ translations: ts });
+    }
   }
 
   render() {
+    const locales = this.state.locales.map(locale =>
+      <Translation key={locale.id} locale={locale} onLocaleSelect={this.handleLocaleSelect} />
+    );
+
     return (
       <div>
         <PageCaption text="04 Translations" />
-        <LocaleAddDialog ref="locale_add_dialog" callback={this.handleLocaleCreate} />
+        <LocaleAddDialog ref={(c) => { this.addDialog = c; }} callback={this.handleLocaleCreate} />
         <div className={styles.inlineContainer}>
-          <Translation
-            locales={this.state.locales}
-            onLocaleSelect={this.handleLocaleSelect}
-          />
+          {locales}
           <Button className="pt-minimal" iconName="add" onClick={this.handleAddClick} />
         </div>
         <TranslationTable
-          translation={this.state.translations}
+          translations={this.state.translations}
           onTextChange={this.handleTextChange}
         />
       </div>

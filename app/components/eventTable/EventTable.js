@@ -9,31 +9,25 @@ export default class EventTable extends Component {
   handleRemove = (id) => this.props.callback(id)
 
   render() {
-    let rows = [];
-    let i = 1;
     const l18n = new L18n(this.props.locale, this.props.refs);
-
-    this.props.events
-      .forEach(function (event) {
-        rows.push(<EventTableRow
-          event={event}
-          refs={this.props.refs}
-          l18n={l18n}
-          key={i}
-          callback={this.handleRemove}
-        />);
-        i++;
-      }, this);
+    const events = this.props.events.map(event => <EventTableRow
+      key={event.id}
+      event={event}
+      refs={this.props.refs}
+      l18n={l18n}
+      callback={this.handleRemove}
+    />);
 
     let result = null;
 
-    if (rows.length > 0) {
+    if (events) {
       result = (
         <table className={`pt-table pt-striped ${styles.eventTable}`}>
           <thead>
             <tr>
               <th>Departure</th>
               <th>Type</th>
+              <th>Gate</th>
               <th>Destination</th>
               <th>Cost</th>
               <th>Duration</th>
@@ -42,7 +36,7 @@ export default class EventTable extends Component {
               <th title="It is `operations`">Ops</th>
             </tr>
           </thead>
-          <tbody>{rows}</tbody>
+          <tbody>{events}</tbody>
         </table>
       );
     } else {

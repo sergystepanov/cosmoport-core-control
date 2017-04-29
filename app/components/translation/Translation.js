@@ -1,31 +1,17 @@
-// @flow
 import React, { Component } from 'react';
-import { Tag } from '@blueprintjs/core';
-
-import styles from './Translation.css';
+import { Button } from '@blueprintjs/core';
 
 export default class Translation extends Component {
-  handleClick = (e) => {
-    e.preventDefault();
-
-    this.props.onLocaleSelect(e.target.getAttribute('data-id'));
+  handleSelect = () => {
+    this.props.onLocaleSelect(this.props.locale.id);
   }
 
-  renderLocale = ({ id, code, defaultLocale, localeDescription }) => (
-    <Tag
-      key={id}
-      data-id={id}
-      className={styles.localeTag}
-      onClick={this.handleClick}
-    >
-      {code}&nbsp;({localeDescription})
-    </Tag>
-  );
-
   render() {
+    const { locale } = this.props;
+
     return (
       <div>
-        {this.props.locales.map(this.renderLocale)}
+        <Button key={locale.id} className="pt-minimal" text={`${locale.code} (${locale.localeDescription})`} onClick={this.handleSelect} />
       </div>
     );
   }
