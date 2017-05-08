@@ -1,29 +1,11 @@
-// @flow
 import React, { Component } from 'react';
 import { Button } from '@blueprintjs/core';
 
 import Message from '../../components/messages/Message';
 import EventAddDialog from '../dialog/EventAddDialog';
+import EventEditDialog from '../dialog/EventEditDialog';
 import EventDeleteAlert from '../dialog/EventDeleteAlert';
 import EventTable from '../eventTable/EventTable';
-import Api from '../../../lib/core-api-client/ApiV1';
-
-const API = new Api();
-const mapEvent = (data) => ({
-  id: 0,
-  contestants: data.bought,
-  cost: data.cost,
-  event_date: data.date,
-  event_destination_id: data.destination,
-  duration_time: data.duration,
-  gate_id: data.gate,
-  people_limit: data.limit,
-  repeat_interval: data.repeat_interval,
-  event_status_id: data.status,
-  start_time: data.time,
-  event_type_id: data.type
-});
-const errorMessage = (error) => Message.show(`Error #${error.code || '000'}: ${error.message}`, 'error');
 
 export default class Table extends Component {
   handleCreate = (formData) => {
@@ -32,11 +14,7 @@ export default class Table extends Component {
       return;
     }
 
-    API
-      .createEvent(mapEvent(formData))
-      .then(result => Message.show(`Event has been created [${result.id}].`))
-      .then(() => this.props.onRefresh())
-      .catch(error => errorMessage(error));
+    this.props.onCreate(formData);
   }
 
   handleAddClick = () => {
@@ -51,27 +29,37 @@ export default class Table extends Component {
     this.refs.delete_alert.open(id);
   }
 
-  handleDelete = (id) => {
-    API
-      .deleteEvent(id)
-      .then((result) => Message.show(`Deleted ${result.deleted}.`))
-      .then(() => this.props.onRefresh())
-      .catch(error => errorMessage(error));
+  handleEdit = (event) => {
+    this.refs.event_edit_dialog.edit(event);
   }
 
-  render = () =>
-    <div>
-      <EventDeleteAlert ref="delete_alert" onConfirm={this.handleDelete} />
-      <EventAddDialog ref="event_add_dialog" callback={this.handleCreate} refs={this.props.refs} locale={this.props.locale} />
+  handleEditApply = (formData) => {
+     if (!formData.valid) {
+      Message.show('Please check the form data.', 'error');
+      return;
+    }
+
+    this.props.onEdit(formData);
+  }
+
+  handleDelete = (id) => {
+    this.props.onDelete(id);
+  }
+
+  render() {
+    const { refs, locale, events } = this.props;
+
+    return (
       <div>
-        <Button className="pt-minimal" iconName="add" onClick={this.handleAddClick} />
-        <Button className="pt-minimal" iconName="refresh" onClick={this.handleRefresh} />
+        <EventDeleteAlert ref="delete_alert" onConfirm={this.handleDelete} />
+        <EventAddDialog ref="event_add_dialog" callback={this.handleCreate} refs={refs} locale={locale} />
+        <EventEditDialog ref="event_edit_dialog" callback={this.handleEditApply} refs={refs} locale={locale} />
+        <div>
+          <Button className="pt-minimal" iconName="add" onClick={this.handleAddClick} />
+          <Button className="pt-minimal" iconName="refresh" onClick={this.handleRefresh} />
+        </div>
+        <EventTable editCallback={this.handleEdit} callback={this.handlePreDelete} refs={refs} locale={locale} events={events} />
       </div>
-      <EventTable
-        callback={this.handlePreDelete}
-        refs={this.props.refs}
-        locale={this.props.locale}
-        events={this.props.events}
-      />
-    </div>
+    );
+  }
 }

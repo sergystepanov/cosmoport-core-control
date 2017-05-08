@@ -11,3 +11,17 @@
 .block {
     margin-bottom: 1em;
 }
+
+.baseEdit, .edit {
+    border-bottom: 1px solid #bf7326;
+}
+
+.edit {
+    width: 16px;   
+    margin: 0 .3em;
+    padding-left: .1em;
+}
+
+.margin {
+    margin-top: .8em;
+}

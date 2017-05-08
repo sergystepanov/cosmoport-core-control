@@ -23,6 +23,21 @@ import styles from './EventForm.css';
  */
 export default class EventForm extends Component {
   static propTypes = {
+    event: PropTypes.shape({
+      contestants: PropTypes.number,
+      cost: PropTypes.number,
+      dateAdded: PropTypes.string,
+      durationTime: PropTypes.number,
+      eventDate: PropTypes.string,
+      eventDestinationId: PropTypes.number,
+      eventStatusId: PropTypes.number,
+      eventTypeId: PropTypes.number,
+      gateId: PropTypes.number,
+      id: PropTypes.number,
+      peopleLimit: PropTypes.number,
+      repeatInterval: PropTypes.number,
+      startTime: PropTypes.number
+    }),
     refs: PropTypes.shape({
       destinations: PropTypes.arrayOf(EventDestinationPropType),
       statuses: PropTypes.arrayOf(EventStatusPropType),
@@ -31,7 +46,7 @@ export default class EventForm extends Component {
     locale: LocalePropType.isRequired
   }
 
-  static defaultProps = { refs: { destinations: [], statuses: [], types: [] }, locale: {} }
+  static defaultProps = { event: null, refs: { destinations: [], statuses: [], types: [] }, locale: {} }
 
   constructor(props) {
     super(props);
@@ -55,6 +70,10 @@ export default class EventForm extends Component {
       default_repeat_interval: 0
     };
 
+    if (props.event) {
+      this.fillState(props.event);
+    }
+
     this.validators = {
       time: () => (this.state.time + this.state.duration + this.state.repeat_interval >= 24 * 60 ?
         'The total event\'s duration time should be less than 24 h.' : ''),
@@ -69,6 +88,29 @@ export default class EventForm extends Component {
       duration: () => (this.state.duration !== this.state.default_duration ? 'You have selected not default duration value.' : ''),
       repeat_interval: () => (this.state.repeat_interval !== this.state.default_repeat_interval ? 'You have selected not default repeat interval value.' : '')
     };
+  }
+
+  fillState = (event) => {
+    if (event) {
+      const eventTypeData = this.findEventTypeData(event.eventTypeId);
+
+      this.state = {
+        id: event.id,
+        date: _date.fromYmd(event.eventDate),
+        time: event.startTime,
+        duration: event.durationTime,
+        limit: event.peopleLimit,
+        bought: event.contestants,
+        type: event.eventTypeId,
+        destination: event.eventDestinationId,
+        gate: event.gateId,
+        status: event.eventStatusId,
+        cost: event.cost,
+        repeat_interval: event.repeatInterval,
+        default_duration: eventTypeData.defaultDuration,
+        default_repeat_interval: eventTypeData.defaultRepeatInterval
+      };
+    }
   }
 
   /**
@@ -107,7 +149,7 @@ export default class EventForm extends Component {
     this.handleChange(name, value);
 
     // get type's data from a repository
-    const eventTypeData = this.props.refs.types.find((type) => type.id === value);
+    const eventTypeData = this.findEventTypeData(value);
 
     // fill fields with default values
     this.setState({
@@ -117,6 +159,8 @@ export default class EventForm extends Component {
       default_repeat_interval: eventTypeData.defaultRepeatInterval,
     });
   }
+
+  findEventTypeData = (value) => this.props.refs.types.find((type) => type.id === value)
 
   /**
    * Handles the change event on an input field of <day> type.
@@ -167,6 +211,11 @@ export default class EventForm extends Component {
 
   render() {
     const { destinations, types, statuses } = this.props.refs;
+
+    if (!destinations || !types || !statuses) {
+      return <div>:(</div>;
+    }
+
     const { time, type, status, destination, gate, bought } = this.validators;
     const l18n = new L18n(this.props.locale, this.props.refs);
 

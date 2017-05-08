@@ -3,6 +3,12 @@ import React, { Component } from 'react';
 import PageCaption from '../components/page/PageCaption';
 
 export default class SimulationContainer extends Component {
+  constructor(props) {
+    super(props);
+
+    this.api = this.props.api;
+  }
+
   render() {
     return (
       <div>

@@ -38,6 +38,8 @@ export default class EventTableRow extends Component {
    */
   passClick = (event) => this.props.callback(event.target.getAttribute('data-row-id'))
 
+  passEditClick = () => this.props.editCallback(this.props.event)
+
   renderL18nCell = (id, translations, custom) => {
     const l18nRecords = translations || [];
     const l18nId = l18nRecords.find(record => record.id === id);
@@ -102,7 +104,10 @@ export default class EventTableRow extends Component {
         <td>{`${event.durationTime} min`}</td>
         <td>{this.renderStatusCol(event.eventStatusId, refs.statuses)}</td>
         <td>{`${event.contestants}/${event.peopleLimit}`}</td>
-        <td><Button className="pt-minimal" iconName="remove" {...myAttr} onClick={this.passClick} /></td>
+        <td>
+          <Button className="pt-minimal" iconName="edit" {...myAttr} onClick={this.passEditClick} />
+          <Button className="pt-minimal" iconName="remove" {...myAttr} onClick={this.passClick} />
+        </td>
       </tr >
     );
   }

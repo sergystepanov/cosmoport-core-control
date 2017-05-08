@@ -1,13 +1,10 @@
-// @flow
 import React, { Component } from 'react';
 import { ipcRenderer } from 'electron';
 
 import NavigationBar from '../components/navigation/NavigationBar';
 import styles from './App.css';
 import Api from '../../lib/core-api-client/ApiV1';
-import WebSocketWrapper from '../../lib/core-api-client/WebSocketWrapper';
-
-const API = new Api();
+import Socket0 from '../../lib/core-api-client/WebSocketWrapper';
 
 export default class App extends Component {
   constructor(props) {
@@ -15,27 +12,19 @@ export default class App extends Component {
 
     this.state = {
       timestamp: 0,
-      nodes: {
-        gates: 0,
-        timetables: 0
-      },
-      audio: []
+      nodes: { gates: 0, timetables: 0 },
+      audio: [],
+      api: null,
+      socket: null
     };
 
     ipcRenderer.on('audio', this.handleSetAudio);
+    // After config recieving we should fetch the data and render markup.
+    ipcRenderer.on('config', this.handleConfig);
   }
 
-  componentDidMount() {
-    API
-      .fetchTime()
-      .then(data => this.setState({ timestamp: data.timestamp }))
-      .catch();
-
-    this.trySocket(this);
-  }
-
-  getNodes() {
-    API
+  getNodes = () => {
+    this.state.api
       .fetchNodes()
       .then(data => this.setState({ nodes: data }))
       .catch();
@@ -45,46 +34,69 @@ export default class App extends Component {
     this.setState({ audio: files });
   }
 
-  trySocket = (self) => {
-    let socket = new WebSocketWrapper({
-      url: 'ws://127.0.0.1:8080/events?id=core-control',
+  handleConfig = (event, data) => {
+    this.init(data);
+  }
 
-      onopen() {
-        //this.send('message', 'hi');
-      },
+  init = (config) => {
+    const self = this;
+    const socket0 = new Socket0({
+      url: `ws://${config.address.server}/events?id=control`,
+
+      onopen() { },
 
       onmessage(...args) {
-        console.log(args);
+        const message = args[0].data;
 
-        if (args[0].data === ':update-nodes:') {
+        console.log(message);
+
+        if (message === ':update-nodes:') {
           self.getNodes();
         }
       },
 
       onclose() {
-        socket = null;
-        console.log("close");
+        if (self.state.socket) {
+          self.state.socket.close();
+        }
       },
 
       onerror(...args) {
-        console.log('error occured, oh no!');
         console.error(args);
       }
     });
+
+    this.setState({
+      api: new Api(`http://${config.address.server}`),
+      socket: socket0
+    },
+      () => {
+        this.state.api
+          .fetchTime()
+          .then(data => this.setState({ timestamp: data.timestamp }))
+          .catch();
+
+        this.getNodes();
+      });
   }
 
-  props: {
-    children: HTMLElemen
-  };
-
   render() {
+    if (this.state.api === null) {
+      return <div>Init api.</div>;
+    }
+
+    const el = React.cloneElement(this.props.children, { api: this.state.api });
+
     return (
       <div className="pt-ui-text">
         <div className={styles.container}>
-          <NavigationBar timestamp={this.state.timestamp} nodes={this.state.nodes} audio={this.state.audio} />
-
+          <NavigationBar
+            timestamp={this.state.timestamp}
+            nodes={this.state.nodes}
+            audio={this.state.audio}
+          />
           <div className={styles.content}>
-            {this.props.children}
+            {el}
           </div>
         </div>
       </div>

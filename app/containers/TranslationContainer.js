@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component, PropTypes } from 'react';
 import { Button } from '@blueprintjs/core';
 
 import PageCaption from '../components/page/PageCaption';
@@ -7,13 +7,19 @@ import Translation from '../components/translation/Translation';
 import TranslationTable from '../components/translation/TranslationTable';
 import LocaleAddDialog from '../components/dialog/LocaleAddDialog';
 import Api from '../../lib/core-api-client/ApiV1';
+import ApiError from '../components/indicators/ApiError';
 
 import styles from './App.css';
 
-const API = new Api();
-const errorMessage = (error) => Message.show(`Error #${error.code || '000'}: ${error.message}`, 'error');
-
 export default class TranslationContainer extends Component {
+  static propTypes = {
+    api: PropTypes.instanceOf(Api)
+  }
+
+  static defaultProps = {
+    api: null
+  }
+
   constructor(props) {
     super(props);
 
@@ -25,29 +31,29 @@ export default class TranslationContainer extends Component {
   }
 
   fetchLocales = () => {
-    API
+    this.props.api
       .fetchLocales()
       .then(data => this.setState({ locales: data }))
-      .catch(error => Message.show(`Couldn't fetch locales data from the server, ${error}`, 'error'));
+      .catch(error => ApiError(error));
   }
 
   handleLocaleSelect = (locale) => {
-    API
+    this.props.api
       .fetchTranslationsForLocale(locale)
       .then(data => this.setState({ translations: data, currentTranslation: locale }))
-      .catch(error => Message.show(`Couldn't fetch translations data from the server, ${error}`, 'error'));
+      .catch(error => ApiError(error));
   }
 
   handleTextChange = (id, value, okCallback, notOkCallback) => {
     const valueObject = { text: value };
 
-    API
+    this.props.api
       .updateTranslationTextForId(id, valueObject)
       .then(() => Message.show('Translation value has been saved successfully.'))
       .then(() => this.updateTranslationStateById(id, value))
       .then(() => okCallback)
       .catch(error => {
-        errorMessage(error);
+        ApiError(error);
         notOkCallback();
       });
   }
@@ -57,12 +63,12 @@ export default class TranslationContainer extends Component {
   }
 
   handleLocaleCreate = (data) => {
-    API
+    this.props.api
       .createLocale({ code: data.code, locale_description: data.description })
       .then(() => Message.show('Locale has been created.'))
       .then(() => this.addDialog.toggleDialog())
       .then(() => this.fetchLocales())
-      .catch(error => errorMessage(error));
+      .catch(error => ApiError(error));
   }
 
   updateTranslationStateById = (id, value) => {

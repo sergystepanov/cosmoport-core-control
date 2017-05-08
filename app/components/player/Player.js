@@ -45,11 +45,9 @@ export default class Player extends Component {
     this.candidates = [];
   }
 
-  componentWillReceiveProps(nextProps) {
-    if (this.props.music !== nextProps.music) {
-      this.candidates = nextProps.music.slice(0);
-      this.randomTrack();
-    }
+  componentDidMount() {
+    this.candidates = this.props.music.slice(0);
+    this.randomTrack();
   }
 
   shouldComponentUpdate(nextProps, nextState) {

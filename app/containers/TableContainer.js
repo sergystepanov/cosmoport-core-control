@@ -1,13 +1,21 @@
-import React, { Component } from 'react';
+import React, { Component, PropTypes } from 'react';
 
 import PageCaption from '../components/page/PageCaption';
-import Message from '../components/messages/Message';
 import Table from '../components/table/Table';
 import Api from '../../lib/core-api-client/ApiV1';
-
-const API = new Api();
+import ApiError from '../components/indicators/ApiError';
+import EventMapper from '../components/mapper/EventMapper';
+import Message from '../components/messages/Message';
 
 export default class TableContainer extends Component {
+  static propTypes = {
+    api: PropTypes.instanceOf(Api)
+  }
+
+  static defaultProps = {
+    api: null
+  }
+
   constructor(props) {
     super(props);
 
@@ -18,31 +26,55 @@ export default class TableContainer extends Component {
     this.getData();
   }
 
-  getData() {
+  getData = () => {
     Promise.all([
-      API
-        .fetchReferenceData()
-        .then(data => this.setState({ refs: data })),
-      API
-        .fetchTranslations()
-        .then(translations => this.setState({ locale: translations.en })),
-      API
-        .fetchTimetable()
-        .then(data => this.setState({ events: data }))
+      this.props.api.fetchReferenceData(),
+      this.props.api.fetchTranslations(),
+      this.props.api.fetchTimetable()
     ])
-      .catch(error => Message.show(`Couldn't fetch data from the server, ${error}`, 'error'));
+      .then(data => this.setState({ refs: data[0], locale: data[1].en, events: data[2] }))
+      .catch(error => ApiError(error));
+  }
+
+  handleCreate = (formData) => {
+    this.props.api
+      .createEvent(EventMapper.fromForm(formData))
+      .then(result => Message.show(`Event has been created [${result.id}].`))
+      .then(() => this.handleRefresh())
+      .catch(error => ApiError(error));
+  }
+
+  handleEdit = (formData) => {
+    this.props.api
+      .updateEvent(EventMapper.fromForm(formData))
+      .then(result => Message.show(`Event has been updated [${result.id}].`))
+      .then(() => this.handleRefresh())
+      .catch(error => ApiError(error));
+  }
+
+  handleDelete = (id) => {
+    this.props.api
+      .deleteEvent(id)
+      .then((result) => Message.show(`Deleted ${result.deleted}.`))
+      .then(() => this.handleRefresh())
+      .catch(error => ApiError(error));
   }
 
   handleRefresh = () => this.getData()
 
   render() {
+    const { events, refs, locale } = this.state;
+
     return (
       <div>
         <PageCaption text="03 Timetable" />
         <Table
-          events={this.state.events}
-          refs={this.state.refs}
-          locale={this.state.locale}
+          events={events}
+          refs={refs}
+          locale={locale}
+          onCreate={this.handleCreate}
+          onEdit={this.handleEdit}
+          onDelete={this.handleDelete}
           onRefresh={this.handleRefresh}
         />
       </div>

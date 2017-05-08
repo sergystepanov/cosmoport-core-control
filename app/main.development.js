@@ -1,4 +1,4 @@
-import {app, BrowserWindow, Menu, shell} from 'electron';
+import { app, BrowserWindow, Menu, shell } from 'electron';
 
 let menu;
 let template;
@@ -6,8 +6,14 @@ let mainWindow = null;
 
 const fs = require('fs');
 const path = require('path');
+const ini = require('ini');
 
-var nodeConsole = require('console');
+const mp3s = fs.readdirSync(path.join(__dirname, '..', 'audio'))
+  .filter(name => name.endsWith('.mp3'));
+const config = ini.parse(fs.readFileSync(path.join(__dirname, '..', 'config', 'config.ini'), 'utf-8'));
+
+const nodeConsole = require('console');
+
 var myConsole = new nodeConsole.Console(process.stdout, process.stderr);
 
 if (process.env.NODE_ENV === 'production') {
@@ -27,10 +33,10 @@ if (process.env.NODE_ENV === 'development') {
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin')
     app.quit();
-  }
+}
 );
 
-const installExtensions = async() => {
+const installExtensions = async () => {
   if (process.env.NODE_ENV === 'development') {
     const installer = require('electron-devtools-installer'); // eslint-disable-line global-require
 
@@ -47,32 +53,20 @@ const installExtensions = async() => {
 
 app.setPath('music', path.join(__dirname, '..', 'audio'));
 
-app.on('ready', async() => {
+app.on('ready', async () => {
   await installExtensions();
 
-  mainWindow = new BrowserWindow({show: false, width: 1024, height: 728});
+  mainWindow = new BrowserWindow({ show: false, width: 1024, height: 728 });
 
   mainWindow.loadURL(`file://${__dirname}/app.html`);
 
-  mainWindow
-    .webContents
-    .on('did-finish-load', () => {
-      const path0 = path.join(__dirname, '..', 'audio');
-      fs.readdir(path0, (err, dir) => {
-        let files = [];
-        for (var i = 0, path_; path_ = dir[i]; i++) {
-          if (path_.endsWith('.mp3')) {
-            files.push(path_);
-          }
-        }
-        mainWindow
-          .webContents
-          .send('audio', files);
-      });
+  mainWindow.webContents.on('did-finish-load', () => {
+    mainWindow.webContents.send('audio', mp3s);
+    mainWindow.webContents.send('config', config);
 
-      mainWindow.show();
-      mainWindow.focus();
-    });
+    mainWindow.show();
+    mainWindow.focus();
+  });
 
   mainWindow.on('closed', () => {
     mainWindow = null;
@@ -83,7 +77,7 @@ app.on('ready', async() => {
     mainWindow
       .webContents
       .on('context-menu', (e, props) => {
-        const {x, y} = props;
+        const { x, y } = props;
 
         Menu.buildFromTemplate([
           {
@@ -297,31 +291,6 @@ app.on('ready', async() => {
               }
             }
           ]
-      }, {
-        label: 'Help',
-        submenu: [
-          {
-            label: 'Learn More',
-            click() {
-              shell.openExternal('http://electron.atom.io');
-            }
-          }, {
-            label: 'Documentation',
-            click() {
-              shell.openExternal('https://github.com/atom/electron/tree/master/docs#readme');
-            }
-          }, {
-            label: 'Community Discussions',
-            click() {
-              shell.openExternal('https://discuss.atom.io/c/electron');
-            }
-          }, {
-            label: 'Search Issues',
-            click() {
-              shell.openExternal('https://github.com/atom/electron/issues');
-            }
-          }
-        ]
       }
     ];
     menu = Menu.buildFromTemplate(template);

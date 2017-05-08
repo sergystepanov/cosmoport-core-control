@@ -6,6 +6,8 @@ import L18n from '../l18n/L18n';
 import styles from './EventTable.css';
 
 export default class EventTable extends Component {
+  handleEdit = (event) => this.props.editCallback(event)
+
   handleRemove = (id) => this.props.callback(id)
 
   render() {
@@ -15,6 +17,7 @@ export default class EventTable extends Component {
       event={event}
       refs={this.props.refs}
       l18n={l18n}
+      editCallback={this.handleEdit}
       callback={this.handleRemove}
     />);
 

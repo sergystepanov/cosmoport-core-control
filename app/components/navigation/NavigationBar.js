@@ -13,12 +13,17 @@ export default class NavigationBar extends Component {
       <nav className="pt-navbar">
         <div className="pt-navbar-group pt-align-left">
           <span className="pt-icon-standard pt-icon-predictive-analysis">&nbsp;</span>
-          <div className="pt-navbar-heading app-caption">Control (0.1.1)</div>
-          <Navigate to="/" icon="home" onlyActiveOnIndex />
-          <Navigate to="/simulation" icon="globe" />
-          <Navigate to="/table" icon="timeline-events" />
-          <Navigate to="/translation" icon="translate" />
-          <Navigate to="/settings" icon="cog" />
+          <div className="pt-navbar-heading app-caption">
+            Control
+            <span className="version">0.1.2</span>
+          </div>
+          <div className="menu">
+            <Navigate to="/" icon="home" onlyActiveOnIndex />
+            <Navigate to="/simulation" icon="globe" />
+            <Navigate to="/table" icon="timeline-events" />
+            <Navigate to="/translation" icon="translate" />
+            <Navigate to="/settings" icon="cog" />
+          </div>
         </div>
         <div className="pt-navbar-group pt-align-right">
           <Player music={this.props.audio} />
