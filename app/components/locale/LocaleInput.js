@@ -50,8 +50,7 @@ export default class LocaleInput extends Component {
           value={locale.showTime}
           onValueChange={this.handleValueChange}
         />
-        <span>m</span>
-
+        <span>s</span>
       </div>
     );
   }

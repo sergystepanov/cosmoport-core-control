@@ -15,4 +15,19 @@ export default class EventMapper {
       start_time: object.time,
       event_type_id: object.type
     })
+
+  static unmap = (object) => ({
+    id: object.id || 0,
+    event_date: object.eventDate,
+    event_type_id: object.eventTypeId,
+    event_status_id: object.eventStatusId,
+    event_destination_id: object.eventDestinationId,
+    gate_id: object.gateId,
+    start_time: object.startTime,
+    duration_time: object.durationTime,
+    repeat_interval: object.repeatInterval,
+    cost: object.cost,
+    people_limit: object.peopleLimit,
+    contestants: object.contestants
+  })
 }

@@ -1,4 +1,4 @@
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 
 export default class ServerTime extends Component {
   constructor(props) {
@@ -26,32 +26,13 @@ export default class ServerTime extends Component {
   }
 
   format00(value) {
-    return value < 10
-      ? value = `0${value}`
-      : value;
+    return value < 10 ? `0${value}` : value;
   }
 
-  showHide() {
-    return {
-      opacity: this.state.showColon
-        ? '.999'
-        : '0'
-    };
-  }
+  showHide = () => ({ opacity: this.state.showColon ? '.999' : '0' })
 
-  date(part) {
-    return 'h' === part
-      ? this
-        .state
-        .date
-        .getHours()
-      : 'm' === part
-        ? this
-          .state
-          .date
-          .getMinutes()
-        : '';
-  }
+  date = (part) => (part === 'h' ? this.state.date.getHours() :
+    part === 'm' ? this.state.date.getMinutes() : '')
 
   renderTime() {
     return (

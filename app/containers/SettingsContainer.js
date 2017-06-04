@@ -3,6 +3,7 @@ import { Button, EditableText } from '@blueprintjs/core';
 
 import DefaultLocaleMessage from '../components/locale/DefaultLocaleMessage';
 import EventTypeAddDialog from '../components/dialog/EventTypeAddDialog';
+import EventTypeDelDialog from '../components/dialog/EventTypeDelDialog';
 import Message from '../components/messages/Message';
 import Api from '../../lib/core-api-client/ApiV1';
 import ApiError from '../components/indicators/ApiError';
@@ -38,7 +39,7 @@ export default class SettingsContainer extends Component {
   constructor(props) {
     super(props);
 
-    this.state = { locales: [], settings: [] };
+    this.state = { refs: {}, locales: [], trans: {}, settings: [] };
   }
 
   componentDidMount() {
@@ -47,10 +48,12 @@ export default class SettingsContainer extends Component {
 
   getData = () => {
     Promise.all([
+      this.props.api.fetchReferenceData(),
       this.props.api.fetchLocales(),
+      this.props.api.fetchTranslations(),
       this.props.api.fetchSettings()
     ])
-      .then(data => this.setState({ locales: data[0], settings: data[1] }))
+      .then(data => this.setState({ refs: data[0], locales: data[1], trans: data[2].en, settings: data[3] }))
       .catch(error => ApiError(error));
   }
 
@@ -58,15 +61,37 @@ export default class SettingsContainer extends Component {
     this.eventTypeAddDialog.toggleDialog();
   }
 
-  handleCreate = (formData) => {
+  handleDeleteEventType = () => {
+    this.eventTypeDelDialog.toggleDialog();
+  }
+
+  handleCreate = (formData, callback) => {
     if (!formData.valid) {
       Message.show('Please check the form data.', 'error');
       return;
     }
 
     this.props.api.createEventType(mapEvent(formData))
-      .then(result => Message.show(`Event type has been created [${result.id}].`))
+      .then(result => {
+        this.getData();
+        Message.show(`Event type has been created [${result.id}].`);
+        callback();
+
+        return 1;
+      })
       // .then(() => this.props.onRefresh())
+      .catch(error => ApiError(error));
+  }
+
+  handleDelete = (id, callback) => {
+    this.props.api.deleteEventType(id)
+      .then(result => {
+        this.getData();
+        Message.show(`Event type has been created [:${result.deleted}]`);
+        callback();
+
+        return 1;
+      })
       .catch(error => ApiError(error));
   }
 
@@ -115,12 +140,20 @@ export default class SettingsContainer extends Component {
     const linesSetting = this.findSetting(this.state.settings, 'timetable_screen_lines');
     const boardingSetting = this.findSetting(this.state.settings, 'boarding_time');
 
+
     return (
       <div>
         <EventTypeAddDialog
           ref={(c) => { this.eventTypeAddDialog = c; }}
           callback={this.handleCreate}
         />
+        <EventTypeDelDialog
+          trans={this.state.trans}
+          refs={this.state.refs}
+          ref={(c) => { this.eventTypeDelDialog = c; }}
+          callback={this.handleDelete}
+        />
+
         <PageCaption text="05 Settings" />
 
         <div>All of thees changes are applied in real time.
@@ -139,6 +172,7 @@ export default class SettingsContainer extends Component {
           <Caption text={'01 Events'} />
           <div>
             <Button className="pt-minimal" text="Click if you want to create new event type" onClick={this.handleCreateEventType} />
+            <Button className="pt-minimal" text="Click if you want to delete an event type" onClick={this.handleDeleteEventType} />
           </div>
 
           <Caption text={'02 Locales'} />
@@ -157,7 +191,7 @@ export default class SettingsContainer extends Component {
             lines of events.
           </div>
 
-          <Caption text={'04 Synchronization [wip]'} />
+          <Caption text={'04 Synchronization (WIP)'} />
           <div>
             All tickets data will be being synchronized with the server by the address:&nbsp;
             <EditableText className={styles.baseEdit} defaultValue="http://sync.cosmoport.com" placeholder="" />.
