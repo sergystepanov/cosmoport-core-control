@@ -24,6 +24,7 @@ import styles from './EventForm.css';
  */
 export default class EventForm extends Component {
   static propTypes = {
+    forCreate: PropTypes.bool,
     event: PropTypes.shape({
       contestants: PropTypes.number,
       cost: PropTypes.number,
@@ -49,7 +50,7 @@ export default class EventForm extends Component {
   }
 
   static defaultProps = {
-    event: null, refs: { destinations: [], statuses: [], types: [] }, locale: {}, gates: []
+    forCreate: false, event: null, refs: { destinations: [], statuses: [], types: [] }, locale: {}, gates: []
   }
 
   constructor(props) {
@@ -278,7 +279,7 @@ export default class EventForm extends Component {
           </div>
         </div>
 
-        <ListFieldGroup name="status" index={this.state.status} validator={status()} onChange={this.handleChange}>
+        <ListFieldGroup name="status" disabled={this.props.forCreate} index={this.state.status} validator={status()} onChange={this.handleChange}>
           {statusOptions}
         </ListFieldGroup>
 

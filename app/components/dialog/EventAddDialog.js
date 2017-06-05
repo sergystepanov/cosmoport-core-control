@@ -67,6 +67,7 @@ export default class EventAddDialog extends Component {
             locale={this.props.locale}
             refs={this.props.refs}
             gates={this.props.gates}
+            forCreate
           />
         </div>
         <div className="pt-dialog-footer">

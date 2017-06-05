@@ -9,7 +9,8 @@ export default class ListFieldGroup extends PureComponent {
     index: PropTypes.number,
     onChange: PropTypes.func,
     validator: PropTypes.string,
-    children: PropTypes.node
+    children: PropTypes.node,
+    disabled: PropTypes.bool
   }
 
   static defaultProps = {
@@ -17,7 +18,8 @@ export default class ListFieldGroup extends PureComponent {
     index: 0,
     onChange: () => { },
     validator: '',
-    children: null
+    children: null,
+    disabled: false
   }
 
   handleSelectChange = (event) => {
@@ -28,6 +30,10 @@ export default class ListFieldGroup extends PureComponent {
     const invalid = this.props.validator !== '';
     const caption = this.props.caption !== '' ? this.props.caption : this.props.name;
     const invalidMaybeClass = invalid ? ' pt-intent-danger' : '';
+    const opts = {};
+    if (this.props.disabled) {
+      opts.disabled = 'disabled';
+    }
 
     return (
       <div className={`pt-form-group pt-inline${invalidMaybeClass}`}>
@@ -41,6 +47,7 @@ export default class ListFieldGroup extends PureComponent {
               name={this.props.name}
               value={this.props.index}
               onChange={this.handleSelectChange}
+              {...opts}
             >
               <option key={0} value={0}>{`Select a ${caption.toLowerCase()}...`}</option>
               {this.props.children}
