@@ -5,6 +5,7 @@ import EventTypePropType from '../../props/EventTypePropType';
 import EventDestinationPropType from '../../props/EventDestinationPropType';
 import EventStatusPropType from '../../props/EventStatusPropType';
 import LocalePropType from '../../props/LocalePropType';
+import GatePropType from '../../props/GatePropType';
 import EventForm from '../form/EventForm';
 
 /**
@@ -20,7 +21,8 @@ export default class EventAddDialog extends Component {
       statuses: PropTypes.arrayOf(EventStatusPropType),
       types: PropTypes.arrayOf(EventTypePropType)
     }).isRequired,
-    locale: LocalePropType.isRequired
+    locale: LocalePropType.isRequired,
+    gates: PropTypes.arrayOf(GatePropType).isRequired
   }
 
   static defaultProps = {
@@ -30,15 +32,14 @@ export default class EventAddDialog extends Component {
       statuses: [],
       types: []
     },
-    locale: {}
+    locale: {},
+    gates: []
   }
 
   constructor(props) {
     super(props);
 
-    this.state = {
-      isOpen: false
-    };
+    this.state = { isOpen: false };
   }
 
   passState = () => {
@@ -65,6 +66,7 @@ export default class EventAddDialog extends Component {
             }}
             locale={this.props.locale}
             refs={this.props.refs}
+            gates={this.props.gates}
           />
         </div>
         <div className="pt-dialog-footer">

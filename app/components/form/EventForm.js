@@ -4,6 +4,7 @@ import EventTypePropType from '../../props/EventTypePropType';
 import EventDestinationPropType from '../../props/EventDestinationPropType';
 import EventStatusPropType from '../../props/EventStatusPropType';
 import LocalePropType from '../../props/LocalePropType';
+import GatePropType from '../../props/GatePropType';
 import L18n from '../l18n/L18n';
 import DateFiledGroup from './group/DateFieldGroup';
 import TimeFieldGroup from './group/TimeFieldGroup';
@@ -43,10 +44,13 @@ export default class EventForm extends Component {
       statuses: PropTypes.arrayOf(EventStatusPropType),
       types: PropTypes.arrayOf(EventTypePropType)
     }).isRequired,
-    locale: LocalePropType.isRequired
+    locale: LocalePropType.isRequired,
+    gates: PropTypes.arrayOf(GatePropType).isRequired
   }
 
-  static defaultProps = { event: null, refs: { destinations: [], statuses: [], types: [] }, locale: {} }
+  static defaultProps = {
+    event: null, refs: { destinations: [], statuses: [], types: [] }, locale: {}, gates: []
+  }
 
   constructor(props) {
     super(props);
@@ -90,6 +94,20 @@ export default class EventForm extends Component {
     };
   }
 
+  /**
+   * Returns all form's field mapped values.
+   *
+   * @return {Object} The form field values.
+   * @since 0.1.0
+   */
+  getFormData = () => Object.assign(
+    this.state, { date: _date.toYmd(this.state.date), valid: this.isValid() });
+
+  /**
+   * Converts an event object into form understandable state.
+   *
+   * @since 0.1.0
+   */
   fillState = (event) => {
     if (event) {
       const eventTypeData = this.findEventTypeData(event.eventTypeId);
@@ -112,15 +130,6 @@ export default class EventForm extends Component {
       };
     }
   }
-
-  /**
-   * Returns all form's field mapped values.
-   *
-   * @return {Object} The form field values.
-   * @since 0.1.0
-   */
-  getFormData = () => Object.assign(
-    this.state, { date: _date.toYmd(this.state.date), valid: this.isValid() });
 
   /**
    * Handles a change event on an input component.
@@ -234,6 +243,11 @@ export default class EventForm extends Component {
         {l18n.findTranslationById(op, 'i18nEventTypeName')}&nbsp;/&nbsp;{l18n.findTranslationById(op, 'i18nEventTypeSubname')}
       </option>
     );
+    const gateOptions = this.props.gates.map(gate_ =>
+      <option key={gate_.id} value={gate_.id}>
+        {gate_.id} - {gate_.number} {gate_.gateName}
+      </option>
+    );
 
     const date = _date.fromYmd(this.state.date);
     const timeRange = this.state.time + this.state.duration;
@@ -269,10 +283,7 @@ export default class EventForm extends Component {
         </ListFieldGroup>
 
         <ListFieldGroup name="gate" index={this.state.gate} validator={gate()} onChange={this.handleChange}>
-          <option value="1">One</option>
-          <option value="2">Two</option>
-          <option value="3">Three</option>
-          <option value="4">Four</option>
+          {gateOptions}
         </ListFieldGroup>
 
         <ListFieldGroup name="destination" index={this.state.destination} validator={destination()} onChange={this.handleChange}>

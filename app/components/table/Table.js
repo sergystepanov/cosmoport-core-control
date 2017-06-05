@@ -34,7 +34,7 @@ export default class Table extends Component {
   }
 
   handleEditApply = (formData) => {
-     if (!formData.valid) {
+    if (!formData.valid) {
       Message.show('Please check the form data.', 'error');
       return;
     }
@@ -47,13 +47,13 @@ export default class Table extends Component {
   }
 
   render() {
-    const { refs, locale, events } = this.props;
+    const { refs, locale, events, gates } = this.props;
 
     return (
       <div>
         <EventDeleteAlert ref="delete_alert" onConfirm={this.handleDelete} />
-        <EventAddDialog ref="event_add_dialog" callback={this.handleCreate} refs={refs} locale={locale} />
-        <EventEditDialog ref="event_edit_dialog" callback={this.handleEditApply} refs={refs} locale={locale} />
+        <EventAddDialog ref="event_add_dialog" callback={this.handleCreate} refs={refs} locale={locale} gates={gates} />
+        <EventEditDialog ref="event_edit_dialog" callback={this.handleEditApply} refs={refs} locale={locale} gates={gates} />
         <div>
           <Button className="pt-minimal" iconName="add" onClick={this.handleAddClick} />
           <Button className="pt-minimal" iconName="refresh" onClick={this.handleRefresh} />

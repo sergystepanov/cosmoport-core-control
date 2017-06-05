@@ -19,7 +19,7 @@ export default class TableContainer extends Component {
   constructor(props) {
     super(props);
 
-    this.state = { events: [], locale: {}, refs: {} };
+    this.state = { events: [], locale: {}, refs: {}, gates: [] };
   }
 
   componentDidMount() {
@@ -30,9 +30,12 @@ export default class TableContainer extends Component {
     Promise.all([
       this.props.api.fetchReferenceData(),
       this.props.api.fetchTranslations(),
-      this.props.api.fetchTimetable()
+      this.props.api.fetchTimetable(),
+      this.props.api.fetchGates()
     ])
-      .then(data => this.setState({ refs: data[0], locale: data[1].en, events: data[2] }))
+      .then(data => this.setState(
+        { refs: data[0], locale: data[1].en, events: data[2], gates: data[3] })
+      )
       .catch(error => ApiError(error));
   }
 
@@ -63,7 +66,7 @@ export default class TableContainer extends Component {
   handleRefresh = () => this.getData()
 
   render() {
-    const { events, refs, locale } = this.state;
+    const { events, refs, locale, gates } = this.state;
 
     return (
       <div>
@@ -72,6 +75,7 @@ export default class TableContainer extends Component {
           events={events}
           refs={refs}
           locale={locale}
+          gates={gates}
           onCreate={this.handleCreate}
           onEdit={this.handleEdit}
           onDelete={this.handleDelete}

@@ -5,6 +5,7 @@ import EventTypePropType from '../../props/EventTypePropType';
 import EventDestinationPropType from '../../props/EventDestinationPropType';
 import EventStatusPropType from '../../props/EventStatusPropType';
 import LocalePropType from '../../props/LocalePropType';
+import GatePropType from '../../props/GatePropType';
 import EventForm from '../form/EventForm';
 
 /**
@@ -21,7 +22,8 @@ export default class EventEditDialog extends Component {
       statuses: PropTypes.arrayOf(EventStatusPropType),
       types: PropTypes.arrayOf(EventTypePropType)
     }).isRequired,
-    locale: LocalePropType.isRequired
+    locale: LocalePropType.isRequired,
+    gates: PropTypes.arrayOf(GatePropType)
   }
 
   static defaultProps = {
@@ -32,7 +34,8 @@ export default class EventEditDialog extends Component {
       statuses: [],
       types: []
     },
-    locale: {}
+    locale: {},
+    gates: []
   }
 
   constructor(props) {
@@ -55,12 +58,12 @@ export default class EventEditDialog extends Component {
 
   render() {
     const { isOpen } = this.state;
-    const { locale, refs, event } = this.props;
+    const { locale, refs, event, gates } = this.props;
 
     return (
       <Dialog isOpen={isOpen} onClose={this.toggleDialog} canOutsideClickClose={false} title="Edit event" >
         <div className="pt-dialog-body">
-          <EventForm event={this.state.event} ref={(c) => { this.form = c; }} locale={locale} refs={refs} />
+          <EventForm event={this.state.event} ref={(c) => { this.form = c; }} locale={locale} refs={refs} gates={gates} />
         </div>
         <div className="pt-dialog-footer">
           <div className="pt-dialog-footer-actions">
