@@ -58,7 +58,7 @@ export default class Table extends Component {
           <Button className="pt-minimal" iconName="add" onClick={this.handleAddClick} />
           <Button className="pt-minimal" iconName="refresh" onClick={this.handleRefresh} />
         </div>
-        <EventTable editCallback={this.handleEdit} callback={this.handlePreDelete} refs={refs} locale={locale} events={events} />
+        <EventTable editCallback={this.handleEdit} callback={this.handlePreDelete} refs={refs} locale={locale} events={events} auth={this.props.auth} />
       </div>
     );
   }

@@ -127,8 +127,17 @@ export default class SettingsContainer extends Component {
     const valueObject = { text: newVal };
 
     this.props.api.updateSettingValueForId(id, valueObject)
-      .then(() => Message.show('Setting value has been saved successfully.'))
+      .then(() => Message.show('The value has been saved successfully.'))
       .then(() => this.getData())
+      .catch(error => ApiError(error));
+  }
+
+  handlePassChange = () => {
+    const pass = this.passField.value;
+
+    this.props.api
+      .authSetPass({ pwd: pass })
+      .then((response) => response.result ? Message.show('Password has changed.') : Message.show('Error during save.', 'error'))
       .catch(error => ApiError(error));
   }
 
@@ -156,8 +165,10 @@ export default class SettingsContainer extends Component {
 
         <PageCaption text="05 Settings" />
 
-        <div>All of thees changes are applied in real time.
-        So no need to restart any of the applications.</div>
+        <div>
+          All of thees changes are applied in real time.
+        So no need to restart any of the applications.
+        </div>
 
         <div className={styles.container}>
           <Caption text={'00 Simulation'} />
@@ -191,8 +202,17 @@ export default class SettingsContainer extends Component {
             lines of events.
           </div>
 
-          <Caption text={'04 Synchronization (WIP)'} />
+          <Caption text={'04 Protection'} />
           <div>
+            Change the password:
+              <div className="pt-control-group" style={{ marginTop: '.6em' }}>
+              <input type="password" className="pt-input" placeholder="Be brave." ref={(c) => { this.passField = c; }} />
+              <button className="pt-button pt-icon-floppy-disk" onClick={this.handlePassChange} />
+            </div>
+          </div>
+
+          <Caption text={'05 Synchronization (WIP)'} />
+          <div style={{ marginBottom: '1em' }}>
             All tickets data will be being synchronized with the server by the address:&nbsp;
             <EditableText className={styles.baseEdit} defaultValue="http://sync.cosmoport.com" placeholder="" />.
           </div>

@@ -19,6 +19,7 @@ export default class EventTable extends Component {
       l18n={l18n}
       editCallback={this.handleEdit}
       callback={this.handleRemove}
+      auth={this.props.auth}
     />);
 
     let result = null;

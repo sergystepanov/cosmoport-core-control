@@ -106,7 +106,7 @@ export default class EventTableRow extends Component {
         <td>{`${event.contestants}/${event.peopleLimit}`}</td>
         <td>
           <Button className="pt-minimal" iconName="edit" {...myAttr} onClick={this.passEditClick} />
-          <Button className="pt-minimal" iconName="remove" {...myAttr} onClick={this.passClick} />
+          {this.props.auth && <Button className="pt-minimal" iconName="remove" {...myAttr} onClick={this.passClick} />}
         </td>
       </tr >
     );

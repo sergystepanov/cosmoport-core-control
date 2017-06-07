@@ -80,6 +80,7 @@ export default class TableContainer extends Component {
           onEdit={this.handleEdit}
           onDelete={this.handleDelete}
           onRefresh={this.handleRefresh}
+          auth={this.props.auth}
         />
       </div>
     );

@@ -38,7 +38,7 @@ export default class EventTypeDelDialog extends Component {
 
   render() {
     if (!this.state.types) {
-      return <div>:(</div>;
+      return null;
     }
 
     const l18n = new L18n(this.state.tr, this.state.refs);

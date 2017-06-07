@@ -6,8 +6,14 @@ import styles from './App.css';
 import Api from '../../lib/core-api-client/ApiV1';
 import Socket0 from '../../lib/core-api-client/WebSocketWrapper';
 import Rupor from '../components/player/Announcer';
+import ApiError from '../components/indicators/ApiError';
+import Message from '../components/messages/Message';
 
 export default class App extends Component {
+  static contextTypes = {
+    router: React.PropTypes.object.isRequired
+  }
+
   constructor(props) {
     super(props);
 
@@ -20,7 +26,8 @@ export default class App extends Component {
       socket: null,
       simulation: {
         ticks: 0
-      }
+      },
+      auth: false
     };
 
     ipcRenderer.on('audio', this.handleSetAudio);
@@ -105,7 +112,6 @@ export default class App extends Component {
   }
 
   handleAnnouncmentEnd = () => {
-    console.log('ende');
     const anns = this.state.announcments;
     if (anns.length > 0) {
       this.removeEndedAnoncment();
@@ -118,9 +124,34 @@ export default class App extends Component {
     }));
   }
 
+  handlePassword = (pass) => {
+    this.state.api
+      .authWith({ pwd: pass })
+      .then(response => {
+        if (response.result) {
+          this.setState({ auth: true });
+          Message.show('Access was granted.');
+        }
+
+        return 1;
+      })
+      .catch(error => ApiError(error));
+  }
+
+  handleLogout = () => {
+    this.setState({ auth: false });
+    Message.show('Access was revoked.');
+  }
+
   render() {
-    if (this.state.api === null) {
+    const { auth, api } = this.state;
+
+    if (api === null) {
       return <div>Loading...</div>;
+    }
+
+    if (!auth) {
+      
     }
 
     const el = React.cloneElement(
@@ -129,7 +160,10 @@ export default class App extends Component {
         api: this.state.api,
         simulation: this.state.simulation,
         simulation_announcments: this.state.announcments,
-        onAnnouncment: this.handleAnnouncment
+        auth: this.state.auth,
+        onAnnouncment: this.handleAnnouncment,
+        onAuth: this.handlePassword,
+        onDeAuth: this.handleLogout
       }
     );
 
@@ -142,6 +176,7 @@ export default class App extends Component {
               timestamp={this.state.timestamp}
               nodes={this.state.nodes}
               audio={this.state.audio}
+              authed={this.state.auth}
             />
             <div className={styles.content}>
               {el}

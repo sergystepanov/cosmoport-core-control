@@ -15,14 +15,16 @@ export default class NavigationBar extends Component {
           <span className="pt-icon-standard pt-icon-predictive-analysis">&nbsp;</span>
           <div className="pt-navbar-heading app-caption">
             Control
-            <span className="version">0.1.2</span>
+            <span className="version">0.1.3</span>
           </div>
           <div className="menu">
             <Navigate to="/" icon="home" onlyActiveOnIndex />
             <Navigate to="/simulation" icon="globe" />
             <Navigate to="/table" icon="timeline-events" />
-            <Navigate to="/translation" icon="translate" />
-            <Navigate to="/settings" icon="cog" />
+            {this.props.authed && <Navigate to="/translation" icon="translate" />}
+            {this.props.authed && <Navigate to="/settings" icon="cog" />}
+            {!this.props.authed && <Navigate to="/login" icon="lock" />}
+            {this.props.authed && <Navigate to="/logout" icon="unlock" />}
           </div>
         </div>
         <div className="pt-navbar-group pt-align-right">
