@@ -38,7 +38,7 @@ export default class SimulationContainer extends Component {
 
   handleTurnGateOn = (action) => {
     console.info('gateOn', action);
-    this.fireUpTheGate(action.event);
+    this.fireUpTheGate(action.event, 'before_departion');
   }
 
   handleArchive = (action) => {
@@ -48,7 +48,7 @@ export default class SimulationContainer extends Component {
   handleReturn = (action) => {
     console.info('return', action);
     this.setEventStatus(action.event, action);
-    this.fireUpTheGate(action.event);
+    this.fireUpTheGate(action.event, 'before_return');
   }
 
   handleStatusChange = (action) => {
@@ -73,10 +73,10 @@ export default class SimulationContainer extends Component {
       .catch(error => ApiError(error));
   }
 
-  fireUpTheGate = (event) => {
+  fireUpTheGate = (evt, tpy) => {
     this.props.api
-      .proxy({ name: 'fire_gate', event })
-      .then(() => Message.show(`Firing up the Gate #${event.gateId}.`))
+      .proxy({ name: 'fire_gate', event: evt, type: tpy })
+      .then(() => Message.show(`Firing up the Gate #${evt.gateId}.`))
       .catch(error => ApiError(error));
   }
 

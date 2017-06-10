@@ -12,7 +12,6 @@ export default class NavigationBar extends Component {
     return (
       <nav className="pt-navbar">
         <div className="pt-navbar-group pt-align-left">
-          <span className="pt-icon-standard pt-icon-predictive-analysis">&nbsp;</span>
           <div className="pt-navbar-heading app-caption">
             Control
             <span className="version">0.1.3</span>

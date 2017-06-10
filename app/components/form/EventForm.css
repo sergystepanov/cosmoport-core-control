@@ -29,8 +29,16 @@
   margin: 0 0 1em 5.3em;
 }
 
-.formTimeRangeContainer {
+.formTimeRangeContainer, .formGatesContainer {
   flex-direction: row !important;
+}
+
+.formGatesContainer {
+  margin-bottom: 0 !important;
+}
+
+.formGates {
+  width: 84%;
 }
 
 .formTimeRange {

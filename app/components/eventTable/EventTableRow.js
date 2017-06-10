@@ -83,7 +83,8 @@ export default class EventTableRow extends Component {
     }
 
     const name = event.status === 'inactive' ? 'canceled' : '';
-    const gate = (`${event.gateId}`).length === 1 ? `0${event.gateId}` : event.gateId;
+    const gate1 = (`${event.gateId}`).length === 1 ? `0${event.gateId}` : event.gateId;
+    const gate2 = (`${event.gate2Id}`).length === 1 ? `0${event.gate2Id}` : event.gate2Id;
 
     // An attribute to store the row id
     const myAttr = { 'data-row-id': event.id };
@@ -98,7 +99,7 @@ export default class EventTableRow extends Component {
           </span>
           {event.type}
         </td>
-        <td>{gate}</td>
+        <td>{gate1}{gate1 !== gate2 && `→${gate2}`}</td>
         <td>{this.renderDestCol(event.eventDestinationId, refs.destinations)}</td>
         <td>{`${event.cost} €`}</td>
         <td>{`${event.durationTime} min`}</td>

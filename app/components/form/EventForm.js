@@ -15,8 +15,6 @@ import _date from '../date/_date';
 
 import styles from './EventForm.css';
 
-// TODO Make sure the props are changing (componentWill...)
-
 /**
  * The class for event properties form.
  *
@@ -35,6 +33,7 @@ export default class EventForm extends Component {
       eventStatusId: PropTypes.number,
       eventTypeId: PropTypes.number,
       gateId: PropTypes.number,
+      gate2Id: PropTypes.number,
       id: PropTypes.number,
       peopleLimit: PropTypes.number,
       repeatInterval: PropTypes.number,
@@ -68,6 +67,7 @@ export default class EventForm extends Component {
       type: 0,
       destination: 0,
       gate: 0,
+      gate2: 0,
       status: 1,
       cost: 1,
       repeat_interval: 0,
@@ -84,7 +84,8 @@ export default class EventForm extends Component {
         'The total event\'s duration time should be less than 24 h.' : ''),
       type: () => (this.state.type === 0 ? 'Type is not selected.' : ''),
       status: () => (this.state.status === 0 ? 'Status is not selected.' : ''),
-      gate: () => (this.state.gate === 0 ? 'Gate is not selected.' : ''),
+      gate: () => (this.state.gate === 0 ? 'Gate for departion is not selected.' : ''),
+      gate2: () => (this.state.gate2 === 0 ? 'Gate for return is not selected.' : ''),
       destination: () => (this.state.destination === 0 ? 'Destination is not selected.' : ''),
       bought: () => (this.state.bought > this.state.limit ? 'Beyond the tickets limit.' : '')
     };
@@ -123,6 +124,7 @@ export default class EventForm extends Component {
         type: event.eventTypeId,
         destination: event.eventDestinationId,
         gate: event.gateId,
+        gate2: event.gate2Id,
         status: event.eventStatusId,
         cost: event.cost,
         repeat_interval: event.repeatInterval,
@@ -188,7 +190,7 @@ export default class EventForm extends Component {
 
   /**
    * Returns all form validators' call result.
-   * It will return false on a first validation with a negative result (which has a message).
+   * It will return false on a first validation rule violation (which has a message).
    *
    * @return {boolean} The result of validation.
    * @since 0.1.0
@@ -226,7 +228,7 @@ export default class EventForm extends Component {
       return <div>:(</div>;
     }
 
-    const { time, type, status, destination, gate, bought } = this.validators;
+    const { time, type, status, destination, gate, gate2, bought } = this.validators;
     const l18n = new L18n(this.props.locale, this.props.refs);
 
     const statusOptions = statuses.map(op =>
@@ -283,9 +285,20 @@ export default class EventForm extends Component {
           {statusOptions}
         </ListFieldGroup>
 
-        <ListFieldGroup name="gate" index={this.state.gate} validator={gate()} onChange={this.handleChange}>
-          {gateOptions}
-        </ListFieldGroup>
+        <div className={`pt-form-group ${styles.formGatesContainer}`}>
+          <label htmlFor="time-range" className={`pt-label pt-inline ${styles.label_text} ${styles.timeLabel}`}>
+            <span>Gates</span>
+          </label>
+          <div className={styles.formGates}>
+            <ListFieldGroup name="gate" caption="Departion" index={this.state.gate} validator={gate()} onChange={this.handleChange}>
+              {gateOptions}
+            </ListFieldGroup>
+
+            <ListFieldGroup name="gate2" caption="Return" index={this.state.gate2} validator={gate2()} onChange={this.handleChange}>
+              {gateOptions}
+            </ListFieldGroup>
+          </div>
+        </div>
 
         <ListFieldGroup name="destination" index={this.state.destination} validator={destination()} onChange={this.handleChange}>
           {destinationOptions}
