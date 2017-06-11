@@ -3,6 +3,7 @@ import React, { Component, PropTypes } from 'react';
 import EventTypePropType from '../../props/EventTypePropType';
 import EventDestinationPropType from '../../props/EventDestinationPropType';
 import EventStatusPropType from '../../props/EventStatusPropType';
+import EventStatePropType from '../../props/EventStatePropType';
 import LocalePropType from '../../props/LocalePropType';
 import GatePropType from '../../props/GatePropType';
 import L18n from '../l18n/L18n';
@@ -42,6 +43,7 @@ export default class EventForm extends Component {
     refs: PropTypes.shape({
       destinations: PropTypes.arrayOf(EventDestinationPropType),
       statuses: PropTypes.arrayOf(EventStatusPropType),
+      states: PropTypes.arrayOf(EventStatePropType),
       types: PropTypes.arrayOf(EventTypePropType)
     }).isRequired,
     locale: LocalePropType.isRequired,
@@ -49,7 +51,11 @@ export default class EventForm extends Component {
   }
 
   static defaultProps = {
-    forCreate: false, event: null, refs: { destinations: [], statuses: [], types: [] }, locale: {}, gates: []
+    forCreate: false,
+    event: null,
+    refs: { destinations: [], statuses: [], states: [], types: [] },
+    locale: {},
+    gates: []
   }
 
   constructor(props) {
@@ -68,7 +74,8 @@ export default class EventForm extends Component {
       destination: 0,
       gate: 0,
       gate2: 0,
-      status: 1,
+      status: 0,
+      state: 1,
       cost: 1,
       repeat_interval: 0,
       default_duration: 0,
@@ -83,7 +90,6 @@ export default class EventForm extends Component {
       time: () => (this.state.time + this.state.duration + this.state.repeat_interval >= 24 * 60 ?
         'The total event\'s duration time should be less than 24 h.' : ''),
       type: () => (this.state.type === 0 ? 'Type is not selected.' : ''),
-      status: () => (this.state.status === 0 ? 'Status is not selected.' : ''),
       gate: () => (this.state.gate === 0 ? 'Gate for departion is not selected.' : ''),
       gate2: () => (this.state.gate2 === 0 ? 'Gate for return is not selected.' : ''),
       destination: () => (this.state.destination === 0 ? 'Destination is not selected.' : ''),
@@ -126,6 +132,7 @@ export default class EventForm extends Component {
         gate: event.gateId,
         gate2: event.gate2Id,
         status: event.eventStatusId,
+        state: event.eventStateId,
         cost: event.cost,
         repeat_interval: event.repeatInterval,
         default_duration: eventTypeData.defaultDuration,
@@ -222,18 +229,23 @@ export default class EventForm extends Component {
   }
 
   render() {
-    const { destinations, types, statuses } = this.props.refs;
+    const { destinations, types, statuses, states } = this.props.refs;
 
     if (!destinations || !types || !statuses) {
       return <div>:(</div>;
     }
 
-    const { time, type, status, destination, gate, gate2, bought } = this.validators;
+    const { time, type, destination, gate, gate2, bought } = this.validators;
     const l18n = new L18n(this.props.locale, this.props.refs);
 
     const statusOptions = statuses.map(op =>
       <option key={op.id} value={op.id}>
         {l18n.findTranslationById(op, 'i18nStatus')}
+      </option>
+    );
+    const stateOptions = states.map(op =>
+      <option key={op.id} value={op.id}>
+        {l18n.findTranslationById(op, 'i18nState')}
       </option>
     );
     const destinationOptions = destinations.map(op =>
@@ -281,7 +293,7 @@ export default class EventForm extends Component {
           </div>
         </div>
 
-        <ListFieldGroup name="status" disabled={this.props.forCreate} index={this.state.status} validator={status()} onChange={this.handleChange}>
+        <ListFieldGroup name="status" index={this.state.status} onChange={this.handleChange}>
           {statusOptions}
         </ListFieldGroup>
 
@@ -309,6 +321,10 @@ export default class EventForm extends Component {
         <NumberFieldGroup name="limit" number={this.state.limit} onChange={this.handleChange} inline />
 
         <NumberFieldGroup name="bought" number={this.state.bought} validator={bought()} onChange={this.handleChange} inline />
+
+        {!this.props.forCreate && <ListFieldGroup name="state" index={this.state.state} onChange={this.handleChange}>
+          {stateOptions}
+        </ListFieldGroup>}
       </div>
     );
   }

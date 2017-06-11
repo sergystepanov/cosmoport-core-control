@@ -13,6 +13,7 @@ export default class EventMapper {
       people_limit: object.limit,
       repeat_interval: object.repeat_interval,
       event_status_id: object.status,
+      event_state_id: object.state,
       start_time: object.time,
       event_type_id: object.type
     })
@@ -22,6 +23,7 @@ export default class EventMapper {
     event_date: object.eventDate,
     event_type_id: object.eventTypeId,
     event_status_id: object.eventStatusId,
+    event_state_id: object.eventStateId,
     event_destination_id: object.eventDestinationId,
     gate_id: object.gateId,
     gate2_id: object.gate2Id,

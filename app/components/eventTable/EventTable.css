@@ -2,3 +2,7 @@
 .eventTable {
   width: 100%;
 }
+
+.eventTable tbody tr td {
+  vertical-align: middle;
+}

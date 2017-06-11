@@ -45,7 +45,7 @@ export default class EventTableRow extends Component {
     const l18nId = l18nRecords.find(record => record.id === id);
     const l18n = this.props.l18n;
 
-    return l18nId ? custom(l18nId, l18n) : id;
+    return l18nId ? custom(l18nId, l18n) : id > 0 ? id : '';
   }
 
   /**
@@ -75,6 +75,8 @@ export default class EventTableRow extends Component {
   renderStatusCol = (id, statuses) => this.renderL18nCell(id, statuses, (l18nId, l18n) =>
     l18n.findTranslationById(l18nId, 'i18nStatus'))
 
+  renderState = (state) => state === 2 && <span className="pt-icon-lock" style={{ fontSize: '.8em', color: '#5c7080' }} />
+
   render() {
     const { event, refs } = this.props;
 
@@ -90,7 +92,7 @@ export default class EventTableRow extends Component {
     const myAttr = { 'data-row-id': event.id };
 
     return (
-      <tr className={name} >
+      <tr className={name}>
         <td>{`${event.eventDate}
           ${_date.minutesToHm(event.startTime)}`}</td>
         <td>
@@ -104,7 +106,7 @@ export default class EventTableRow extends Component {
         <td>{`${event.cost} €`}</td>
         <td>{`${event.durationTime} min`}</td>
         <td>{this.renderStatusCol(event.eventStatusId, refs.statuses)}</td>
-        <td>{`${event.contestants}/${event.peopleLimit}`}</td>
+        <td>{`${event.contestants}/${event.peopleLimit} `}{this.renderState(event.eventStateId)}</td>
         <td>
           <Button className="pt-minimal" iconName="edit" {...myAttr} onClick={this.passEditClick} />
           {this.props.auth && <Button className="pt-minimal" iconName="remove" {...myAttr} onClick={this.passClick} />}
