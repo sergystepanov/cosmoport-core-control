@@ -6,6 +6,7 @@ import Api from '../../lib/core-api-client/ApiV1';
 import ApiError from '../components/indicators/ApiError';
 import EventMapper from '../components/mapper/EventMapper';
 import Message from '../components/messages/Message';
+import _date from '../components/date/_date';
 
 export default class TableContainer extends Component {
   static propTypes = {
@@ -65,6 +66,12 @@ export default class TableContainer extends Component {
 
   handleRefresh = () => this.getData()
 
+  handleDateChange = (range) => {
+    this.props.api.get(`/timetable?date=${range[0] ? _date.toYmd(range[0]) : ''}&date2=${range[1] ? _date.toYmd(range[1]) : ''}`)
+      .then(data => this.setState({ events: data }))
+      .catch(error => ApiError(error));
+  }
+
   render() {
     const { events, refs, locale, gates } = this.state;
 
@@ -76,6 +83,7 @@ export default class TableContainer extends Component {
           refs={refs}
           locale={locale}
           gates={gates}
+          onDateRangeChange={this.handleDateChange}
           onCreate={this.handleCreate}
           onEdit={this.handleEdit}
           onDelete={this.handleDelete}

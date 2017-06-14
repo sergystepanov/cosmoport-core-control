@@ -123,7 +123,7 @@ export default class Player extends Component {
   render() {
     const { volume, playStatus, position, track } = this.state;
     const hasTrack = track !== '' && this.props.music.length > 0;
-    const trackInfo = `Track ${shrink(track, 21)} is ${this.getStatus()}`;
+    const trackInfo = `Track ${shrink(track.replace('.mp3', ''), 21)} is ${this.getStatus()}`;
 
     return (
       <div className={`${styles.centred} ${styles.overlay}`}>

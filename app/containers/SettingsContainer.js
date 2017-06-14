@@ -174,9 +174,13 @@ export default class SettingsContainer extends Component {
           <Caption text={'00 Simulation'} />
           <div>
             <div>
-              Before each departion there is a boarding interval of
+              Before each departion there is a boarding interval and before each reaturn -- display interval of
               <TextValueEditor className={styles.edit} id={boardingSetting.id} text={boardingSetting.value} onConfirm={this.handleSettingConfirm} placeholder="" selectAllOnFocus />
               minutes to show an information.
+            </div>
+            <div style={{fontSize: '85%'}}>
+              Fell free to decrease this value but it is not recommended to
+              increase it because some of the existing events' pre-show periods might overlap each other.
             </div>
           </div>
 

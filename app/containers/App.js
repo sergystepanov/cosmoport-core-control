@@ -43,13 +43,6 @@ export default class App extends Component {
     clearInterval(this.simulacraTimerId);
   }
 
-  getNodes = () => {
-    this.state.api
-      .fetchNodes()
-      .then(data => this.setState({ nodes: data }))
-      .catch();
-  }
-
   tick = () => {
     // this.setState({});
     console.info('[simulacra] tick');
@@ -77,7 +70,9 @@ export default class App extends Component {
         console.log(message);
 
         if (message === ':update-nodes:') {
-          self.getNodes();
+          self.state.api.fetchNodes()
+            .then(data => self.setState({ nodes: data }))
+            .catch(error => console.error(error));
         }
       },
 
@@ -91,19 +86,16 @@ export default class App extends Component {
         console.error(args);
       }
     });
+    const api0 = new Api(`http://${config.address.server}`);
 
     this.setState({
-      api: new Api(`http://${config.address.server}`),
+      api: api0,
       socket: socket0
-    },
-      () => {
-        this.state.api
-          .fetchTime()
-          .then(data => this.setState({ timestamp: data.timestamp }))
-          .catch();
+    });
 
-        this.getNodes();
-      });
+    Promise.all([api0.fetchTime(), api0.fetchNodes()])
+      .then(data => this.setState({ timestamp: data[0], nodes: data[1] }))
+      .catch(error => console.error(error));
   }
 
   handleAnnouncment = (name) => {
@@ -151,7 +143,7 @@ export default class App extends Component {
     }
 
     if (!auth) {
-      
+
     }
 
     const el = React.cloneElement(

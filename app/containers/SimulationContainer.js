@@ -21,17 +21,16 @@ export default class SimulationContainer extends Component {
     super(props);
 
     this.state = {
-      actions: []
+      actions: [],
+      events: []
     };
   }
 
   componentDidMount() {
-    const start = new Date().getTime();
     this.props.api.fetchEvents()
       .then(data => {
         const acts = new Simulacra0().actions(data);
-        this.setState({ actions: acts });
-        console.info('time', (new Date().getTime() - start));
+        this.setState({ actions: acts, events: data });
       })
       .catch(error => console.log(error));
   }
@@ -60,7 +59,7 @@ export default class SimulationContainer extends Component {
   setEventStatus = (event, action) => {
     // Be careful with these hardcoded values
     const statusIdMap =
-      { show_return: 6, set_status_boarding: 4, set_status_departed: 5 }[action.do];
+      { set_status_boarding: 2, set_status_departed: 3, show_return: 4, set_status_returned: 5 }[action.do];
 
     let ev = event;
     ev.eventStatusId = statusIdMap;
@@ -81,6 +80,7 @@ export default class SimulationContainer extends Component {
   }
 
   render() {
+    const start = new Date().getTime();
     const announcments = this.props.simulation_announcments.length > 0 ? this.props.simulation_announcments.map((a, i) => <div key={a + i}>{`${i + 1} - ${a}`}</div>) : <div>Empty</div>;
 
     return (
@@ -98,6 +98,7 @@ export default class SimulationContainer extends Component {
         </div>
         <SimulacraControl
           actions={this.state.actions}
+          events={this.state.events}
           simulacra={this.props.simulation}
           onAnnouncment={this.props.onAnnouncment}
           onTurnGateOn={this.handleTurnGateOn}

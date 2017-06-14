@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { Button } from '@blueprintjs/core';
 
 import _date from '../date/_date';
+import GateSchedule from './schedule/GateSchedule';
 
 import styles from '../../components/simulator/Simulator.css';
 
@@ -13,7 +14,8 @@ export default class SimulacraControl extends Component {
     set_status_departed: 'handleSetStatus',
     play_departed_sound: 'handleAnnouncement',
     archive: 'handleArchive',
-    show_return: 'handleReturn'
+    show_return: 'handleReturn',
+    set_status_returned: 'handleSetStatus'
   }[action.do])
 
   handleActionClick = (action) => this[this.mapActionReaction(action)](action)
@@ -32,12 +34,16 @@ export default class SimulacraControl extends Component {
     const currentMinutes = _date.toMinutes(new Date());
     const events = this.props.actions.map(
       action => (<div className={`pt-minimal ${action.time < currentMinutes ? styles.done : ''}`} key={`${action.event.id}_${action.time}_${action.do}`}>
-        {_date.minutesToHm(action.time)} → <Button className={`pt-minimal ${action.time < currentMinutes ? styles.done : ''}`} text={action.do} onClick={this.handleActionClick.bind(this, action)} />
+        {_date.minutesToHm(action.time)} → {action.do === 'turn_on_gate' ? `(G${action.event.gateId}) ` : action.do === 'show_return' ?
+          `(G${action.event.gate2Id}) ` : ''}<Button className={`pt-minimal ${action.time < currentMinutes ? styles.done : ''}`} text={action.do} onClick={this.handleActionClick.bind(this, action)} />
       </div>));
 
     return (
       <div>
         <span className="pt-icon-heart">{this.props.simulacra.ticks > 0 && this.props.simulacra.ticks}</span>
+        <div>
+          <GateSchedule events={this.props.events} />
+        </div>
         <div>
           {events}
         </div>
