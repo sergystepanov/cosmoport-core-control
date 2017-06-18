@@ -1,4 +1,5 @@
-import React, { Component, PropTypes } from 'react';
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import { Dialog, Colors } from '@blueprintjs/core';
 
 import L18n from '../../components/l18n/L18n';
@@ -9,8 +10,13 @@ import L18n from '../../components/l18n/L18n';
  * @since 0.1.0
  */
 export default class EventTypeDelDialog extends Component {
-  static propTypes = { callback: PropTypes.func.isRequired }
-  static defaultProps = { callback: () => { } }
+  static propTypes = {
+    callback: PropTypes.func.isRequired
+  }
+
+  static defaultProps = {
+    callback: () => { }
+  }
 
   constructor(props) {
     super(props);
@@ -43,10 +49,10 @@ export default class EventTypeDelDialog extends Component {
 
     const l18n = new L18n(this.state.tr, this.state.refs);
     const eventTypes = this.state.types.map(op =>
-      <div key={op.id}>
+      (<div key={op.id}>
         {l18n.findTranslationById(op, 'i18nEventTypeName')}&nbsp;/&nbsp;{l18n.findTranslationById(op, 'i18nEventTypeSubname')}
         <button type="button" className="pt-button pt-minimal pt-icon-remove pt-intent-danger" onClick={this.onDelete.bind(this, op.id)} />
-      </div>
+      </div>)
     );
 
     return (
@@ -54,7 +60,9 @@ export default class EventTypeDelDialog extends Component {
         <div className="pt-dialog-body">
           <div className="pt-callout">
             Click on the button (<span className="pt-icon-remove" />) bellow to delete right away an event type.
-            <div style={{ color: Colors.RED1 }}>The application does allow to delete event types which are used in existing events.</div>
+            <div style={{ color: Colors.RED1 }}>
+              The application does not allow to delete event types which are used in existing events.
+            </div>
           </div>
           <p>&nbsp;</p>
           {eventTypes}

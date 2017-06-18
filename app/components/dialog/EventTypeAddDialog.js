@@ -1,4 +1,5 @@
-import React, { Component, PropTypes } from 'react';
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import { Dialog, Button, Intent } from '@blueprintjs/core';
 
 import EventTypeForm from '../form/event/EventTypeForm';
@@ -38,7 +39,7 @@ export default class EventTypeAddDialog extends Component {
             You should fill the fields with a text of default locale.
             After the save the text will be copied to other locales
             and don&apos;t forget to translate it later in the dedicated translation
-            interfase of the application (<span className="pt-icon-translate" />).
+            interface of the application (<span className="pt-icon-translate" />).
           </div>
           <p>&nbsp;</p>
           <EventTypeForm ref={(c) => { this.form = c; }} />

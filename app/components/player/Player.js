@@ -1,4 +1,5 @@
-import React, { Component, PropTypes } from 'react';
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import Sound from 'react-sound';
 
 import PlayerControls from './PlayerControls';
@@ -37,7 +38,7 @@ export default class Player extends Component {
       position: 0,
       volume: 20,
       period: 1,
-      // Played / Stoped
+      // Played / Stopped
       playStatus: Sound.status.STOPPED,
       isWaiting: false
     };

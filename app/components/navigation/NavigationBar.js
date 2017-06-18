@@ -1,14 +1,37 @@
-import React, { Component, PropTypes } from 'react';
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 
-import NavLink from './NavLink';
+import { NavLink } from 'react-router-dom';
 import ServerTime from '../../components/time/ServerTime';
 import Player from '../player/Player';
 
-const Navigate = (props) => <NavLink to={props.to} onlyActiveOnIndex={props.onlyActiveOnIndex}><span className={`pt-icon-standard pt-icon-${props.icon}`} /></NavLink>;
-Navigate.propTypes = { to: PropTypes.string.isRequired, icon: PropTypes.string.isRequired };
+import styles from './Navigation.css';
+
+const Navigate = (props) => (
+  <NavLink to={props.to} activeClassName={styles.activeLink} exact={props.exact} className="nav-link">
+    <span className={`pt-icon-standard pt-icon-${props.icon}`} />
+  </NavLink>
+);
+Navigate.propTypes = {
+  to: PropTypes.string.isRequired,
+  icon: PropTypes.string.isRequired,
+  exact: PropTypes.bool
+};
+Navigate.defaultProps = {
+  exact: false
+};
 
 export default class NavigationBar extends Component {
+  static propTypes = {
+    auth: PropTypes.bool
+  }
+
+  static defaultProps = {
+    auth: false
+  }
+
   render() {
+    const { auth: auth_, audio, nodes, timestamp } = this.props;
     return (
       <nav className="pt-navbar">
         <div className="pt-navbar-group pt-align-left">
@@ -17,21 +40,21 @@ export default class NavigationBar extends Component {
             <span className="version">0.1.3</span>
           </div>
           <div className="menu">
-            <Navigate to="/" icon="home" onlyActiveOnIndex />
+            <Navigate to="/" icon="home" exact />
             <Navigate to="/simulation" icon="globe" />
             <Navigate to="/table" icon="timeline-events" />
-            {this.props.authed && <Navigate to="/translation" icon="translate" />}
-            {this.props.authed && <Navigate to="/settings" icon="cog" />}
-            {!this.props.authed && <Navigate to="/login" icon="lock" />}
-            {this.props.authed && <Navigate to="/logout" icon="unlock" />}
+            {auth_ && <Navigate to="/translation" icon="translate" />}
+            {auth_ && <Navigate to="/settings" icon="cog" />}
+            {!auth_ && <Navigate to="/login" icon="lock" />}
+            {auth_ && <Navigate to="/logout" icon="unlock" />}
           </div>
         </div>
         <div className="pt-navbar-group pt-align-right">
-          <Player music={this.props.audio} />
+          <Player music={audio} />
           <span className="pt-navbar-divider" />
-          <span>{this.props.nodes.timetables}/{this.props.nodes.gates}</span>
+          <span>{nodes.timetables}/{nodes.gates}</span>
           <span className="pt-navbar-divider" />
-          <ServerTime timestamp={this.props.timestamp} />
+          <ServerTime timestamp={timestamp} />
         </div>
       </nav>
     );

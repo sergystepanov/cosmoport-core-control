@@ -1,4 +1,5 @@
-import React, { Component, PropTypes } from 'react';
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import { EditableText } from '@blueprintjs/core';
 
 export default class TextValueEditor extends Component {
@@ -21,6 +22,6 @@ export default class TextValueEditor extends Component {
   }
 
   render() {
-    return <EditableText className={this.props.className} placeholder="" selectAllOnFocus defaultValue={this.props.text} onConfirm={this.onConfirm} />;
+    return <EditableText className={this.props.className} placeholder="" selectAllOnFocus value={this.props.text} onConfirm={this.onConfirm} />;
   }
 }

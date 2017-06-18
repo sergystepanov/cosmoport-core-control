@@ -1,38 +1,32 @@
-import React, { Component, PropTypes } from 'react';
-
-import Api from '../../lib/core-api-client/ApiV1';
-
-import styles from './App.css';
+import React, { PureComponent } from 'react';
+import PropTypes from 'prop-types';
 
 const ImLucky = (min, max) => {
-  const min_ = Math.ceil(min);
-  const max_ = Math.floor(max);
-  return Math.floor(Math.random() * (max_ - min_ + 1)) + min_;
+  const left = Math.ceil(min);
+  return Math.floor(Math.random() * (Math.floor(max) - (left + 1))) + left;
 };
 const what = ['flash', 'moon'];
 
-export default class UnlockContainer extends Component {
+export default class UnlockContainer extends PureComponent {
   static propTypes = {
-    api: PropTypes.instanceOf(Api)
+    onAuth: PropTypes.func
   }
 
   static defaultProps = {
-    api: null
-  }
-
-  handleInput = (event) => {
-    const value = event.target.value;
-
-    // make debounce
-    this.props.onAuth(value);
+    onAuth: () => { }
   }
 
   shouldComponentUpdate() {
     return false;
   }
 
+  handleInput = (event) => {
+    // make debounce
+    this.props.onAuth(event.target.value);
+  }
+
   render() {
-    return (<div className="pt-non-ideal-state" style={{marginTop: '1em'}}>
+    return (<div className="pt-non-ideal-state" style={{ marginTop: '1em' }}>
       <div className="pt-non-ideal-state-visual pt-non-ideal-state-icon">
         <span className={`pt-icon pt-icon-${what[ImLucky(0, 1)]}`} />
       </div>

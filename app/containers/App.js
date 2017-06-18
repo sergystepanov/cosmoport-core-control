@@ -1,5 +1,10 @@
+// @flow
 import React, { Component } from 'react';
 import { ipcRenderer } from 'electron';
+import {
+  Route,
+  Switch
+} from 'react-router-dom';
 
 import NavigationBar from '../components/navigation/NavigationBar';
 import styles from './App.css';
@@ -8,12 +13,15 @@ import Socket0 from '../../lib/core-api-client/WebSocketWrapper';
 import Rupor from '../components/player/Announcer';
 import ApiError from '../components/indicators/ApiError';
 import Message from '../components/messages/Message';
+import MainPage from '../containers/MainPage';
+import Table from '../containers/TableContainer';
+import Simulation from '../containers/SimulationContainer';
+import Translation from '../containers/TranslationContainer';
+import Settings from '../containers/SettingsContainer';
+import Lock from '../containers/LockContainer';
+import Unlock from '../containers/UnlockContainer';
 
 export default class App extends Component {
-  static contextTypes = {
-    router: React.PropTypes.object.isRequired
-  }
-
   constructor(props) {
     super(props);
 
@@ -21,7 +29,7 @@ export default class App extends Component {
       timestamp: 0,
       nodes: { gates: 0, timetables: 0 },
       audio: [],
-      announcments: [],
+      announcements: [],
       api: null,
       socket: null,
       simulation: {
@@ -30,22 +38,24 @@ export default class App extends Component {
       auth: false
     };
 
+    this.timers = {
+      simulationTick: null
+    };
+
     ipcRenderer.on('audio', this.handleSetAudio);
-    // After config recieving we should fetch the data and render markup.
+    // After receiving the config, we should fetch the data and render markup.
     ipcRenderer.on('config', this.handleConfig);
   }
 
   componentDidMount() {
-    this.simulacraTimerId = setInterval(() => this.tick(), 1000 * 30);
+    this.timers.simulationTick = setInterval(() => this.tick(), 1000 * 30);
   }
 
   componentWillUnmount() {
-    clearInterval(this.simulacraTimerId);
+    Object.keys(this.timers).forEach(timer => clearInterval(this.timers[timer]));
   }
 
   tick = () => {
-    // this.setState({});
-    console.info('[simulacra] tick');
     this.setState({ simulation: { ticks: this.state.simulation.ticks + 1 } });
   }
 
@@ -88,41 +98,34 @@ export default class App extends Component {
     });
     const api0 = new Api(`http://${config.address.server}`);
 
-    this.setState({
-      api: api0,
-      socket: socket0
-    });
+    this.setState({ api: api0, socket: socket0 });
 
     Promise.all([api0.fetchTime(), api0.fetchNodes()])
       .then(data => this.setState({ timestamp: data[0], nodes: data[1] }))
       .catch(error => console.error(error));
   }
 
-  handleAnnouncment = (name) => {
-    this.setState({ announcments: this.state.announcments.concat([name]) });
-    console.info('announcment', name);
+  handleAnnouncement = (name) => {
+    this.setState({ announcements: this.state.announcements.concat([name]) });
+    console.info('announcement', name);
   }
 
-  handleAnnouncmentEnd = () => {
-    const anns = this.state.announcments;
-    if (anns.length > 0) {
-      this.removeEndedAnoncment();
+  handleAnnouncementEnd = () => {
+    if (this.state.announcements.length > 0) {
+      // Remove last announcement
+      this.setState((prevState) => ({
+        announcements: prevState.announcements.filter((_, i) => i !== 0)
+      }));
     }
   }
 
-  removeEndedAnoncment = () => {
-    this.setState((prevState) => ({
-      announcments: prevState.announcments.filter((_, i) => i !== 0)
-    }));
-  }
-
   handlePassword = (pass) => {
-    this.state.api
-      .authWith({ pwd: pass })
+    this.state.api.authWith({ pwd: pass })
       .then(response => {
         if (response.result) {
-          this.setState({ auth: true });
-          Message.show('Access was granted.');
+          this.setState({ auth: true }, () => {
+            Message.show('Access was granted.');
+          });
         }
 
         return 1;
@@ -131,47 +134,50 @@ export default class App extends Component {
   }
 
   handleLogout = () => {
-    this.setState({ auth: false });
-    Message.show('Access was revoked.');
+    this.setState({ auth: false }, () => {
+      Message.show('Access was revoked.');
+    });
   }
 
   render() {
-    const { auth, api } = this.state;
+    const {
+      auth: auth_,
+      api: api_,
+      announcements,
+      simulation: sim,
+      timestamp,
+      nodes,
+      audio
+    } = this.state;
 
-    if (api === null) {
+    if (api_ === null) {
       return <div>Loading...</div>;
     }
 
-    if (!auth) {
-
-    }
-
-    const el = React.cloneElement(
-      this.props.children,
-      {
-        api: this.state.api,
-        simulation: this.state.simulation,
-        simulation_announcments: this.state.announcments,
-        auth: this.state.auth,
-        onAnnouncment: this.handleAnnouncment,
-        onAuth: this.handlePassword,
-        onDeAuth: this.handleLogout
-      }
-    );
+    const commonProps = {
+      api: api_,
+      simulation: sim,
+      simulation_announcements: announcements,
+      auth: auth_,
+      onAnnouncement: this.handleAnnouncement
+    };
 
     return (
       <div>
-        <Rupor announcments={this.state.announcments} onAnnouncmentEnd={this.handleAnnouncmentEnd} />
+        <Rupor announcements={announcements} onAnnouncementEnd={this.handleAnnouncementEnd} />
         <div className="pt-ui-text">
           <div className={styles.container}>
-            <NavigationBar
-              timestamp={this.state.timestamp}
-              nodes={this.state.nodes}
-              audio={this.state.audio}
-              authed={this.state.auth}
-            />
+            <NavigationBar timestamp={timestamp} nodes={nodes} audio={audio} auth={auth_} />
             <div className={styles.content}>
-              {el}
+              <Switch>
+                <Route exact path="/" render={props => <MainPage {...props} {...commonProps} />} />
+                <Route path="/simulation" render={props => <Simulation {...props} {...commonProps} />} />
+                <Route path="/translation" render={props => <Translation {...props} {...commonProps} auth />} />
+                <Route path="/table" render={props => <Table {...props} {...commonProps} />} />
+                <Route path="/login" render={() => <Unlock onAuth={this.handlePassword} />} />
+                <Route path="/logout" render={() => <Lock onDeAuth={this.handleLogout} />} />
+                <Route path="/settings" render={props => <Settings {...props} {...commonProps} auth />} />
+              </Switch>
             </div>
           </div>
         </div>

@@ -12,7 +12,7 @@ export default class EventTable extends Component {
 
   render() {
     const l18n = new L18n(this.props.locale, this.props.refs);
-    const events = this.props.events.map(event => <EventTableRow
+    const events = this.props.events.map(event => (<EventTableRow
       key={event.id}
       event={event}
       refs={this.props.refs}
@@ -20,7 +20,7 @@ export default class EventTable extends Component {
       editCallback={this.handleEdit}
       callback={this.handleRemove}
       auth={this.props.auth}
-    />);
+    />));
 
     let result = null;
 

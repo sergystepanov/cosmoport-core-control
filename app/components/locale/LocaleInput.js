@@ -1,4 +1,5 @@
-import React, { Component, PropTypes } from 'react';
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import { NumericInput, Checkbox } from '@blueprintjs/core';
 
 import styles from './LocaleInput.css';
@@ -35,8 +36,20 @@ export default class LocaleInput extends Component {
   render() {
     const { locale } = this.props;
     const checkBox = locale.default ?
-      <Checkbox key={1} className={styles.locale} checked={locale.show} label={locale.code} disabled /> :
-      <Checkbox key={1} className={styles.locale} checked={locale.show} label={locale.code} onChange={this.handleCheck} />;
+      (<Checkbox
+        key={1}
+        className={styles.locale}
+        checked={locale.show}
+        label={locale.code}
+        disabled
+      />) :
+      (<Checkbox
+        key={1}
+        className={styles.locale}
+        checked={locale.show}
+        label={locale.code}
+        onChange={this.handleCheck}
+      />);
 
     return (
       <div className={styles.container}>

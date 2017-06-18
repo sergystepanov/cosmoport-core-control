@@ -46,7 +46,7 @@ export default class _date {
   /**
    * Converts a formated string into date object.
    *
-   * @param {string} value The fromated date to convert.
+   * @param {string} value The formated date to convert.
    * @returns {Date} The date object.
    */
   static fromYmd(value) {

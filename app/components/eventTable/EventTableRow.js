@@ -1,4 +1,5 @@
-import React, { PropTypes, Component } from 'react';
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import { Button } from '@blueprintjs/core';
 
 import EventPropType from '../../props/EventPropType';
@@ -16,7 +17,9 @@ import L18n from '../l18n/L18n';
  */
 export default class EventTableRow extends Component {
   static propTypes = {
+    auth: PropTypes.bool,
     callback: PropTypes.func,
+    editCallback: PropTypes.func,
     event: EventPropType,
     refs: PropTypes.shape({
       destinations: PropTypes.arrayOf(EventDestinationPropType),
@@ -27,7 +30,9 @@ export default class EventTableRow extends Component {
   }
 
   static defaultProps = {
+    auth: false,
     callback: () => { },
+    editCallback: () => { },
     event: {},
     refs: { destinations: [], statuses: [], types: [] },
     l18n: {}
@@ -45,7 +50,7 @@ export default class EventTableRow extends Component {
     const l18nId = l18nRecords.find(record => record.id === id);
     const l18n = this.props.l18n;
 
-    return l18nId ? custom(l18nId, l18n) : id > 0 ? id : '';
+    return l18nId ? custom(l18nId, l18n) : (id > 0) ? id : '';
   }
 
   /**
@@ -78,7 +83,7 @@ export default class EventTableRow extends Component {
   renderState = (state) => state === 2 && <span className="pt-icon-lock" style={{ fontSize: '.8em', color: '#5c7080' }} />
 
   render() {
-    const { event, refs } = this.props;
+    const { auth, event, refs } = this.props;
 
     if (event === undefined || refs === undefined) {
       return null;
@@ -109,7 +114,7 @@ export default class EventTableRow extends Component {
         <td>{`${event.contestants}/${event.peopleLimit} `}{this.renderState(event.eventStateId)}</td>
         <td>
           <Button className="pt-minimal" iconName="edit" {...myAttr} onClick={this.passEditClick} />
-          {this.props.auth && <Button className="pt-minimal" iconName="remove" {...myAttr} onClick={this.passClick} />}
+          {auth && <Button className="pt-minimal" iconName="remove" {...myAttr} onClick={this.passClick} />}
         </td>
       </tr >
     );

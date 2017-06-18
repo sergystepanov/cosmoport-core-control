@@ -1,6 +1,19 @@
 import React, { PureComponent } from 'react';
+import PropTypes from 'prop-types';
 
 export default class LockContainer extends PureComponent {
+  static propTypes = {
+    onDeAuth: PropTypes.func
+  }
+
+  static defaultProps = {
+    onDeAuth: () => { }
+  }
+
+  shouldComponentUpdate() {
+    return false;
+  }
+
   handleClick = () => {
     this.props.onDeAuth();
   }

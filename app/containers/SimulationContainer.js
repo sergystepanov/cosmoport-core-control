@@ -1,4 +1,5 @@
-import React, { Component, PropTypes } from 'react';
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 
 import Api from '../../lib/core-api-client/ApiV1';
 import PageCaption from '../components/page/PageCaption';
@@ -81,7 +82,7 @@ export default class SimulationContainer extends Component {
 
   render() {
     const start = new Date().getTime();
-    const announcments = this.props.simulation_announcments.length > 0 ? this.props.simulation_announcments.map((a, i) => <div key={a + i}>{`${i + 1} - ${a}`}</div>) : <div>Empty</div>;
+    const announcements = this.props.simulation_announcements.length > 0 ? this.props.simulation_announcements.map((a, i) => <div key={a + i}>{`${i + 1} - ${a}`}</div>) : <div>Empty</div>;
 
     return (
       <div>
@@ -93,14 +94,14 @@ export default class SimulationContainer extends Component {
         <div>
           <div>
             Queue for announcements:
-          {announcments}
+          {announcements}
           </div>
         </div>
         <SimulacraControl
           actions={this.state.actions}
           events={this.state.events}
           simulacra={this.props.simulation}
-          onAnnouncment={this.props.onAnnouncment}
+          onAnnouncement={this.props.onAnnouncement}
           onTurnGateOn={this.handleTurnGateOn}
           onArchive={this.handleArchive}
           onReturn={this.handleReturn}

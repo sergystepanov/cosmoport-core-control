@@ -1,20 +1,23 @@
-import React, { Component, PropTypes } from 'react';
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 
 import PageCaption from '../components/page/PageCaption';
 import Table from '../components/table/Table';
-import Api from '../../lib/core-api-client/ApiV1';
 import ApiError from '../components/indicators/ApiError';
+import Api from '../../lib/core-api-client/ApiV1';
+
 import EventMapper from '../components/mapper/EventMapper';
 import Message from '../components/messages/Message';
 import _date from '../components/date/_date';
 
 export default class TableContainer extends Component {
   static propTypes = {
-    api: PropTypes.instanceOf(Api)
+    api: PropTypes.instanceOf(Api).isRequired,
+    auth: PropTypes.bool
   }
 
   static defaultProps = {
-    api: null
+    auth: false
   }
 
   constructor(props) {

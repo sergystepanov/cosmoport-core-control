@@ -1,3 +1,5 @@
-import {PropTypes} from 'react';
+import PropTypes from 'prop-types';
 
-export default PropTypes.shape({id: PropTypes.number, i18nEventDestinationName: PropTypes.number});
+export default PropTypes.shape(
+    { id: PropTypes.number, i18nEventDestinationName: PropTypes.number }
+);

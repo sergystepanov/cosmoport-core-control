@@ -29,12 +29,12 @@ export default class GateSchedule extends PureComponent {
 
   render() {
     const { events } = this.props;
-    const mapping = Object.assign({}, groupByGate(events, 'gateId')/*, groupByGate(events, 'gate2Id')*/);
+    const mapping = Object.assign({}, groupByGate(events, 'gateId')/* , groupByGate(events, 'gate2Id')*/);
     const gates = Object.keys(mapping).map(key =>
-      <div key={key} className={styles.container} style={{ marginBottom: '1em' }}>
+      (<div key={key} className={styles.container} style={{ marginBottom: '1em' }}>
         <div>{key}</div>
         <div className={styles.container}>{this.draw1440(mapping[key])}</div>
-      </div>
+      </div>)
     );
 
     return (<div>

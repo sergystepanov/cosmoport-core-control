@@ -1,4 +1,5 @@
-import React, { Component, PropTypes } from 'react';
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import Sound from 'react-sound';
 
 const { app } = require('electron').remote;
@@ -7,11 +8,13 @@ const buildUrl = (file) => `file:///${app.getPath('music')}/events/${file}`;
 
 export default class Announcer extends Component {
   static propTypes = {
-    announcments: PropTypes.arrayOf(PropTypes.string)
+    announcements: PropTypes.arrayOf(PropTypes.string),
+    onAnnouncementEnd: PropTypes.func
   }
 
   static defaultProps = {
-    announcments: []
+    announcements: [],
+    onAnnouncementEnd: () => { }
   }
 
   constructor(props) {
@@ -24,7 +27,7 @@ export default class Announcer extends Component {
   }
 
   handleTrackFinish = () => {
-    this.props.onAnnouncmentEnd();
+    this.props.onAnnouncementEnd();
 
     // if (this.state === Sound.status.STOPPED) {
     //   return;
@@ -40,16 +43,16 @@ export default class Announcer extends Component {
   }
 
   render() {
-    const { announcments } = this.props;
+    const { announcements } = this.props;
     const { playStatus } = this.state;
-    const hasAnnouncments = announcments.length > 0;
+    const hasAnnouncements = announcements.length > 0;
 
-    if (!hasAnnouncments) {
+    if (!hasAnnouncements) {
       return null;
     }
 
     return (<Sound
-      url={buildUrl(`${announcments[0]}.mp3`)}
+      url={buildUrl(`${announcements[0]}.mp3`)}
       playStatus={playStatus}
       playFromPosition={0}
       volume={30}

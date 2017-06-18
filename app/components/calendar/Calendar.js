@@ -1,5 +1,5 @@
 // @flow
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 import $ from 'jquery';
 
 import L18n from '../l18n/L18n';

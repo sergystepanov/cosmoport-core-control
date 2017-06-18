@@ -1,10 +1,9 @@
 # core-control
-> 0.1.0
+> 0.1.3
 
 ### Uses
 - Electron
 - React
-- Redux
 - Blueprint
 
 ### Submodules

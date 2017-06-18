@@ -22,7 +22,7 @@ export default class SimulacraControl extends Component {
 
   handleSetStatus = (action) => this.props.onStatusChange(action)
 
-  handleAnnouncement = (action) => this.props.onAnnouncment({ play_boarding_sound: 'boarding', play_departed_sound: 'departure' }[action.do])
+  handleAnnouncement = (action) => this.props.onAnnouncement({ play_boarding_sound: 'boarding', play_departed_sound: 'departure' }[action.do])
 
   handleGateTurning = (action) => this.props.onTurnGateOn(action)
 

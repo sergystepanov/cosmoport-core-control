@@ -1,4 +1,5 @@
-import React, { PureComponent, PropTypes } from 'react';
+import React, { PureComponent } from 'react';
+import PropTypes from 'prop-types';
 
 import styles from '../EventForm.css';
 
@@ -9,7 +10,8 @@ export default class TextFieldGroup extends PureComponent {
     value: PropTypes.string,
     onChange: PropTypes.func,
     validator: PropTypes.string,
-    inline: PropTypes.bool
+    inline: PropTypes.bool,
+    className: PropTypes.string
   }
 
   static defaultProps = {
@@ -17,7 +19,8 @@ export default class TextFieldGroup extends PureComponent {
     value: '',
     onChange: () => { },
     validator: '',
-    inline: false
+    inline: false,
+    className: ''
   }
 
   handleChange = (event) => {

@@ -1,4 +1,5 @@
-import React, { Component, PropTypes } from 'react';
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import { Button, EditableText } from '@blueprintjs/core';
 
 import DefaultLocaleMessage from '../components/locale/DefaultLocaleMessage';
@@ -148,7 +149,7 @@ export default class SettingsContainer extends Component {
     );
     const linesSetting = this.findSetting(this.state.settings, 'timetable_screen_lines');
     const boardingSetting = this.findSetting(this.state.settings, 'boarding_time');
-
+    const syncServerAddressSetting = this.findSetting(this.state.settings, 'sync_server_address');
 
     return (
       <div>
@@ -215,10 +216,10 @@ export default class SettingsContainer extends Component {
             </div>
           </div>
 
-          <Caption text={'05 Synchronization (WIP)'} />
+          <Caption text={'05 Synchronization'} />
           <div style={{ marginBottom: '1em' }}>
             All tickets data will be being synchronized with the server by the address:&nbsp;
-            <EditableText className={styles.baseEdit} defaultValue="http://sync.cosmoport.com" placeholder="" />.
+            <EditableText className={styles.baseEdit} value={syncServerAddressSetting.value} placeholder="" />.
           </div>
           <p />
         </div>

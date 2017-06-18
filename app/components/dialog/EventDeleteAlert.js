@@ -1,7 +1,16 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import { Alert, Intent } from '@blueprintjs/core';
 
 export default class EventDeleteAlert extends Component {
+  static propTypes = {
+    onConfirm: PropTypes.func
+  }
+
+  static defaultProps = {
+    onConfirm: () => { }
+  }
+
   constructor(props) {
     super(props);
 
@@ -30,7 +39,7 @@ export default class EventDeleteAlert extends Component {
     >
       <p>
         Are you sure you want to delete selected <b>event</b>? You will not be able to restore it.
-       </p>
+      </p>
     </Alert>);
   }
 }

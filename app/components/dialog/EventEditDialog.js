@@ -1,4 +1,5 @@
-import React, { Component, PropTypes } from 'react';
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import { Dialog, Button, Intent } from '@blueprintjs/core';
 
 import EventTypePropType from '../../props/EventTypePropType';
@@ -15,7 +16,6 @@ import EventForm from '../form/EventForm';
  */
 export default class EventEditDialog extends Component {
   static propTypes = {
-    event: PropTypes.object,
     callback: PropTypes.func.isRequired,
     refs: PropTypes.shape({
       destinations: PropTypes.arrayOf(EventDestinationPropType),
@@ -52,18 +52,24 @@ export default class EventEditDialog extends Component {
     this.setState({ isOpen: !this.state.isOpen });
   }
 
-  edit = (event) => {
-    this.setState({ event: event }, () => this.toggleDialog());
+  edit = (ev) => {
+    this.setState({ event: ev }, () => this.toggleDialog());
   }
 
   render() {
-    const { isOpen } = this.state;
-    const { locale, refs, event, gates } = this.props;
+    const { isOpen, event } = this.state;
+    const { locale, refs, gates } = this.props;
 
     return (
       <Dialog isOpen={isOpen} onClose={this.toggleDialog} canOutsideClickClose={false} title="Edit event" >
         <div className="pt-dialog-body">
-          <EventForm event={this.state.event} ref={(c) => { this.form = c; }} locale={locale} refs={refs} gates={gates} />
+          <EventForm
+            event={event}
+            ref={(c) => { this.form = c; }}
+            locale={locale}
+            refs={refs}
+            gates={gates}
+          />
         </div>
         <div className="pt-dialog-footer">
           <div className="pt-dialog-footer-actions">

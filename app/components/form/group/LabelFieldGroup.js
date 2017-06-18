@@ -1,11 +1,14 @@
-import React, { PureComponent, PropTypes } from 'react';
+import React, { PureComponent } from 'react';
+import PropTypes from 'prop-types';
 
 export default class LabelFieldGroup extends PureComponent {
   static propTypes = {
+    className: PropTypes.string,
     value: PropTypes.string
   }
 
   static defaultProps = {
+    className: '',
     value: ''
   }
 

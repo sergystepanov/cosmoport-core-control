@@ -1,4 +1,5 @@
-import React, { PureComponent, PropTypes } from 'react';
+import React, { PureComponent } from 'react';
+import PropTypes from 'prop-types';
 import { NumericInput, Intent } from '@blueprintjs/core';
 
 import styles from '../EventForm.css';
@@ -11,7 +12,8 @@ export default class NumberFieldGroup extends PureComponent {
     onChange: PropTypes.func,
     validator: PropTypes.string,
     icon: PropTypes.string,
-    inline: PropTypes.bool
+    inline: PropTypes.bool,
+    className: PropTypes.string
   }
 
   static defaultProps = {
@@ -20,7 +22,8 @@ export default class NumberFieldGroup extends PureComponent {
     onChange: () => { },
     validator: '',
     icon: null,
-    inline: false
+    inline: false,
+    className: ''
   }
 
   handleValueChange = (valueAsNumber) => {
