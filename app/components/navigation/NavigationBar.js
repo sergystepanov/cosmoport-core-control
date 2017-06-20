@@ -23,17 +23,30 @@ Navigate.defaultProps = {
 
 export default class NavigationBar extends Component {
   static propTypes = {
-    auth: PropTypes.bool
+    auth: PropTypes.bool,
+    audio: PropTypes.arrayOf(PropTypes.string),
+    nodes: PropTypes.shape({
+      timetables: PropTypes.number,
+      gates: PropTypes.number
+    }),
+    timestamp: PropTypes.number
   }
 
   static defaultProps = {
-    auth: false
+    auth: false,
+    audio: [],
+    nodes: {
+      timetables: 0,
+      gates: 0
+    },
+    timestamp: 1
   }
 
   render() {
     const { auth: auth_, audio, nodes, timestamp } = this.props;
+
     return (
-      <nav className="pt-navbar">
+      <nav className={`pt-navbar ${styles.sticky}`}>
         <div className="pt-navbar-group pt-align-left">
           <div className="pt-navbar-heading app-caption">
             Control

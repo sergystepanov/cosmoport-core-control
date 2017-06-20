@@ -1,10 +1,8 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
-import EventTypePropType from '../../props/EventTypePropType';
-import EventDestinationPropType from '../../props/EventDestinationPropType';
-import EventStatusPropType from '../../props/EventStatusPropType';
-import EventStatePropType from '../../props/EventStatePropType';
+import EventPropType from '../../props/EventPropType';
+import RefsPropType from '../../props/RefsPropType';
 import LocalePropType from '../../props/LocalePropType';
 import GatePropType from '../../props/GatePropType';
 import L18n from '../l18n/L18n';
@@ -25,28 +23,8 @@ import styles from './EventForm.css';
 export default class EventForm extends Component {
   static propTypes = {
     forCreate: PropTypes.bool,
-    event: PropTypes.shape({
-      contestants: PropTypes.number,
-      cost: PropTypes.number,
-      dateAdded: PropTypes.string,
-      durationTime: PropTypes.number,
-      eventDate: PropTypes.string,
-      eventDestinationId: PropTypes.number,
-      eventStatusId: PropTypes.number,
-      eventTypeId: PropTypes.number,
-      gateId: PropTypes.number,
-      gate2Id: PropTypes.number,
-      id: PropTypes.number,
-      peopleLimit: PropTypes.number,
-      repeatInterval: PropTypes.number,
-      startTime: PropTypes.number
-    }),
-    refs: PropTypes.shape({
-      destinations: PropTypes.arrayOf(EventDestinationPropType),
-      statuses: PropTypes.arrayOf(EventStatusPropType),
-      states: PropTypes.arrayOf(EventStatePropType),
-      types: PropTypes.arrayOf(EventTypePropType)
-    }).isRequired,
+    event: EventPropType,
+    refs: RefsPropType.isRequired,
     locale: LocalePropType.isRequired,
     gates: PropTypes.arrayOf(GatePropType).isRequired
   }
@@ -240,29 +218,29 @@ export default class EventForm extends Component {
     const l18n = new L18n(this.props.locale, this.props.refs);
 
     const statusOptions = statuses.map(op =>
-      <option key={op.id} value={op.id}>
+      (<option key={op.id} value={op.id}>
         {l18n.findTranslationById(op, 'i18nStatus')}
-      </option>
+      </option>)
     );
     const stateOptions = states.map(op =>
-      <option key={op.id} value={op.id}>
+      (<option key={op.id} value={op.id}>
         {l18n.findTranslationById(op, 'i18nState')}
-      </option>
+      </option>)
     );
     const destinationOptions = destinations.map(op =>
-      <option key={op.id} value={op.id}>
+      (<option key={op.id} value={op.id}>
         {l18n.findTranslationById(op, 'i18nEventDestinationName')}
-      </option>
+      </option>)
     );
     const typeOptions = types.map(op =>
-      <option key={op.id} value={op.id}>
+      (<option key={op.id} value={op.id}>
         {l18n.findTranslationById(op, 'i18nEventTypeName')}&nbsp;/&nbsp;{l18n.findTranslationById(op, 'i18nEventTypeSubname')}
-      </option>
+      </option>)
     );
     const gateOptions = this.props.gates.map(gate_ =>
-      <option key={gate_.id} value={gate_.id}>
+      (<option key={gate_.id} value={gate_.id}>
         {gate_.id} - {gate_.number} {gate_.gateName}
-      </option>
+      </option>)
     );
 
     const date = _date.fromYmd(this.state.date);

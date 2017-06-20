@@ -1,23 +1,34 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import { Dialog, Button, Intent } from '@blueprintjs/core';
 
 import LocaleForm from '../form/locale/LocaleForm';
 
 export default class LocaleAddDialog extends Component {
+  static propTypes = {
+    callback: PropTypes.func
+  }
+
+  static defaultProps = {
+    callback: () => { }
+  }
+
   constructor(props) {
     super(props);
 
     this.state = {
       isOpen: false
     };
+  }
 
-    this.toggleDialog = this
-      .toggleDialog
-      .bind(this);
+  passState = () => {
+    this.props.callback(this.form.getFormData());
+  }
 
-    this.passState = this
-      .passState
-      .bind(this);
+  toggleDialog = () => {
+    this.setState({
+      isOpen: !this.state.isOpen
+    });
   }
 
   render() {
@@ -30,7 +41,7 @@ export default class LocaleAddDialog extends Component {
         title="Create locale"
       >
         <div className="pt-dialog-body">
-          <LocaleForm ref="form" />
+          <LocaleForm ref={(form) => { this.form = form; }} />
         </div>
         <div className="pt-dialog-footer">
           <div className="pt-dialog-footer-actions">
@@ -39,15 +50,5 @@ export default class LocaleAddDialog extends Component {
         </div>
       </Dialog>
     );
-  }
-
-  passState() {
-    this.props.callback(this.refs.form.getFormData());
-  }
-
-  toggleDialog() {
-    this.setState({
-      isOpen: !this.state.isOpen
-    });
   }
 }

@@ -2,9 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Dialog, Button, Intent } from '@blueprintjs/core';
 
-import EventTypePropType from '../../props/EventTypePropType';
-import EventDestinationPropType from '../../props/EventDestinationPropType';
-import EventStatusPropType from '../../props/EventStatusPropType';
+import RefsPropType from '../../props/RefsPropType';
 import LocalePropType from '../../props/LocalePropType';
 import GatePropType from '../../props/GatePropType';
 import EventForm from '../form/EventForm';
@@ -17,23 +15,13 @@ import EventForm from '../form/EventForm';
 export default class EventAddDialog extends Component {
   static propTypes = {
     callback: PropTypes.func.isRequired,
-    refs: PropTypes.shape({
-      destinations: PropTypes.arrayOf(EventDestinationPropType),
-      statuses: PropTypes.arrayOf(EventStatusPropType),
-      types: PropTypes.arrayOf(EventTypePropType)
-    }).isRequired,
+    refs: RefsPropType.isRequired,
     locale: LocalePropType.isRequired,
     gates: PropTypes.arrayOf(GatePropType).isRequired
   }
 
   static defaultProps = {
     callback: () => { },
-    refs: {
-      destinations: [],
-      statuses: [],
-      types: []
-    },
-    locale: {},
     gates: []
   }
 

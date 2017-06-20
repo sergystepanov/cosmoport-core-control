@@ -1,15 +1,28 @@
 import React, { PureComponent } from 'react';
+import PropTypes from 'prop-types';
+
+import EventPropType from '../../../props/EventPropType';
 
 import styles from './GateSchedule.css';
 
-const groupByGate = (events, prop) => events.reduce((r, a) => {
-  r[a[prop]] = r[a[prop]] || [];
-  r[a[prop]].push(a);
-  return r;
+const groupByGate = (events, prop) => events.reduce((acc, val) => {
+  const day = val[prop];
+  acc[day] = acc[day] || [];
+  acc[day].push(val);
+
+  return acc;
 }, Object.create(null));
 
 export default class GateSchedule extends PureComponent {
-  shouldComponentUpdate(nextProps, nextState) {
+  static propTypes = {
+    events: PropTypes.arrayOf(EventPropType)
+  }
+
+  static defaultProps = {
+    events: []
+  }
+
+  shouldComponentUpdate(nextProps) {
     return this.props.events !== nextProps.events;
   }
 
@@ -17,7 +30,7 @@ export default class GateSchedule extends PureComponent {
     // const start = new Date().getTime();
     const rez = [];
 
-    for (let i = 0; i < 1441; i++) {
+    for (let i = 0; i < 1441; i += 1) {
       const set = lines.find(e => (i >= e.startTime) && (i <= (e.startTime + e.durationTime)));
       rez.push(set ? <span key={i} className={styles.set} /> : <span key={i} />);
     }

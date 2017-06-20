@@ -1,6 +1,15 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 
 export default class ServerTime extends Component {
+  static propTypes = {
+    timestamp: PropTypes.number
+  }
+
+  static defaultProps = {
+    timestamp: 1
+  }
+
   constructor(props) {
     super(props);
 
@@ -25,24 +34,17 @@ export default class ServerTime extends Component {
     });
   }
 
-  format00(value) {
-    return value < 10 ? `0${value}` : value;
-  }
+  format00 = (value) => (value < 10 ? `0${value}` : value)
 
   showHide = () => ({ opacity: this.state.showColon ? '.999' : '0' })
 
-  date = (part) => (part === 'h' ? this.state.date.getHours() :
-    part === 'm' ? this.state.date.getMinutes() : '')
-
-  renderTime() {
-    return (
-      <div className="time__number">
-        <span>{this.date('h')}</span>
-        <span style={this.showHide()}>:</span>
-        <span>{this.format00(this.date('m'))}</span>
-      </div>
-    );
-  }
+  renderTime = () => (
+    <div className="time__number">
+      <span>{this.state.date.getHours()}</span>
+      <span style={this.showHide()}>:</span>
+      <span>{this.format00(this.state.date.getMinutes())}</span>
+    </div>
+  )
 
   render() {
     return (

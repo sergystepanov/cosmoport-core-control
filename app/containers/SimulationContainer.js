@@ -12,10 +12,16 @@ import Message from '../components/messages/Message';
 export default class SimulationContainer extends Component {
   static propTypes = {
     api: PropTypes.instanceOf(Api),
+    simulation: PropTypes.shape({ ticks: PropTypes.number }),
+    simulation_announcements: PropTypes.arrayOf(PropTypes.string),
+    onAnnouncement: PropTypes.func
   }
 
   static defaultProps = {
-    api: null
+    api: null,
+    simulation: { ticks: 0 },
+    simulation_announcements: [],
+    onAnnouncement: () => { }
   }
 
   constructor(props) {
@@ -32,6 +38,8 @@ export default class SimulationContainer extends Component {
       .then(data => {
         const acts = new Simulacra0().actions(data);
         this.setState({ actions: acts, events: data });
+
+        return 1;
       })
       .catch(error => console.log(error));
   }
@@ -58,11 +66,15 @@ export default class SimulationContainer extends Component {
   }
 
   setEventStatus = (event, action) => {
-    // Be careful with these hardcoded values
-    const statusIdMap =
-      { set_status_boarding: 2, set_status_departed: 3, show_return: 4, set_status_returned: 5 }[action.do];
+    // Be careful with these values
+    const statusIdMap = {
+      set_status_boarding: 2,
+      set_status_departed: 3,
+      show_return: 4,
+      set_status_returned: 5
+    }[action.do];
 
-    let ev = event;
+    const ev = event;
     ev.eventStatusId = statusIdMap;
     const modifiedEvent = EventMapper.unmap(ev);
 
@@ -81,8 +93,9 @@ export default class SimulationContainer extends Component {
   }
 
   render() {
-    const start = new Date().getTime();
-    const announcements = this.props.simulation_announcements.length > 0 ? this.props.simulation_announcements.map((a, i) => <div key={a + i}>{`${i + 1} - ${a}`}</div>) : <div>Empty</div>;
+    const { simulation, simulation_announcements, onAnnouncement } = this.props;
+    const announcements = simulation_announcements.length > 0 ?
+      simulation_announcements.map((a, i) => <div key={a + i}>{`${i + 1} - ${a}`}</div>) : <div>Empty</div>;
 
     return (
       <div>
@@ -100,8 +113,8 @@ export default class SimulationContainer extends Component {
         <SimulacraControl
           actions={this.state.actions}
           events={this.state.events}
-          simulacra={this.props.simulation}
-          onAnnouncement={this.props.onAnnouncement}
+          simulacra={simulation}
+          onAnnouncement={onAnnouncement}
           onTurnGateOn={this.handleTurnGateOn}
           onArchive={this.handleArchive}
           onReturn={this.handleReturn}

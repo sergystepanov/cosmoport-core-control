@@ -16,7 +16,7 @@ export default class EventTypeForm extends Component {
     };
 
     this.validators = {
-      notEmpty: (field) => (this.state[field] === '' ? 'Field shouldn\'t be empty.' : '')
+      notEmpty: (field) => (this.state[field] === '' ? "Field shouldn't be empty." : '')
     };
   }
 

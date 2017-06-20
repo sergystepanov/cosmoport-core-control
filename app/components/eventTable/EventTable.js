@@ -1,18 +1,40 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 
+import RefsPropType from '../../props/RefsPropType';
+import LocalePropType from '../../props/LocalePropType';
+import EventPropType from '../../props/EventPropType';
 import EventTableRow from './EventTableRow';
 import L18n from '../l18n/L18n';
 
 import styles from './EventTable.css';
 
 export default class EventTable extends Component {
+  static propTypes = {
+    editCallback: PropTypes.func,
+    callback: PropTypes.func,
+    auth: PropTypes.bool,
+    refs: RefsPropType.isRequired,
+    locale: LocalePropType.isRequired,
+    events: PropTypes.arrayOf(EventPropType)
+  }
+
+  static defaultProps = {
+    editCallback: () => { },
+    callback: () => { },
+    auth: false,
+    events: []
+  }
+
   handleEdit = (event) => this.props.editCallback(event)
 
   handleRemove = (id) => this.props.callback(id)
 
   render() {
-    const l18n = new L18n(this.props.locale, this.props.refs);
-    const events = this.props.events.map(event => (<EventTableRow
+    const { locale, refs, events: events_ } = this.props;
+    const l18n = new L18n(locale, refs);
+
+    const events = events_.map(event => (<EventTableRow
       key={event.id}
       event={event}
       refs={this.props.refs}

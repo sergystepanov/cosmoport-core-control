@@ -26,7 +26,7 @@ export default class App extends Component {
     super(props);
 
     this.state = {
-      timestamp: 0,
+      timestamp: 1,
       nodes: { gates: 0, timetables: 0 },
       audio: [],
       announcements: [],
@@ -101,7 +101,7 @@ export default class App extends Component {
     this.setState({ api: api0, socket: socket0 });
 
     Promise.all([api0.fetchTime(), api0.fetchNodes()])
-      .then(data => this.setState({ timestamp: data[0], nodes: data[1] }))
+      .then(data => this.setState({ timestamp: data[0].timestamp, nodes: data[1] }))
       .catch(error => console.error(error));
   }
 

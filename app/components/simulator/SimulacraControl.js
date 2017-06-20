@@ -1,12 +1,40 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import { Button } from '@blueprintjs/core';
 
+import EventPropType from '../../props/EventPropType';
 import _date from '../date/_date';
 import GateSchedule from './schedule/GateSchedule';
 
 import styles from '../../components/simulator/Simulator.css';
 
 export default class SimulacraControl extends Component {
+  static propTypes = {
+    onStatusChange: PropTypes.func,
+    onAnnouncement: PropTypes.func,
+    onTurnGateOn: PropTypes.func,
+    onArchive: PropTypes.func,
+    onReturn: PropTypes.func,
+    actions: PropTypes.arrayOf(PropTypes.shape({
+      event: EventPropType,
+      time: PropTypes.number,
+      do: PropTypes.string
+    })),
+    events: PropTypes.arrayOf(EventPropType),
+    simulacra: PropTypes.shape({ ticks: PropTypes.number })
+  }
+
+  static defaultProps = {
+    onStatusChange: () => { },
+    onAnnouncement: () => { },
+    onTurnGateOn: () => { },
+    onArchive: () => { },
+    onReturn: () => { },
+    actions: [],
+    events: [],
+    simulacra: { ticks: 0 }
+  }
+
   mapActionReaction = (action) => ({
     set_status_boarding: 'handleSetStatus',
     play_boarding_sound: 'handleAnnouncement',
@@ -33,10 +61,18 @@ export default class SimulacraControl extends Component {
   render() {
     const currentMinutes = _date.toMinutes(new Date());
     const events = this.props.actions.map(
-      action => (<div className={`pt-minimal ${action.time < currentMinutes ? styles.done : ''}`} key={`${action.event.id}_${action.time}_${action.do}`}>
-        {_date.minutesToHm(action.time)} → {action.do === 'turn_on_gate' ? `(G${action.event.gateId}) ` : action.do === 'show_return' ?
-          `(G${action.event.gate2Id}) ` : ''}<Button className={`pt-minimal ${action.time < currentMinutes ? styles.done : ''}`} text={action.do} onClick={this.handleActionClick.bind(this, action)} />
-      </div>));
+      action => {
+        let destination = '';
+        if (action.do === 'turn_on_gate') {
+          destination = `(G${action.event.gateId}) `;
+        } else if (action.do === 'show_return') {
+          destination = `(G${action.event.gate2Id}) `;
+        }
+
+        return (<div className={`pt-minimal ${action.time < currentMinutes ? styles.done : ''}`} key={`${action.event.id}_${action.time}_${action.do}`}>
+          {_date.minutesToHm(action.time)} → {destination}<Button className={`pt-minimal ${action.time < currentMinutes ? styles.done : ''}`} text={action.do} onClick={this.handleActionClick.bind(this, action)} />
+        </div>);
+      });
 
     return (
       <div>

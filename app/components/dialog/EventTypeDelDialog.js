@@ -2,6 +2,9 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Dialog, Colors } from '@blueprintjs/core';
 
+import EventTypePropType from '../../props/EventTypePropType';
+import RefsPropType from '../../props/RefsPropType';
+import LocalePropType from '../../props/LocalePropType';
 import L18n from '../../components/l18n/L18n';
 
 /**
@@ -11,10 +14,14 @@ import L18n from '../../components/l18n/L18n';
  */
 export default class EventTypeDelDialog extends Component {
   static propTypes = {
+    types: PropTypes.arrayOf(EventTypePropType),
+    refs: RefsPropType.isRequired,
+    trans: LocalePropType.isRequired,
     callback: PropTypes.func.isRequired
   }
 
   static defaultProps = {
+    types: [],
     callback: () => { }
   }
 
@@ -61,7 +68,8 @@ export default class EventTypeDelDialog extends Component {
           <div className="pt-callout">
             Click on the button (<span className="pt-icon-remove" />) bellow to delete right away an event type.
             <div style={{ color: Colors.RED1 }}>
-              The application does not allow to delete event types which are used in existing events.
+              The application does not allow to delete event types
+              which are used in existing events.
             </div>
           </div>
           <p>&nbsp;</p>

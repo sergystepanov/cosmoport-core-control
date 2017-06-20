@@ -23,6 +23,7 @@ const mapEvent = (data) => ({
   subname: data.subname
 });
 const Caption = (props) => <p className={styles.caption}>{props.text}</p>;
+Caption.propTypes = { text: PropTypes.string.isRequired };
 const updateLocale = (locale, locales) => {
   const jo = locales.map(l => (l.id === locale.id ? locale : l));
   return jo;
@@ -54,7 +55,9 @@ export default class SettingsContainer extends Component {
       this.props.api.fetchTranslations(),
       this.props.api.fetchSettings()
     ])
-      .then(data => this.setState({ refs: data[0], locales: data[1], trans: data[2].en, settings: data[3] }))
+      .then(data => this.setState(
+        { refs: data[0], locales: data[1], trans: data[2].en, settings: data[3] }
+      ))
       .catch(error => ApiError(error));
   }
 
@@ -138,14 +141,19 @@ export default class SettingsContainer extends Component {
 
     this.props.api
       .authSetPass({ pwd: pass })
-      .then((response) => response.result ? Message.show('Password has changed.') : Message.show('Error during save.', 'error'))
+      .then(response => (response.result ? Message.show('Password has changed.') : Message.show('Error during save.', 'error')))
       .catch(error => ApiError(error));
   }
 
   render() {
     const localeMessage = DefaultLocaleMessage(this.state.locales);
     const localeTimeouts = this.state.locales.map(
-      locale => <LocaleInput key={locale.id} locale={locale} onChange={this.handleLocaleTimeoutChange} onCheck={this.handleCheck} />
+      locale => (<LocaleInput
+        key={locale.id}
+        locale={locale}
+        onChange={this.handleLocaleTimeoutChange}
+        onCheck={this.handleCheck}
+      />)
     );
     const linesSetting = this.findSetting(this.state.settings, 'timetable_screen_lines');
     const boardingSetting = this.findSetting(this.state.settings, 'boarding_time');
@@ -175,13 +183,14 @@ export default class SettingsContainer extends Component {
           <Caption text={'00 Simulation'} />
           <div>
             <div>
-              Before each departion there is a boarding interval and before each reaturn -- display interval of
+              Before each departion there is a boarding interval and before each return —
+              display interval of
               <TextValueEditor className={styles.edit} id={boardingSetting.id} text={boardingSetting.value} onConfirm={this.handleSettingConfirm} placeholder="" selectAllOnFocus />
               minutes to show an information.
             </div>
-            <div style={{fontSize: '85%'}}>
-              Fell free to decrease this value but it is not recommended to
-              increase it because some of the existing events' pre-show periods might overlap each other.
+            <div style={{ fontSize: '85%' }}>
+              Fill free to decrease this value but it is not recommended to
+              increase it because some of the intervals might overlap each other.
             </div>
           </div>
 
@@ -194,9 +203,13 @@ export default class SettingsContainer extends Component {
           <Caption text={'02 Locales'} />
           <div>
             {localeMessage}
-            <div>Every other app will be being shown given amount of time in all of the selected translations:</div>
+            <div>
+              Every other app will be being shown given amount of time
+              in all of the selected translations:
+            </div>
             <div className={styles.margin}>{localeTimeouts}</div>
-            <div>You can create new translations in the dedicated translation interfase of the application
+            <div>You can create new translations in the dedicated translation interface
+            of the application
             (<span className="pt-icon-translate" />).</div>
           </div>
 
@@ -209,8 +222,8 @@ export default class SettingsContainer extends Component {
 
           <Caption text={'04 Protection'} />
           <div>
-            Change the password:
-              <div className="pt-control-group" style={{ marginTop: '.6em' }}>
+            <span>Change the password:</span>
+            <div className="pt-control-group" style={{ marginTop: '.6em' }}>
               <input type="password" className="pt-input" placeholder="Be brave." ref={(c) => { this.passField = c; }} />
               <button className="pt-button pt-icon-floppy-disk" onClick={this.handlePassChange} />
             </div>

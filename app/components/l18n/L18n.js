@@ -16,18 +16,7 @@ export default class L18n {
     return this.findEventById(eventDestinationId, 'destinations');
   }
 
-  findEventById(id, property) {
-    let result = false;
-
-    for (const eventProp of this.refs[property]) {
-      if (eventProp.id === id) {
-        result = eventProp;
-        break;
-      }
-    }
-
-    return result;
-  }
+  findEventById = (id, property) => this.refs[property].find(el => el.id === id) || false
 
   findTranslationById(ref, name) {
     const data = this.locale[ref[name]];

@@ -1,7 +1,21 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import { Button } from '@blueprintjs/core';
 
 export default class Translation extends Component {
+  static propTypes = {
+    locale: PropTypes.shape({
+      id: PropTypes.number,
+      code: PropTypes.string,
+      localeDescription: PropTypes.string
+    }).isRequired,
+    onLocaleSelect: PropTypes.func
+  }
+
+  static defaultProps = {
+    onLocaleSelect: () => { }
+  }
+
   handleSelect = () => {
     this.props.onLocaleSelect(this.props.locale.id);
   }

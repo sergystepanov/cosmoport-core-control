@@ -11,6 +11,7 @@ export default PropTypes.shape({
   eventStatusId: PropTypes.number,
   eventTypeId: PropTypes.number,
   gateId: PropTypes.number,
+  gate2Id: PropTypes.number,
   peopleLimit: PropTypes.number,
   repeatInterval: PropTypes.number,
   startTime: PropTypes.number

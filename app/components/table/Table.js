@@ -1,7 +1,12 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import { Button } from '@blueprintjs/core';
 import { DateRangeInput } from '@blueprintjs/datetime';
 
+import RefsPropType from '../../props/RefsPropType';
+import LocalePropType from '../../props/LocalePropType';
+import EventPropType from '../../props/EventPropType';
+import GatePropType from '../../props/GatePropType';
 import Message from '../../components/messages/Message';
 import EventAddDialog from '../dialog/EventAddDialog';
 import EventEditDialog from '../dialog/EventEditDialog';
@@ -9,6 +14,30 @@ import EventDeleteAlert from '../dialog/EventDeleteAlert';
 import EventTable from '../eventTable/EventTable';
 
 export default class Table extends Component {
+  static propTypes = {
+    onCreate: PropTypes.func,
+    onRefresh: PropTypes.func,
+    onEdit: PropTypes.func,
+    onDelete: PropTypes.func,
+    onDateRangeChange: PropTypes.func,
+    refs: RefsPropType.isRequired,
+    locale: LocalePropType.isRequired,
+    events: PropTypes.arrayOf(EventPropType),
+    gates: PropTypes.arrayOf(GatePropType),
+    auth: PropTypes.bool
+  }
+
+  static defaultProps = {
+    onCreate: () => { },
+    onRefresh: () => { },
+    onEdit: () => { },
+    onDelete: () => { },
+    onDateRangeChange: () => { },
+    events: [],
+    gates: [],
+    auth: false
+  }
+
   constructor(props) {
     super(props);
 
@@ -25,7 +54,7 @@ export default class Table extends Component {
   }
 
   handleAddClick = () => {
-    this.refs.event_add_dialog.toggleDialog();
+    this.eventAddDialog.toggleDialog();
   }
 
   handleRefresh = () => {
@@ -34,11 +63,11 @@ export default class Table extends Component {
   }
 
   handlePreDelete = (id) => {
-    this.refs.delete_alert.open(id);
+    this.deleteAlert.open(id);
   }
 
   handleEdit = (event) => {
-    this.refs.event_edit_dialog.edit(event);
+    this.eventEditDialog.edit(event);
   }
 
   handleEditApply = (formData) => {
@@ -54,9 +83,9 @@ export default class Table extends Component {
     this.props.onDelete(id);
   }
 
-  handleChange = (rangee) => {
-    this.props.onDateRangeChange(rangee);
-    this.setState({ range: rangee });
+  handleChange = (range_) => {
+    this.props.onDateRangeChange(range_);
+    this.setState({ range: range_ });
   }
 
   handleClearRange = () => {
@@ -66,13 +95,28 @@ export default class Table extends Component {
 
   render() {
     const { range } = this.state;
-    const { refs, locale, events, gates } = this.props;
+    const { refs, locale, events, gates, auth } = this.props;
 
     return (
       <div>
-        <EventDeleteAlert ref="delete_alert" onConfirm={this.handleDelete} />
-        <EventAddDialog ref="event_add_dialog" callback={this.handleCreate} refs={refs} locale={locale} gates={gates} />
-        <EventEditDialog ref="event_edit_dialog" callback={this.handleEditApply} refs={refs} locale={locale} gates={gates} />
+        <EventDeleteAlert
+          ref={(alert) => { this.deleteAlert = alert; }}
+          onConfirm={this.handleDelete}
+        />
+        <EventAddDialog
+          ref={(dialog) => { this.eventAddDialog = dialog; }}
+          callback={this.handleCreate}
+          refs={refs}
+          locale={locale}
+          gates={gates}
+        />
+        <EventEditDialog
+          ref={(dialog) => { this.eventEditDialog = dialog; }}
+          callback={this.handleEditApply}
+          refs={refs}
+          locale={locale}
+          gates={gates}
+        />
         <div>
           <Button className="pt-minimal" iconName="add" onClick={this.handleAddClick} />
           <Button className="pt-minimal" iconName="refresh" onClick={this.handleRefresh} />
@@ -81,7 +125,14 @@ export default class Table extends Component {
             <Button className="pt-minimal" iconName="remove" onClick={this.handleClearRange} />
           </div>
         </div>
-        <EventTable editCallback={this.handleEdit} callback={this.handlePreDelete} refs={refs} locale={locale} events={events} auth={this.props.auth} />
+        <EventTable
+          editCallback={this.handleEdit}
+          callback={this.handlePreDelete}
+          refs={refs}
+          locale={locale}
+          events={events}
+          auth={auth}
+        />
       </div>
     );
   }

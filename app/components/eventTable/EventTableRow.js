@@ -3,9 +3,7 @@ import PropTypes from 'prop-types';
 import { Button } from '@blueprintjs/core';
 
 import EventPropType from '../../props/EventPropType';
-import EventTypePropType from '../../props/EventTypePropType';
-import EventDestinationPropType from '../../props/EventDestinationPropType';
-import EventStatusPropType from '../../props/EventStatusPropType';
+import RefsPropType from '../../props/RefsPropType';
 
 import _date from '../date/_date';
 import L18n from '../l18n/L18n';
@@ -21,11 +19,7 @@ export default class EventTableRow extends Component {
     callback: PropTypes.func,
     editCallback: PropTypes.func,
     event: EventPropType,
-    refs: PropTypes.shape({
-      destinations: PropTypes.arrayOf(EventDestinationPropType),
-      statuses: PropTypes.arrayOf(EventStatusPropType),
-      types: PropTypes.arrayOf(EventTypePropType)
-    }),
+    refs: RefsPropType.isRequired,
     l18n: PropTypes.instanceOf(L18n)
   }
 
@@ -34,7 +28,6 @@ export default class EventTableRow extends Component {
     callback: () => { },
     editCallback: () => { },
     event: {},
-    refs: { destinations: [], statuses: [], types: [] },
     l18n: {}
   }
 
@@ -48,9 +41,12 @@ export default class EventTableRow extends Component {
   renderL18nCell = (id, translations, custom) => {
     const l18nRecords = translations || [];
     const l18nId = l18nRecords.find(record => record.id === id);
-    const l18n = this.props.l18n;
 
-    return l18nId ? custom(l18nId, l18n) : (id > 0) ? id : '';
+    if (l18nId) {
+      return custom(l18nId, this.props.l18n);
+    }
+
+    return id > 0 ? id : '';
   }
 
   /**

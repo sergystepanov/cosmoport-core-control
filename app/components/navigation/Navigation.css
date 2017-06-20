@@ -1,4 +1,9 @@
 
+.sticky {
+    position: fixed !important;
+    width: 100%;
+}
+
 .activeLink {
     color: #bf7326 !important;
 }

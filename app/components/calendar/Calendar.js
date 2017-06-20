@@ -1,12 +1,32 @@
 // @flow
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import $ from 'jquery';
 
 import L18n from '../l18n/L18n';
+import _date from '../date/_date';
+import EventPropType from '../../props/EventPropType';
+import RefsPropType from '../../props/RefsPropType';
+import LocalePropType from '../../props/LocalePropType';
 
 require('fullcalendar/dist/fullcalendar.min.js');
 
+/**
+ * Hybrid React/Fullcalendar component.
+ *
+ * @since 0.1.0
+ */
 export default class Calendar extends Component {
+  static propTypes = {
+    events: PropTypes.arrayOf(EventPropType),
+    locale: LocalePropType.isRequired,
+    refs: RefsPropType.isRequired
+  }
+
+  static defaultProps = {
+    events: []
+  }
+
   constructor(props) {
     super(props);
 
@@ -14,122 +34,90 @@ export default class Calendar extends Component {
   }
 
   componentDidMount() {
-    this.$node = $(this.refs.calendar);
+    this.$node = $(this.calendar);
+    const self = this;
 
-    this
-      .$node
-      .fullCalendar({
-        header: {
-          left: 'prev,next today',
-          center: 'title',
-          right: 'month,basicWeek,basicDay'
-        },
-        timeFormat: 'HH:mm',
-        // eventLimit: true,
-        eventSources: [
-          {
-            events: this.getEvents
-          }
-        ],
-        navLinks: true, // can click day/week names to navigate views
-        selectable: true,
-        selectHelper: true,
-        select: function (start, end) {
-          var title = prompt('Event Title:');
-          var eventData;
-          if (title) {
-            eventData = {
-              title: title,
-              start: start,
-              end: end
-            };
-            this
-              .$node
-              .fullCalendar('renderEvent', eventData, true); // stick? = true
-          }
-          this
-            .$node
-            .fullCalendar('unselect');
-        },
-        editable: true,
-
-        dayClick(date, jsEvent, view) {
-          // alert('Clicked on: ' + date.format()); alert('Coordinates: ' + jsEvent.pageX
-          // + ',' + jsEvent.pageY); alert('Current view: ' + view.name); change the day's
-          // background color just for fun $(this).css('background-color', 'red');
-        }
-      });
+    this.$node.fullCalendar({
+      height: 'auto',
+      header: {
+        left: '',
+        center: 'title',
+        right: 'prev,next today,month,agendaWeek,agendaDay'
+      },
+      defaultView: 'month',
+      timeFormat: 'HH:mm',
+      // starts from Monday
+      firstDay: 1,
+      // eventLimit: true,
+      allDaySlot: false,
+      slotDuration: '00:30:00',
+      slotLabelFormat: 'HH:mm',
+      slotEventOverlap: false,
+      eventSources: [{ events: this.getEvents }],
+      navLinks: true,
+      selectable: false,
+      selectHelper: false,
+      dayClick: self.handleDayClick,
+      eventClick: self.handleEventClick,
+      editable: false
+    });
   }
 
+  /**
+   * Each time when component receives new props, we should trigger refresh or
+   * perform anything else we need. For this example, we'll update only the
+   * enable/disable option, as soon as we receive a different value for
+   * this.props.enable if (nextProps.enable !== this.props.enable) { }
+   *
+   * @param {*} nextProps The properties of the object.
+   */
   componentWillReceiveProps(nextProps) {
-    // Each time when component receives new props, we should trigger refresh or
-    // perform anything else we need. For this example, we'll update only the
-    // enable/disable option, as soon as we receive a different value for
-    // this.props.enable if (nextProps.enable !== this.props.enable) {
-    // this.$node.sortable(nextProps.enable ? 'enable' : 'disable'); } if
-    // (nextProps.events) {
     this.events = nextProps.events;
     this.l18n = new L18n(nextProps.locale, nextProps.refs);
-    this
-      .$node
-      .fullCalendar('refetchEvents');
+    this.$node.fullCalendar('refetchEvents');
   }
 
   shouldComponentUpdate() {
     return false;
   }
 
+  /**
+   * Removes elements, events handlers, and internal data
+   * when the component will unmount.
+   *
+   * @since 0.1.0
+   */
   componentWillUnmount() {
-    // Clean up the mess when the component unmounts this.$node.sortable('destroy');
+    this.$node.fullCalendar('destroy');
+  }
+
+  handleDayClick = (date, jsEvent, view) => {
+    console.log(date.format(), view.name);
+  }
+
+  handleEventClick = (calEvent, jsEvent, view) => {
+    console.log(calEvent.title, view.name);
   }
 
   getEvents = (start, end, timezone, callback) => {
-    const events = [];
+    const events = this.events.map(event => {
+      const eventData = this.l18n.findEventRefByEventTypeId(event.eventTypeId);
 
-    for (const event of this.events) {
-      const eventData = this
-        .l18n
-        .findEventRefByEventTypeId(event.eventTypeId);
-      events.push({
-        title: `${this
-          .l18n
-          .findTranslationById(eventData, 'i18nEventTypeName')} / ${this
+      return {
+        title: `${this.l18n.findTranslationById(eventData, 'i18nEventTypeName')} / ${this
           .l18n
           .findTranslationById(eventData, 'i18nEventTypeSubname')}`,
         start: `${event
-          .eventDate}T${this
-          .minutesToHm(event.startTime)}`,
-        end: `${event
-          .eventDate}T${this
-          .minutesToHm(event.startTime + event.durationTime)}`
-      });
-    }
+          .eventDate}T${_date.minutesToHm(event.startTime)}`,
+        end: `${event.eventDate}T${_date.minutesToHm(event.startTime + event.durationTime)}`
+      };
+    });
 
     callback(events);
   }
 
-  minutesToHm(minutes) {
-    if (minutes < 0) {
-      return '00:00:00';
-    }
-
-    const h = Math.trunc(minutes / 60);
-    const m = minutes % 60;
-
-    return `${h < 10
-      ? '0' + h
-      : h}:${m < 10
-        ? '0' + m
-        : m}:00`;
-  }
-
-  props : {
-    events: array,
-    locale: object,
-    refs: object
-  }
 
   render() {
-    return (<div ref="calendar"/>);
+    return <div ref={(div) => { this.calendar = div; }} />;
   }
 }
