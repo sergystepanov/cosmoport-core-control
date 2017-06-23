@@ -6,6 +6,7 @@ import RefsPropType from '../../props/RefsPropType';
 import LocalePropType from '../../props/LocalePropType';
 import GatePropType from '../../props/GatePropType';
 import EventForm from '../form/EventForm';
+import EventMapper from '../../components/mapper/EventMapper';
 
 /**
  * The class for event edit dialog.
@@ -33,7 +34,7 @@ export default class EventEditDialog extends Component {
   }
 
   passState = () => {
-    this.props.callback(this.form.getFormData());
+    this.props.callback(EventMapper.fromForm(this.form.getFormData()));
   }
 
   toggleDialog = () => {

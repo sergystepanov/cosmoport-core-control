@@ -6,8 +6,6 @@ import $ from 'jquery';
 import L18n from '../l18n/L18n';
 import _date from '../date/_date';
 import EventPropType from '../../props/EventPropType';
-import RefsPropType from '../../props/RefsPropType';
-import LocalePropType from '../../props/LocalePropType';
 
 require('fullcalendar/dist/fullcalendar.min.js');
 
@@ -19,12 +17,15 @@ require('fullcalendar/dist/fullcalendar.min.js');
 export default class Calendar extends Component {
   static propTypes = {
     events: PropTypes.arrayOf(EventPropType),
-    locale: LocalePropType.isRequired,
-    refs: RefsPropType.isRequired
+    l18n: PropTypes.instanceOf(L18n).isRequired,
+    onMenu: PropTypes.func,
+    onViewChange: PropTypes.func
   }
 
   static defaultProps = {
-    events: []
+    events: [],
+    onMenu: () => { },
+    onViewChange: () => { }
   }
 
   constructor(props) {
@@ -39,6 +40,7 @@ export default class Calendar extends Component {
 
     this.$node.fullCalendar({
       height: 'auto',
+      aspectRatio: 1,
       header: {
         left: '',
         center: 'title',
@@ -59,7 +61,8 @@ export default class Calendar extends Component {
       selectHelper: false,
       dayClick: self.handleDayClick,
       eventClick: self.handleEventClick,
-      editable: false
+      editable: false,
+      viewRender: self.handleViewChange
     });
   }
 
@@ -73,7 +76,7 @@ export default class Calendar extends Component {
    */
   componentWillReceiveProps(nextProps) {
     this.events = nextProps.events;
-    this.l18n = new L18n(nextProps.locale, nextProps.refs);
+    this.l18n = nextProps.l18n;
     this.$node.fullCalendar('refetchEvents');
   }
 
@@ -91,12 +94,16 @@ export default class Calendar extends Component {
     this.$node.fullCalendar('destroy');
   }
 
-  handleDayClick = (date, jsEvent, view) => {
-    console.log(date.format(), view.name);
+  handleDayClick = (date, jsEvent) => {
+    this.props.onMenu(jsEvent, date, 'day');
   }
 
-  handleEventClick = (calEvent, jsEvent, view) => {
-    console.log(calEvent.title, view.name);
+  handleEventClick = (calEvent, jsEvent) => {
+    this.props.onMenu(jsEvent, calEvent, 'event');
+  }
+
+  handleViewChange = () => {
+    this.props.onViewChange(this.getCurrentDateRange());
   }
 
   getEvents = (start, end, timezone, callback) => {
@@ -104,11 +111,10 @@ export default class Calendar extends Component {
       const eventData = this.l18n.findEventRefByEventTypeId(event.eventTypeId);
 
       return {
-        title: `${this.l18n.findTranslationById(eventData, 'i18nEventTypeName')} / ${this
-          .l18n
-          .findTranslationById(eventData, 'i18nEventTypeSubname')}`,
-        start: `${event
-          .eventDate}T${_date.minutesToHm(event.startTime)}`,
+        id: event.id,
+        title: `${this.l18n.findTranslationById(eventData, 'i18nEventTypeName')} / 
+        ${this.l18n.findTranslationById(eventData, 'i18nEventTypeSubname')}`,
+        start: `${event.eventDate}T${_date.minutesToHm(event.startTime)}`,
         end: `${event.eventDate}T${_date.minutesToHm(event.startTime + event.durationTime)}`
       };
     });
@@ -116,8 +122,13 @@ export default class Calendar extends Component {
     callback(events);
   }
 
+  getCurrentDateRange = () => {
+    const view = this.$node.fullCalendar('getView');
+
+    return { start: view.start, end: view.end };
+  }
 
   render() {
-    return <div ref={(div) => { this.calendar = div; }} />;
+    return <div style={{ padding: '0 5em' }} ref={(div) => { this.calendar = div; }} />;
   }
 }

@@ -6,7 +6,6 @@ import Table from '../components/table/Table';
 import ApiError from '../components/indicators/ApiError';
 import Api from '../../lib/core-api-client/ApiV1';
 
-import EventMapper from '../components/mapper/EventMapper';
 import Message from '../components/messages/Message';
 import _date from '../components/date/_date';
 
@@ -45,7 +44,7 @@ export default class TableContainer extends Component {
 
   handleCreate = (formData) => {
     this.props.api
-      .createEvent(EventMapper.fromForm(formData))
+      .createEvent(formData)
       .then(result => Message.show(`Event has been created [${result.id}].`))
       .then(() => this.handleRefresh())
       .catch(error => ApiError(error));
@@ -53,7 +52,7 @@ export default class TableContainer extends Component {
 
   handleEdit = (formData) => {
     this.props.api
-      .updateEvent(EventMapper.fromForm(formData))
+      .updateEvent(formData)
       .then(result => Message.show(`Event has been updated [${result.id}].`))
       .then(() => this.handleRefresh())
       .catch(error => ApiError(error));

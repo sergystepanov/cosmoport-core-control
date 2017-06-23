@@ -27,15 +27,12 @@ export default class GateSchedule extends PureComponent {
   }
 
   draw1440 = (lines) => {
-    // const start = new Date().getTime();
     const rez = [];
 
     for (let i = 0; i < 1441; i += 1) {
       const set = lines.find(e => (i >= e.startTime) && (i <= (e.startTime + e.durationTime)));
       rez.push(set ? <span key={i} className={styles.set} /> : <span key={i} />);
     }
-
-    // console.info('draw1440', (new Date().getTime() - start));
 
     return rez;
   }
@@ -52,7 +49,7 @@ export default class GateSchedule extends PureComponent {
 
     return (<div>
       <div>
-        Very slow render of the events duration across all the gates (lol) (gates #2 not included).
+        A duration of the events across all the gates (the second gates are not included).
       </div>
       <div className={styles.container}>
         {gates}

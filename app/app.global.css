@@ -39,6 +39,11 @@ h2 {
   letter-spacing: -.025em;
 }
 
+/** Blueprint override */
+.pt-control-indicator {
+  outline: none !important;
+  user-select: none !important;
+}
 
 /* Calendar styles override */
 .fc-center h2 {

@@ -35,6 +35,10 @@ export default class SimulacraControl extends Component {
     simulacra: { ticks: 0 }
   }
 
+  state = {
+    showSchedule: false
+  }
+
   mapActionReaction = (action) => ({
     set_status_boarding: 'handleSetStatus',
     play_boarding_sound: 'handleAnnouncement',
@@ -58,9 +62,14 @@ export default class SimulacraControl extends Component {
 
   handleReturn = (action) => this.props.onReturn(action)
 
+  handleShowScheduleClick = () => {
+    this.setState({ showSchedule: true });
+  }
+
   render() {
+    const { actions, simulacra } = this.props;
     const currentMinutes = _date.toMinutes(new Date());
-    const events = this.props.actions.map(
+    const events = actions.map(
       action => {
         let destination = '';
         if (action.do === 'turn_on_gate') {
@@ -76,9 +85,10 @@ export default class SimulacraControl extends Component {
 
     return (
       <div>
-        <span className="pt-icon-heart">{this.props.simulacra.ticks > 0 && this.props.simulacra.ticks}</span>
+        <span className="pt-icon-heart">{simulacra.ticks > 0 && simulacra.ticks}</span>
         <div>
-          <GateSchedule events={this.props.events} />
+          <Button className="pt-minimal" text="Show schedule" onClick={this.handleShowScheduleClick} />
+          {this.state.showSchedule && <GateSchedule events={this.props.events} />}
         </div>
         <div>
           {events}

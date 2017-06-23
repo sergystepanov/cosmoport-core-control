@@ -12,6 +12,10 @@ export default class L18n {
     return this.findEventById(eventStatusId, 'statuses');
   }
 
+  findEventRefByEventStateId(eventStateId) {
+    return this.findEventById(eventStateId, 'states');
+  }
+
   findEventRefByEventDestinationId(eventDestinationId) {
     return this.findEventById(eventDestinationId, 'destinations');
   }
@@ -21,6 +25,6 @@ export default class L18n {
   findTranslationById(ref, name) {
     const data = this.locale[ref[name]];
 
-    return ref && data ? data.values[0] : name;
+    return ref && data ? data.values[0] : '';
   }
 }

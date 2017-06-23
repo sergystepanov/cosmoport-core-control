@@ -26,7 +26,8 @@ export default class EventForm extends Component {
     event: EventPropType,
     refs: RefsPropType.isRequired,
     locale: LocalePropType.isRequired,
-    gates: PropTypes.arrayOf(GatePropType).isRequired
+    gates: PropTypes.arrayOf(GatePropType).isRequired,
+    date: PropTypes.string
   }
 
   static defaultProps = {
@@ -34,7 +35,8 @@ export default class EventForm extends Component {
     event: null,
     refs: { destinations: [], statuses: [], states: [], types: [] },
     locale: {},
-    gates: []
+    gates: [],
+    date: null
   }
 
   constructor(props) {
@@ -61,8 +63,13 @@ export default class EventForm extends Component {
       default_repeat_interval: 0
     };
 
+    // Overrides initial data with passed in parameters
     if (props.event) {
       this.fillState(props.event);
+    }
+
+    if (props.date) {
+      this.state.date = props.date;
     }
 
     this.validators = {

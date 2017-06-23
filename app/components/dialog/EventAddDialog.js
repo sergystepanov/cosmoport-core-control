@@ -6,6 +6,7 @@ import RefsPropType from '../../props/RefsPropType';
 import LocalePropType from '../../props/LocalePropType';
 import GatePropType from '../../props/GatePropType';
 import EventForm from '../form/EventForm';
+import EventMapper from '../../components/mapper/EventMapper';
 
 /**
  * The class for event add dialog.
@@ -25,29 +26,28 @@ export default class EventAddDialog extends Component {
     gates: []
   }
 
-  constructor(props) {
-    super(props);
-
-    this.state = { isOpen: false };
-  }
+  state = { isOpen: false, date: null }
 
   passState = () => {
-    this.props.callback(this.form.getFormData());
+    this.props.callback(EventMapper.fromForm(this.form.getFormData()));
   }
 
   toggleDialog = () => {
     this.setState({ isOpen: !this.state.isOpen });
   }
 
+  /**
+   * Passes a date value into new event creation dialog form.
+   */
+  openWith = (date_) => {
+    this.setState({ isOpen: true, date: date_ });
+  }
+
   render() {
+    const { isOpen, date } = this.state;
+
     return (
-      <Dialog
-        iconName="airplane"
-        isOpen={this.state.isOpen}
-        onClose={this.toggleDialog}
-        canOutsideClickClose={false}
-        title="Create event"
-      >
+      <Dialog isOpen={isOpen} onClose={this.toggleDialog} canOutsideClickClose={false} title="Create event">
         <div className="pt-dialog-body">
           <EventForm
             ref={(c) => {
@@ -56,6 +56,7 @@ export default class EventAddDialog extends Component {
             locale={this.props.locale}
             refs={this.props.refs}
             gates={this.props.gates}
+            date={date}
             forCreate
           />
         </div>
