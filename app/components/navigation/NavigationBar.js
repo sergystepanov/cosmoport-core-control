@@ -1,9 +1,11 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import { Tooltip, Position } from '@blueprintjs/core';
 
 import { NavLink } from 'react-router-dom';
 import ServerTime from '../../components/time/ServerTime';
 import Player from '../player/Player';
+import SimulationPropType from '../../props/SimulationPropType';
 
 import styles from './Navigation.css';
 
@@ -29,7 +31,8 @@ export default class NavigationBar extends Component {
       timetables: PropTypes.number,
       gates: PropTypes.number
     }),
-    timestamp: PropTypes.number
+    timestamp: PropTypes.number,
+    simulation: SimulationPropType
   }
 
   static defaultProps = {
@@ -39,11 +42,14 @@ export default class NavigationBar extends Component {
       timetables: 0,
       gates: 0
     },
-    timestamp: 1
+    timestamp: 1,
+    simulation: {
+      active: true
+    }
   }
 
   render() {
-    const { auth: auth_, audio, nodes, timestamp } = this.props;
+    const { auth: auth_, audio, nodes, timestamp, simulation } = this.props;
 
     return (
       <nav className={`pt-navbar ${styles.sticky}`}>
@@ -62,6 +68,11 @@ export default class NavigationBar extends Component {
             {auth_ && <Navigate to="/logout" icon="unlock" />}
           </div>
         </div>
+        <div className="pt-navbar-group pt-align-left">
+          <Tooltip content="Simulation status (on/off)" position={Position.BOTTOM}>
+            <span className={`pt-icon-standard pt-icon-lightbulb ${simulation.active && styles.active}`} />
+          </Tooltip>
+        </div>
         <div className="pt-navbar-group pt-align-right">
           <Player music={audio} />
           <span className="pt-navbar-divider" />
@@ -69,7 +80,7 @@ export default class NavigationBar extends Component {
           <span className="pt-navbar-divider" />
           <ServerTime timestamp={timestamp} />
         </div>
-      </nav>
+      </nav >
     );
   }
 }

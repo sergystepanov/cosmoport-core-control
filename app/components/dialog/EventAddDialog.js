@@ -29,7 +29,9 @@ export default class EventAddDialog extends Component {
   state = { isOpen: false, date: null }
 
   passState = () => {
-    this.props.callback(EventMapper.fromForm(this.form.getFormData()));
+    const data = this.form.getFormData();
+
+    this.props.callback(EventMapper.fromForm(data), data.valid);
   }
 
   toggleDialog = () => {

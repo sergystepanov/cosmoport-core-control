@@ -52,6 +52,7 @@ export default class EventTable extends Component {
           <thead>
             <tr>
               <th>Departure</th>
+              <th>#</th>
               <th>Type</th>
               <th>Gates</th>
               <th>Destination</th>

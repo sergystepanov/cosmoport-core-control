@@ -94,8 +94,8 @@ export default class EventTableRow extends Component {
 
     return (
       <tr className={name}>
-        <td>{`${event.eventDate}
-          ${_date.minutesToHm(event.startTime)}`}</td>
+        <td>{`${event.eventDate} ${_date.minutesToHm(event.startTime)}`}</td>
+        <td>{event.id}</td>
         <td>
           <span className="type-name">
             {this.renderTypeCol(event.eventTypeId, refs.types)}

@@ -31,11 +31,12 @@ const updateLocale = (locale, locales) => {
 
 export default class SettingsContainer extends Component {
   static propTypes = {
-    api: PropTypes.instanceOf(Api)
+    api: PropTypes.instanceOf(Api).isRequired,
+    onRefresh: PropTypes.func
   }
 
   static defaultProps = {
-    api: null
+    onRefresh: () => { }
   }
 
   constructor(props) {
@@ -77,21 +78,20 @@ export default class SettingsContainer extends Component {
 
     this.props.api.createEventType(mapEvent(formData))
       .then(result => {
-        this.getData();
         Message.show(`Event type has been created [${result.id}].`);
+        this.getData();
         callback();
 
         return 1;
       })
-      // .then(() => this.props.onRefresh())
       .catch(error => ApiError(error));
   }
 
   handleDelete = (id, callback) => {
     this.props.api.deleteEventType(id)
       .then(result => {
-        this.getData();
         Message.show(`Event type has been created [:${result.deleted}]`);
+        this.getData();
         callback();
 
         return 1;
@@ -132,7 +132,7 @@ export default class SettingsContainer extends Component {
 
     this.props.api.updateSettingValueForId(id, valueObject)
       .then(() => Message.show('The value has been saved successfully.'))
-      .then(() => this.getData())
+      .then(() => this.handleRefresh())
       .catch(error => ApiError(error));
   }
 
@@ -143,6 +143,11 @@ export default class SettingsContainer extends Component {
       .authSetPass({ pwd: pass })
       .then(response => (response.result ? Message.show('Password has changed.') : Message.show('Error during save.', 'error')))
       .catch(error => ApiError(error));
+  }
+
+  handleRefresh = () => {
+    this.getData();
+    this.props.onRefresh();
   }
 
   render() {

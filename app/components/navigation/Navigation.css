@@ -7,3 +7,11 @@
 .activeLink {
     color: #bf7326 !important;
 }
+
+.passive {
+    color: #777;
+}
+
+.active {
+    color: #bf7326;
+}

@@ -12,11 +12,13 @@ import _date from '../components/date/_date';
 export default class TableContainer extends Component {
   static propTypes = {
     api: PropTypes.instanceOf(Api).isRequired,
-    auth: PropTypes.bool
+    auth: PropTypes.bool,
+    onRefresh: PropTypes.func
   }
 
   static defaultProps = {
-    auth: false
+    auth: false,
+    onRefresh: () => { }
   }
 
   constructor(props) {
@@ -66,7 +68,10 @@ export default class TableContainer extends Component {
       .catch(error => ApiError(error));
   }
 
-  handleRefresh = () => this.getData()
+  handleRefresh = () => {
+    this.getData();
+    this.props.onRefresh();
+  }
 
   handleDateChange = (range) => {
     this.props.api.get(`/timetable?date=${range[0] ? _date.toYmd(range[0]) : ''}&date2=${range[1] ? _date.toYmd(range[1]) : ''}`)

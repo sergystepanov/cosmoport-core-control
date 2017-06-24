@@ -7,7 +7,6 @@ import {
 } from 'react-router-dom';
 
 import NavigationBar from '../components/navigation/NavigationBar';
-import styles from './App.css';
 import Api from '../../lib/core-api-client/ApiV1';
 import Socket0 from '../../lib/core-api-client/WebSocketWrapper';
 import Rupor from '../components/player/Announcer';
@@ -20,6 +19,11 @@ import Translation from '../containers/TranslationContainer';
 import Settings from '../containers/SettingsContainer';
 import Lock from '../containers/LockContainer';
 import Unlock from '../containers/UnlockContainer';
+import Simulator from '../components/simulator/v0/Simulator';
+import EventMapper from '../components/mapper/EventMapper';
+import _date from '../components/date/_date';
+
+import styles from './App.css';
 
 export default class App extends Component {
   constructor(props) {
@@ -28,35 +32,22 @@ export default class App extends Component {
     this.state = {
       timestamp: 1,
       nodes: { gates: 0, timetables: 0 },
+      events: [],
       audio: [],
-      announcements: [],
       api: null,
       socket: null,
+      simulationAnnouncements: [],
       simulation: {
+        active: true,
+        actions: [],
         ticks: 0
       },
       auth: false
     };
 
-    this.timers = {
-      simulationTick: null
-    };
-
     ipcRenderer.on('audio', this.handleSetAudio);
     // After receiving the config, we should fetch the data and render markup.
     ipcRenderer.on('config', this.handleConfig);
-  }
-
-  componentDidMount() {
-    this.timers.simulationTick = setInterval(() => this.tick(), 1000 * 30);
-  }
-
-  componentWillUnmount() {
-    Object.keys(this.timers).forEach(timer => clearInterval(this.timers[timer]));
-  }
-
-  tick = () => {
-    this.setState({ simulation: { ticks: this.state.simulation.ticks + 1 } });
   }
 
   handleSetAudio = (event, files) => {
@@ -98,23 +89,43 @@ export default class App extends Component {
     });
     const api0 = new Api(`http://${config.address.server}`);
 
-    this.setState({ api: api0, socket: socket0 });
+    this.setState({ api: api0, socket: socket0 }, () => {
+      this.getData();
+    });
+  }
 
-    Promise.all([api0.fetchTime(), api0.fetchNodes()])
-      .then(data => this.setState({ timestamp: data[0].timestamp, nodes: data[1] }))
+  getData = () => {
+    const { api, simulation } = this.state;
+    const today = _date.current();
+
+    Promise.all([api.fetchTime(), api.fetchNodes(), api.fetchEventsInRange(today, today)])
+      .then(([time, nodes_, events_]) => this.setState(
+        {
+          timestamp: time.timestamp,
+          nodes: nodes_,
+          events: events_,
+          simulation: {
+            active: simulation.active,
+            actions: this.simulator.scheduleActions(events_),
+            ticks: simulation.ticks
+          }
+        }
+      ))
       .catch(error => console.error(error));
   }
 
-  handleAnnouncement = (name) => {
-    this.setState({ announcements: this.state.announcements.concat([name]) });
-    console.info('announcement', name);
+  handleAnnouncement = (ann) => {
+    this.setState({
+      simulationAnnouncements: this.state.simulationAnnouncements.concat(ann)
+    });
+    console.info('announcement', ann.type);
   }
 
   handleAnnouncementEnd = () => {
-    if (this.state.announcements.length > 0) {
+    if (this.state.simulationAnnouncements.length > 0) {
       // Remove last announcement
       this.setState((prevState) => ({
-        announcements: prevState.announcements.filter((_, i) => i !== 0)
+        simulationAnnouncements: prevState.simulationAnnouncements.filter((_, i) => i !== 0)
       }));
     }
   }
@@ -139,12 +150,73 @@ export default class App extends Component {
     });
   }
 
+  handleStatusChange = (action) => {
+    console.info('status', action);
+
+    this.setEventStatus(action.event, action);
+  }
+
+  setEventStatus = (event, action) => {
+    // Be careful with these values
+    const statusIdMap = {
+      set_status_boarding: 2,
+      set_status_departed: 3,
+      show_return: 4,
+      set_status_returned: 5
+    }[action.do];
+
+    const ev = event;
+    ev.eventStatusId = statusIdMap;
+    const modifiedEvent = EventMapper.unmap(ev);
+
+    this.state.api
+      .updateEvent(modifiedEvent)
+      .then(result => Message.show(`Event status has been updated [${result.id}].`))
+      // .then(() => this.handleRefresh())
+      .catch(error => ApiError(error));
+  }
+
+  handleTurnGateOn = (action) => {
+    console.info('gateOn', action);
+    this.fireUpTheGate(action.event, 'before_departion');
+  }
+
+  fireUpTheGate = (evt, tpy) => {
+    this.state.api
+      .proxy({ name: 'fire_gate', event: evt, type: tpy })
+      .then(() => Message.show(`Firing up the Gate #${evt.gateId}.`))
+      .catch(error => ApiError(error));
+  }
+
+  handleArchive = (action) => {
+    console.info('archive', action);
+  }
+
+  handleReturn = (action) => {
+    console.info('return', action);
+    this.setEventStatus(action.event, action);
+    this.fireUpTheGate(action.event, 'before_return');
+  }
+
+  handleAction = (action) => {
+    this.simulator.doIt(action);
+  }
+
+  handleSimulationTick = (state) => {
+    this.setState({ simulation: state });
+  }
+
+  handleRefresh = () => {
+    this.getData();
+  }
+
   render() {
     const {
       auth: auth_,
       api: api_,
-      announcements,
+      events: events_,
       simulation: sim,
+      simulationAnnouncements: sa,
       timestamp,
       nodes,
       audio
@@ -154,24 +226,30 @@ export default class App extends Component {
       return <div>Loading...</div>;
     }
 
-    const commonProps = {
-      api: api_,
-      simulation: sim,
-      simulation_announcements: announcements,
-      auth: auth_,
-      onAnnouncement: this.handleAnnouncement
-    };
+    const commonProps = { api: api_, auth: auth_, onRefresh: this.handleRefresh };
 
     return (
       <div>
-        <Rupor announcements={announcements} onAnnouncementEnd={this.handleAnnouncementEnd} />
+        <Simulator
+          ref={s => { this.simulator = s; }}
+          active
+          events={events_}
+          onAnnouncement={this.handleAnnouncement}
+          onStatusChange={this.handleStatusChange}
+          onTurnGateOn={this.handleTurnGateOn}
+          onArchive={this.handleArchive}
+          onReturn={this.handleReturn}
+          onSimulationTick={this.handleSimulationTick}
+          onNewDay={this.handleRefresh}
+        />
+        <Rupor announcements={sa} onAnnouncementEnd={this.handleAnnouncementEnd} />
         <div className="pt-ui-text">
           <div className={styles.container}>
-            <NavigationBar timestamp={timestamp} nodes={nodes} audio={audio} auth={auth_} />
+            <NavigationBar timestamp={timestamp} nodes={nodes} audio={audio} auth={auth_} simulation={sim} />
             <div className={styles.content}>
               <Switch>
                 <Route exact path="/" render={props => <MainPage {...props} {...commonProps} />} />
-                <Route path="/simulation" render={props => <Simulation {...props} {...commonProps} />} />
+                <Route path="/simulation" render={() => <Simulation simulation={sim} announcements={sa} onActionClick={this.handleAction} events={events_} {...commonProps} />} />
                 <Route path="/translation" render={props => <Translation {...props} {...commonProps} auth />} />
                 <Route path="/table" render={props => <Table {...props} {...commonProps} />} />
                 <Route path="/login" render={() => <Unlock onAuth={this.handlePassword} />} />

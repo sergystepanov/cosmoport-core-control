@@ -14,7 +14,12 @@ import _date from '../components/date/_date';
 
 export default class MainPage extends Component {
   static propTypes = {
-    api: PropTypes.instanceOf(Api).isRequired
+    api: PropTypes.instanceOf(Api).isRequired,
+    onRefresh: PropTypes.func
+  }
+
+  static defaultProps = {
+    onRefresh: () => { }
   }
 
   state = {
@@ -36,7 +41,7 @@ export default class MainPage extends Component {
       this.props.api.fetchReferenceData(),
       this.props.api.fetchTranslations(),
       // Fetch all the events between the current calendar view range
-      this.props.api.get(`/timetable?date=${this.state.start}&date2=${this.state.end}`),
+      this.props.api.fetchEventsInRange(this.state.start, this.state.end),
       this.props.api.fetchGates()
     ])
       .then(([r, l, e, g]) => this.setState({ refs: r, locale: l.en, events: e, gates: g }))
@@ -44,7 +49,7 @@ export default class MainPage extends Component {
   }
 
   refreshEventsData = () => {
-    this.props.api.get(`/timetable?date=${this.state.start}&date2=${this.state.end}`)
+    this.props.api.fetchEventsInRange(this.state.start, this.state.end)
       .then(result => this.setState({ events: result }))
       .catch(error => ApiError(error));
   }
@@ -55,7 +60,7 @@ export default class MainPage extends Component {
 
   handleEventTickets = (id) => {
     this.props.api
-      .get(`/timetable/byIdAndOneAfter?id=${id}`)
+      .fetchEventsByIdForGate(id)
       .then(data => this.eventTicketsDialog.toggle(data[0]))
       .catch(error => ApiError(error));
   }
@@ -82,7 +87,12 @@ export default class MainPage extends Component {
     this.eventAddDialog.openWith(date);
   }
 
-  handleCreate = (formData) => {
+  handleCreate = (formData, valid) => {
+    if (!valid) {
+      Message.show('Please check the form data.', 'error');
+      return;
+    }
+
     this.props.api
       .createEvent(formData)
       .then(result => Message.show(`Event has been created [${result.id}].`))
@@ -90,7 +100,10 @@ export default class MainPage extends Component {
       .catch(error => ApiError(error));
   }
 
-  handleRefresh = () => this.getData()
+  handleRefresh = () => {
+    this.getData();
+    this.props.onRefresh();
+  }
 
   handleCalendarViewChange = (dates) => {
     this.setState({ start: dates.start.format('YYYY-MM-DD'), end: dates.end.format('YYYY-MM-DD') },

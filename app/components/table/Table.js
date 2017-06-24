@@ -44,8 +44,8 @@ export default class Table extends Component {
     this.state = { range: [null, null] };
   }
 
-  handleCreate = (formData) => {
-    if (!formData.valid) {
+  handleCreate = (formData, valid) => {
+    if (!valid) {
       Message.show('Please check the form data.', 'error');
       return;
     }
@@ -70,8 +70,8 @@ export default class Table extends Component {
     this.eventEditDialog.edit(event);
   }
 
-  handleEditApply = (formData) => {
-    if (!formData.valid) {
+  handleEditApply = (formData, valid) => {
+    if (!valid) {
       Message.show('Please check the form data.', 'error');
       return;
     }

@@ -8,7 +8,12 @@ const buildUrl = (file) => `file:///${app.getPath('music')}/events/${file}`;
 
 export default class Announcer extends Component {
   static propTypes = {
-    announcements: PropTypes.arrayOf(PropTypes.string),
+    announcements: PropTypes.arrayOf(
+      PropTypes.shape({
+        id: PropTypes.number,
+        type: PropTypes.string
+      })
+    ),
     onAnnouncementEnd: PropTypes.func
   }
 
@@ -17,29 +22,13 @@ export default class Announcer extends Component {
     onAnnouncementEnd: () => { }
   }
 
-  constructor(props) {
-    super(props);
-
-    this.state = {
-      active: false,
-      playStatus: Sound.status.PLAYING
-    };
+  state = {
+    active: false,
+    playStatus: Sound.status.PLAYING
   }
 
   handleTrackFinish = () => {
     this.props.onAnnouncementEnd();
-
-    // if (this.state === Sound.status.STOPPED) {
-    //   return;
-    // }
-
-    // // wait some time
-    // this.setState({ playStatus: Sound.status.STOPPED, isWaiting: true }, () => {
-    //   this.randomTrack();
-    //   this.timeout = setTimeout(() => {
-    //     this.setState({ playStatus: Sound.status.PLAYING, isWaiting: false });
-    //   }, this.state.period * 1000 * 60);
-    // });
   }
 
   render() {
@@ -52,7 +41,7 @@ export default class Announcer extends Component {
     }
 
     return (<Sound
-      url={buildUrl(`${announcements[0]}.mp3`)}
+      url={buildUrl(`${announcements[0].type}.mp3`)}
       playStatus={playStatus}
       playFromPosition={0}
       volume={30}

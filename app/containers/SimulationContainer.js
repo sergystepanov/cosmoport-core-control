@@ -1,125 +1,98 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import { Button } from '@blueprintjs/core';
 
-import Api from '../../lib/core-api-client/ApiV1';
 import PageCaption from '../components/page/PageCaption';
-import SimulacraControl from '../components/simulator/SimulacraControl';
-import Simulacra0 from '../components/simulator/Simulacra';
-import ApiError from '../components/indicators/ApiError';
-import EventMapper from '../components/mapper/EventMapper';
-import Message from '../components/messages/Message';
+import GateSchedule from '../components/simulator/schedule/GateSchedule';
+import EventPropType from '../props/EventPropType';
+import SimulationPropType from '../props/SimulationPropType';
+import AnnouncementPropType from '../props/AnnouncementPropType';
+import _date from '../components/date/_date';
+
+import styles from '../components/simulator/Simulator.css';
 
 export default class SimulationContainer extends Component {
   static propTypes = {
-    api: PropTypes.instanceOf(Api),
-    simulation: PropTypes.shape({ ticks: PropTypes.number }),
-    simulation_announcements: PropTypes.arrayOf(PropTypes.string),
-    onAnnouncement: PropTypes.func
+    auth: PropTypes.bool,
+    events: PropTypes.arrayOf(EventPropType),
+    announcements: PropTypes.arrayOf(AnnouncementPropType),
+    simulation: SimulationPropType,
+    onActionClick: PropTypes.func
   }
 
   static defaultProps = {
-    api: null,
-    simulation: { ticks: 0 },
-    simulation_announcements: [],
-    onAnnouncement: () => { }
+    auth: false,
+    events: [],
+    announcements: [],
+    simulation: {
+      active: false,
+      ticks: 0,
+      actions: []
+    },
+    onActionClick: () => { }
   }
 
-  constructor(props) {
-    super(props);
-
-    this.state = {
-      actions: [],
-      events: []
-    };
+  state = {
+    showSchedule: false
   }
 
-  componentDidMount() {
-    this.props.api.fetchEvents()
-      .then(data => {
-        const acts = new Simulacra0().actions(data);
-        this.setState({ actions: acts, events: data });
-
-        return 1;
-      })
-      .catch(error => console.log(error));
+  handleShowScheduleClick = () => {
+    this.setState({ showSchedule: true });
   }
 
-  handleTurnGateOn = (action) => {
-    console.info('gateOn', action);
-    this.fireUpTheGate(action.event, 'before_departion');
-  }
-
-  handleArchive = (action) => {
-    console.info('archive', action);
-  }
-
-  handleReturn = (action) => {
-    console.info('return', action);
-    this.setEventStatus(action.event, action);
-    this.fireUpTheGate(action.event, 'before_return');
-  }
-
-  handleStatusChange = (action) => {
-    console.info('status', action);
-
-    this.setEventStatus(action.event, action);
-  }
-
-  setEventStatus = (event, action) => {
-    // Be careful with these values
-    const statusIdMap = {
-      set_status_boarding: 2,
-      set_status_departed: 3,
-      show_return: 4,
-      set_status_returned: 5
-    }[action.do];
-
-    const ev = event;
-    ev.eventStatusId = statusIdMap;
-    const modifiedEvent = EventMapper.unmap(ev);
-
-    this.props.api
-      .updateEvent(modifiedEvent)
-      .then(result => Message.show(`Event status has been updated [${result.id}].`))
-      // .then(() => this.handleRefresh())
-      .catch(error => ApiError(error));
-  }
-
-  fireUpTheGate = (evt, tpy) => {
-    this.props.api
-      .proxy({ name: 'fire_gate', event: evt, type: tpy })
-      .then(() => Message.show(`Firing up the Gate #${evt.gateId}.`))
-      .catch(error => ApiError(error));
+  handleActionClick = (action) => {
+    if (this.props.auth) {
+      this.props.onActionClick(action);
+    }
   }
 
   render() {
-    const { simulation, simulation_announcements, onAnnouncement } = this.props;
-    const announcements = simulation_announcements.length > 0 ?
-      simulation_announcements.map((a, i) => <div key={a + i}>{`${i + 1} - ${a}`}</div>) : <div>Empty</div>;
+    const { simulation, announcements, events } = this.props;
+    const announcementsList = announcements.length > 0 ?
+      announcements.map((a, i) => <div key={`${a.id}${a.time}`}>{`${i + 1} - ${a.type} (#${a.id})`}</div>) : <div>Empty</div>;
+    const currentMinutes = _date.toMinutes(new Date());
+    const actionsList = simulation.actions.map(
+      action => {
+        let destination = '';
+        if (action.do === 'turn_on_gate') {
+          destination = `(G${action.event.gateId}) `;
+        } else if (action.do === 'show_return') {
+          destination = `(G${action.event.gate2Id}) `;
+        }
+
+        return (<div style={{ minWidth: '260px' }} className={`pt-minimal ${action.time < currentMinutes ? styles.done : ''}`} key={`${action.event.id}_${action.time}_${action.do}`}>
+          {`(#${action.event.id}) `}{_date.minutesToHm(action.time)} → {destination}<Button className={`pt-minimal ${action.time < currentMinutes ? styles.done : ''}`} text={action.do} onClick={this.handleActionClick.bind(this, action)} />
+        </div >);
+      });
 
     return (
-      <div>
+      <div >
         <PageCaption text="02 Simulation (WIP)" />
         <div className="pt-callout">
-          Here you can run the system simulation.
+          Here you can control the system simulation somewhat.
           Be aware it will change statuses of events.
         </div>
+        <p />
         <div>
+          Queue for announcements:
+          {announcementsList}
+        </div>
+        <p />
+        <div>
+          <span className="pt-icon-heart">{simulation.ticks > 0 && simulation.ticks}</span>
           <div>
-            Queue for announcements:
-          {announcements}
+            <Button className="pt-minimal" text="Show schedule infographic" onClick={this.handleShowScheduleClick} />
+            {this.state.showSchedule && <GateSchedule events={events} />}
+          </div>
+          <div className="pt-callout">
+            The list below reads from left to right, and new line starts from the left ⥅.
+        </div>
+          <p />
+          <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-around' }}>
+            {actionsList}
           </div>
         </div>
-        <SimulacraControl
-          actions={this.state.actions}
-          events={this.state.events}
-          simulacra={simulation}
-          onAnnouncement={onAnnouncement}
-          onTurnGateOn={this.handleTurnGateOn}
-          onArchive={this.handleArchive}
-          onReturn={this.handleReturn}
-          onStatusChange={this.handleStatusChange}
-        />
+        <p />
       </div>
     );
   }
