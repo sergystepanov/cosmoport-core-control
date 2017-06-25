@@ -9,7 +9,7 @@ import _date from '../../date/_date';
 /**
  * A client-side Cosmoport activity simulation.
  *
- * Uses internal timer.
+ * Uses internal timer and React eco-system.
  *
  * @version 0.0.0
  */
@@ -19,26 +19,27 @@ export default class Simulator extends Component {
     // Wether or not to activate the simulator
     active: PropTypes.bool,
     // A number of minutes for action calculations before the events
-    precedeTime: PropTypes.number,
+    boarding: PropTypes.number.isRequired,
     onStatusChange: PropTypes.func,
     onAnnouncement: PropTypes.func,
     onTurnGateOn: PropTypes.func,
     onArchive: PropTypes.func,
     onReturn: PropTypes.func,
     onSimulationTick: PropTypes.func,
+    onActionsUpdate: PropTypes.func,
     onNewDay: PropTypes.func
   }
 
   static defaultProps = {
     events: [],
     active: false,
-    precedeTime: 10,
     onStatusChange: () => { },
     onAnnouncement: () => { },
     onTurnGateOn: () => { },
     onArchive: () => { },
     onReturn: () => { },
     onSimulationTick: () => { },
+    onActionsUpdate: () => { },
     onNewDay: () => { }
   }
 
@@ -48,13 +49,8 @@ export default class Simulator extends Component {
     this.state = {
       active: props.active,
       actions: [],
-      // The seconds relative to the current time in which the simulation should update its state
-      simulationTickResolution: 60,
       ticks: 0,
-      times: {
-        precede: 10,
-        archive: 10
-      }
+      archiveTime: 10
     };
 
     // An internal timer
@@ -66,12 +62,11 @@ export default class Simulator extends Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    if (this.props.events !== nextProps.events) {
-      this.setState({ actions: this.scheduleActions(nextProps.events) });
-    }
-
-    if (this.props.precedeTime !== nextProps.precedeTime) {
-      this.setState({ precedeTime: nextProps.precedeTime });
+    if (this.props.events !== nextProps.events || this.props.boarding !== nextProps.boarding) {
+      const newActions =
+        this.scheduleActions(nextProps.events, nextProps.boarding, this.state.archiveTime);
+      this.setState({ actions: newActions });
+      this.props.onActionsUpdate(newActions);
     }
 
     if (this.props.active !== nextProps.active) {
@@ -88,16 +83,12 @@ export default class Simulator extends Component {
   update = () => {
     const date = new Date();
 
-    if (this.isNewDay(date)) {
-      this.props.onNewDay();
+    if (date.getSeconds() === 0) {
+      this.tick(_date.toMinutes(date));
+      if (this.isNewDay(date)) {
+        this.props.onNewDay();
+      }
     }
-
-    const inResolution = date.getSeconds() % this.state.simulationTickResolution === 0;
-    if (!inResolution) {
-      return;
-    }
-
-    this.tick(_date.toMinutes(date));
   }
 
   isNewDay = (date) => date.getMinutes() === 0 && date.getSeconds() === 0
@@ -110,18 +101,15 @@ export default class Simulator extends Component {
     });
   }
 
-  scheduleActions = (events) => {
-    const { times } = this.state;
-
-    return events
-      // Not a canceled even
-      .filter(event => event.eventStatusId !== eventStatus.CANCELED)
-      .map(event => this.eventsToActions(event, times.precede, times.archive))
-      // flatten all actions into one dimensional array
-      .reduce((acc, cur) => acc.concat(cur), [])
-      // sort it by start time and action weight (time following order)
-      .sort((a, b) => a.time - b.time || a.weight - b.weight);
-  }
+  scheduleActions = (events, boarding, archiveTime) => events
+    // Not a canceled event
+    .filter(event => event.eventStatusId !== eventStatus.CANCELED)
+    // Generate actions from the events
+    .map(event => this.eventsToActions(event, boarding, archiveTime))
+    // flatten all actions into one dimensional array
+    .reduce((acc, cur) => acc.concat(cur), [])
+    // sort it by start time and action weight (time following order)
+    .sort((a, b) => a.time - b.time || a.weight - b.weight)
 
   eventsToActions = (event, pre, archive) => {
     const boardingTime = event.startTime - pre > 0 ? event.startTime - pre : 0;
@@ -131,18 +119,18 @@ export default class Simulator extends Component {
     const archiveTime = eventTime + archive;
 
     return [
-      // set event status to boarding
+      // set the event status to boarding
       new Action(event, boardingTime, 'set_status_boarding', 1),
       // Gate? show the number
       // Play sound
       new Action(event, boardingTime, 'play_boarding_sound', 2),
-      // Show gate
+      // Turn on the gate display
       new Action(event, boardingTime, 'turn_on_gate', 3),
-      // set event status to departed
+      // Set event status to departed
       new Action(event, eventTime, 'set_status_departed', 4),
       // Play sound
       new Action(event, eventTime, 'play_departed_sound', 5),
-      // archive event
+      // Archive the event
       new Action(event, archiveTime, 'archive', 6),
       new Action(event, beforeReturnTime, 'show_return', 7),
       new Action(event, returningTime, 'set_status_returned', 8)
@@ -160,27 +148,22 @@ export default class Simulator extends Component {
     set_status_returned: 'handleSetStatus'
   }[action.do])
 
+  mapAnnouncement = (action) => (
+    { play_boarding_sound: 'boarding', play_departed_sound: 'departure' }[action.do])
+
   doActionsForMinute = (minute) => {
     this.state.actions
       .filter(a => a.time === minute)
-      .forEach(a => {
-        this.doIt(a);
-      });
+      .forEach(a => { this.doIt(a); });
   }
 
   doIt = (action) => this[this.mapActionToReaction(action)](action)
 
   handleSetStatus = (action) => this.props.onStatusChange(action)
 
-  handleAnnouncement = (action) => {
-    const announcement = {
-      id: action.event.id,
-      time: new Date().getTime(),
-      type: { play_boarding_sound: 'boarding', play_departed_sound: 'departure' }[action.do]
-    };
-
-    this.props.onAnnouncement(announcement);
-  }
+  handleAnnouncement = (action) => this.props.onAnnouncement({
+    id: action.event.id, time: new Date().getTime(), type: this.mapAnnouncement(action)
+  })
 
   handleGateTurning = (action) => this.props.onTurnGateOn(action)
 

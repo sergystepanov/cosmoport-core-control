@@ -24,7 +24,7 @@ export default class TableContainer extends Component {
   constructor(props) {
     super(props);
 
-    this.state = { events: [], locale: {}, refs: {}, gates: [] };
+    this.state = { hasData: false, events: [], locale: {}, refs: {}, gates: [] };
   }
 
   componentDidMount() {
@@ -39,7 +39,7 @@ export default class TableContainer extends Component {
       this.props.api.fetchGates()
     ])
       .then(data => this.setState(
-        { refs: data[0], locale: data[1].en, events: data[2], gates: data[3] })
+        { hasData: true, refs: data[0], locale: data[1].en, events: data[2], gates: data[3] })
       )
       .catch(error => ApiError(error));
   }
@@ -80,6 +80,10 @@ export default class TableContainer extends Component {
   }
 
   render() {
+    if (!this.state.hasData) {
+      return <span>Loading...</span>;
+    }
+
     const { events, refs, locale, gates } = this.state;
 
     return (

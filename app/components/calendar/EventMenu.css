@@ -1,25 +1,26 @@
 
 .menu {
-    border: 1px dotted #cab096;
+  border: 1px dotted #cab096;
 }
-.active, .hidden {
-    position: absolute;
-    z-index: 100;
+
+.active,
+.hidden {
+  position: absolute;
+  z-index: 100;
 }
 
 .active {
-    display: block;
+  display: block;
 }
 
 .hidden {
-    display: none;
+  display: none;
 }
 
 .mark {
-    position: absolute;
-    top: -.656em;
-    left: -.456em;
-    transform: rotate(45deg);
-
-    color: #cab096;
+  position: absolute;
+  top: -9.656em;
+  left: -0.456em;
+  transform: rotate(45deg);
+  color: #cab096;
 }

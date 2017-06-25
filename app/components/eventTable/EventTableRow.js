@@ -105,7 +105,7 @@ export default class EventTableRow extends Component {
         <td>{gate1}{gate1 !== gate2 && `→${gate2}`}</td>
         <td>{this.renderDestCol(event.eventDestinationId, refs.destinations)}</td>
         <td>{`${event.cost} €`}</td>
-        <td>{`${event.durationTime} min`}</td>
+        <td>{_date.minutesToHm(event.durationTime)}</td>
         <td>{this.renderStatusCol(event.eventStatusId, refs.statuses)}</td>
         <td>{`${event.contestants}/${event.peopleLimit} `}{this.renderState(event.eventStateId)}</td>
         <td>

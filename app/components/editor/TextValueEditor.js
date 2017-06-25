@@ -4,24 +4,39 @@ import { EditableText } from '@blueprintjs/core';
 
 export default class TextValueEditor extends Component {
   static propTypes = {
-    id: PropTypes.number,
-    text: PropTypes.string,
+    id: PropTypes.number.isRequired,
+    text: PropTypes.string.isRequired,
     className: PropTypes.string,
-    onConfirm: PropTypes.func
+    onConfirm: PropTypes.func.isRequired
   }
 
   static defaultProps = {
-    id: 0,
-    text: '',
-    className: '',
-    onConfirm: () => { }
+    className: ''
   }
 
-  onConfirm = (value) => {
-    this.props.onConfirm(this.props.id, value, this.props.text);
+  // componentWillReceiveProps(nextProps) {
+  //   if (this.props.text !== nextProps.text || this.props.id !== nextProps.id) {
+  //     this.setState({ id: nextProps.id, value: nextProps.text });
+  //   }
+  // }
+
+  onConfirm = (val) => {
+    this.props.onConfirm(this.props.id, val, this.props.text);
+  }
+
+  onChange = (val) => {
+    this.setState({ value: val });
   }
 
   render() {
-    return <EditableText className={this.props.className} placeholder="" selectAllOnFocus value={this.props.text} onConfirm={this.onConfirm} />;
+    const { className, text } = this.props;
+
+    return (<EditableText
+      className={className}
+      placeholder=""
+      selectAllOnFocus
+      defaultValue={text}
+      onConfirm={this.onConfirm}
+    />);
   }
 }

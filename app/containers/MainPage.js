@@ -23,6 +23,7 @@ export default class MainPage extends Component {
   }
 
   state = {
+    hasData: false,
     isItOpen: false,
     events: [],
     locale: {},
@@ -44,7 +45,7 @@ export default class MainPage extends Component {
       this.props.api.fetchEventsInRange(this.state.start, this.state.end),
       this.props.api.fetchGates()
     ])
-      .then(([r, l, e, g]) => this.setState({ refs: r, locale: l.en, events: e, gates: g }))
+      .then(([r, l, e, g]) => this.setState({ hasData: true, refs: r, locale: l.en, events: e, gates: g }))
       .catch(error => ApiError(error));
   }
 
@@ -113,6 +114,10 @@ export default class MainPage extends Component {
   }
 
   render() {
+    if (!this.state.hasData) {
+      return <span>Loading...</span>;
+    }
+
     const { events, locale, refs, gates } = this.state;
     const l18n = new L18n(locale, refs);
 

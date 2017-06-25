@@ -42,10 +42,10 @@ export default class SettingsContainer extends Component {
   constructor(props) {
     super(props);
 
-    this.state = { refs: {}, locales: [], trans: {}, settings: [] };
+    this.state = { hasData: false, refs: {}, locales: [], trans: {}, settings: [] };
   }
 
-  componentDidMount() {
+  componentWillMount() {
     this.getData();
   }
 
@@ -57,7 +57,7 @@ export default class SettingsContainer extends Component {
       this.props.api.fetchSettings()
     ])
       .then(data => this.setState(
-        { refs: data[0], locales: data[1], trans: data[2].en, settings: data[3] }
+        { hasData: true, refs: data[0], locales: data[1], trans: data[2].en, settings: data[3] }
       ))
       .catch(error => ApiError(error));
   }
@@ -124,10 +124,12 @@ export default class SettingsContainer extends Component {
   findSetting = (settings, key) => settings.find(setting => setting.param === key) || { id: 0, value: '' }
 
   handleSettingConfirm = (id, newVal, oldVal) => {
+
     if (newVal === oldVal) {
       return;
     }
 
+    console.log("new value is ", newVal);
     const valueObject = { text: newVal };
 
     this.props.api.updateSettingValueForId(id, valueObject)
@@ -151,6 +153,10 @@ export default class SettingsContainer extends Component {
   }
 
   render() {
+    if (!this.state.hasData) {
+      return null;
+    }
+
     const localeMessage = DefaultLocaleMessage(this.state.locales);
     const localeTimeouts = this.state.locales.map(
       locale => (<LocaleInput
@@ -190,7 +196,14 @@ export default class SettingsContainer extends Component {
             <div>
               Before each departion there is a boarding interval and before each return —
               display interval of
-              <TextValueEditor className={styles.edit} id={boardingSetting.id} text={boardingSetting.value} onConfirm={this.handleSettingConfirm} placeholder="" selectAllOnFocus />
+              <TextValueEditor
+                className={styles.edit}
+                id={boardingSetting.id}
+                text={boardingSetting.value}
+                onConfirm={this.handleSettingConfirm}
+                placeholder=""
+                selectAllOnFocus
+              />
               minutes to show an information.
             </div>
             <div style={{ fontSize: '85%' }}>
@@ -221,7 +234,14 @@ export default class SettingsContainer extends Component {
           <Caption text="03 Timetable" />
           <div>
             For each of 3 screens of the Timetable app it will be showing just
-            <TextValueEditor className={styles.edit} id={linesSetting.id} text={linesSetting.value} onConfirm={this.handleSettingConfirm} placeholder="" selectAllOnFocus />
+            <TextValueEditor
+              className={styles.edit}
+              id={linesSetting.id}
+              text={linesSetting.value}
+              onConfirm={this.handleSettingConfirm}
+              placeholder=""
+              selectAllOnFocus
+            />
             lines of events.
           </div>
 

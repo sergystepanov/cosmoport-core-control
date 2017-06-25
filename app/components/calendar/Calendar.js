@@ -39,8 +39,8 @@ export default class Calendar extends Component {
     const self = this;
 
     this.$node.fullCalendar({
-      height: 'auto',
-      aspectRatio: 1,
+      // height: 'auto',
+      // aspectRatio: 1,
       header: {
         left: '',
         center: 'title',

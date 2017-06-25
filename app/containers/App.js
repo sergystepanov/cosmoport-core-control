@@ -32,6 +32,7 @@ export default class App extends Component {
     this.state = {
       timestamp: 1,
       nodes: { gates: 0, timetables: 0 },
+      boarding: 10,
       events: [],
       audio: [],
       api: null,
@@ -98,19 +99,31 @@ export default class App extends Component {
     const { api, simulation } = this.state;
     const today = _date.current();
 
-    Promise.all([api.fetchTime(), api.fetchNodes(), api.fetchEventsInRange(today, today)])
-      .then(([time, nodes_, events_]) => this.setState(
-        {
-          timestamp: time.timestamp,
-          nodes: nodes_,
-          events: events_,
-          simulation: {
-            active: simulation.active,
-            actions: this.simulator.scheduleActions(events_),
-            ticks: simulation.ticks
+    Promise.all([
+      api.fetchTime(),
+      api.fetchNodes(),
+      api.fetchEventsInRange(today, today),
+      api.fetchSettings()])
+      .then(([time, nodes_, events_, settings_]) => {
+        const boardingTime =
+          parseInt(settings_.find(setting => setting.param === 'boarding_time').value, 10) || 10;
+
+        this.setState(
+          {
+            timestamp: time.timestamp,
+            nodes: nodes_,
+            events: events_,
+            boarding: boardingTime,
+            simulation: {
+              active: simulation.active,
+              actions: this.simulator.scheduleActions(events_),
+              ticks: simulation.ticks
+            }
           }
-        }
-      ))
+        );
+
+        return 1;
+      })
       .catch(error => console.error(error));
   }
 
@@ -210,10 +223,18 @@ export default class App extends Component {
     this.getData();
   }
 
+  handleActionsUpdate = (actions_) => {
+    if (actions_ !== this.state.simulation.actions) {
+      const newSimulation = Object.assign({}, this.state.simulation, { actions: actions_ });
+      this.setState({ simulation: newSimulation });
+    }
+  }
+
   render() {
     const {
       auth: auth_,
       api: api_,
+      boarding,
       events: events_,
       simulation: sim,
       simulationAnnouncements: sa,
@@ -234,6 +255,7 @@ export default class App extends Component {
           ref={s => { this.simulator = s; }}
           active
           events={events_}
+          boarding={boarding}
           onAnnouncement={this.handleAnnouncement}
           onStatusChange={this.handleStatusChange}
           onTurnGateOn={this.handleTurnGateOn}
@@ -241,11 +263,18 @@ export default class App extends Component {
           onReturn={this.handleReturn}
           onSimulationTick={this.handleSimulationTick}
           onNewDay={this.handleRefresh}
+          onActionsUpdate={this.handleActionsUpdate}
         />
         <Rupor announcements={sa} onAnnouncementEnd={this.handleAnnouncementEnd} />
         <div className="pt-ui-text">
           <div className={styles.container}>
-            <NavigationBar timestamp={timestamp} nodes={nodes} audio={audio} auth={auth_} simulation={sim} />
+            <NavigationBar
+              timestamp={timestamp}
+              nodes={nodes}
+              audio={audio}
+              auth={auth_}
+              simulation={sim}
+            />
             <div className={styles.content}>
               <Switch>
                 <Route exact path="/" render={props => <MainPage {...props} {...commonProps} />} />
@@ -254,7 +283,7 @@ export default class App extends Component {
                 <Route path="/table" render={props => <Table {...props} {...commonProps} />} />
                 <Route path="/login" render={() => <Unlock onAuth={this.handlePassword} />} />
                 <Route path="/logout" render={() => <Lock onDeAuth={this.handleLogout} />} />
-                <Route path="/settings" render={props => <Settings {...props} {...commonProps} auth />} />
+                <Route path="/settings" render={props => <Settings {...props} {...commonProps} />} />
               </Switch>
             </div>
           </div>

@@ -47,8 +47,6 @@ export default class ServerTime extends Component {
   )
 
   render() {
-    return (
-      <span>{this.renderTime()}</span>
-    );
+    return <span>{this.renderTime()}</span>;
   }
 }
