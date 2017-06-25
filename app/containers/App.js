@@ -108,12 +108,18 @@ export default class App extends Component {
         const boardingTime =
           parseInt(settings_.find(setting => setting.param === 'boarding_time').value, 10) || 10;
 
+        const todayBs =
+          JSON.parse(settings_.find(setting => setting.param === 'business_hours').value);
+
+        const dayBs = todayBs.hours[(new Date().getDay() + 6) % 7];
+
         this.setState(
           {
             timestamp: time.timestamp,
             nodes: nodes_,
             events: events_,
             boarding: boardingTime,
+            bs: dayBs,
             simulation: {
               active: simulation.active,
               actions: this.simulator.scheduleActions(events_),
@@ -235,6 +241,7 @@ export default class App extends Component {
       auth: auth_,
       api: api_,
       boarding,
+      bs,
       events: events_,
       simulation: sim,
       simulationAnnouncements: sa,
@@ -256,6 +263,7 @@ export default class App extends Component {
           active
           events={events_}
           boarding={boarding}
+          business={bs}
           onAnnouncement={this.handleAnnouncement}
           onStatusChange={this.handleStatusChange}
           onTurnGateOn={this.handleTurnGateOn}

@@ -19,6 +19,11 @@ export default class Simulator extends Component {
     // Wether or not to activate the simulator
     active: PropTypes.bool,
     // A number of minutes for action calculations before the events
+    business: PropTypes.shape({
+      start: PropTypes.number,
+      end: PropTypes.number,
+      non: PropTypes.bool
+    }),
     boarding: PropTypes.number.isRequired,
     onStatusChange: PropTypes.func,
     onAnnouncement: PropTypes.func,
@@ -33,6 +38,11 @@ export default class Simulator extends Component {
   static defaultProps = {
     events: [],
     active: false,
+    business: {
+      start: 0,
+      end: 0,
+      non: false
+    },
     onStatusChange: () => { },
     onAnnouncement: () => { },
     onTurnGateOn: () => { },
@@ -47,7 +57,7 @@ export default class Simulator extends Component {
     super(props);
 
     this.state = {
-      active: props.active,
+      active: this.inBusiness(props.business),
       actions: [],
       ticks: 0,
       archiveTime: 10
@@ -69,11 +79,25 @@ export default class Simulator extends Component {
       this.props.onActionsUpdate(newActions);
     }
 
-    if (this.props.active !== nextProps.active) {
-      this.setState({ active: nextProps.active }, () => {
+    if (this.props.business !== nextProps.business) {
+      this.setState({ active: this.inBusiness(nextProps.business) }, () => {
         this.props.onSimulationTick(this.state);
       });
     }
+  }
+
+  inBusiness = (props) => {
+    if (props.non) {
+      return false;
+    }
+
+    if (props.start === 0 && props.end === 0) {
+      return true;
+    }
+
+    const current = _date.toMinutes(new Date());
+
+    return current >= props.start && current <= props.end;
   }
 
   componentWillUnmount() {
@@ -94,11 +118,22 @@ export default class Simulator extends Component {
   isNewDay = (date) => date.getMinutes() === 0 && date.getSeconds() === 0
 
   tick = (minutes) => {
+    this.calculateBusiness();
     this.doActionsForMinute(minutes);
     this.setState({ ticks: this.state.ticks + 1 }, () => {
       // Push the state upwards
       this.props.onSimulationTick(this.state);
     });
+  }
+
+  calculateBusiness = (callback) => {
+    const active_ = this.inBusiness(this.props.business);
+
+    if (this.state.active !== active_) {
+      this.setState({ active: active_ }, () => {
+        this.props.onSimulationTick(this.state);
+      });
+    }
   }
 
   scheduleActions = (events, boarding, archiveTime) => events
@@ -152,6 +187,10 @@ export default class Simulator extends Component {
     { play_boarding_sound: 'boarding', play_departed_sound: 'departure' }[action.do])
 
   doActionsForMinute = (minute) => {
+    if (!this.state.active) {
+      return;
+    }
+
     this.state.actions
       .filter(a => a.time === minute)
       .forEach(a => { this.doIt(a); });

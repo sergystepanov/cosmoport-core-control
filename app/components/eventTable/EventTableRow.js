@@ -94,7 +94,11 @@ export default class EventTableRow extends Component {
 
     return (
       <tr className={name}>
-        <td>{`${event.eventDate} ${_date.minutesToHm(event.startTime)}`}</td>
+        <td>
+          <div style={{ fontSize: '80%', marginBottom: '0.3em' }}>{_date.format(event.eventDate, 'D MMMM')}</div>
+          {_date.minutesToHm(event.startTime)}
+        </td>
+        <td>{_date.minutesToHm(event.durationTime)}</td>
         <td>{event.id}</td>
         <td>
           <span className="type-name">
@@ -104,8 +108,7 @@ export default class EventTableRow extends Component {
         </td>
         <td>{gate1}{gate1 !== gate2 && `→${gate2}`}</td>
         <td>{this.renderDestCol(event.eventDestinationId, refs.destinations)}</td>
-        <td>{`${event.cost} €`}</td>
-        <td>{_date.minutesToHm(event.durationTime)}</td>
+        <td>{`${event.cost} €`}</td>        
         <td>{this.renderStatusCol(event.eventStatusId, refs.statuses)}</td>
         <td>{`${event.contestants}/${event.peopleLimit} `}{this.renderState(event.eventStateId)}</td>
         <td>

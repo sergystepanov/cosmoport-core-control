@@ -67,10 +67,11 @@ export default class SimulationContainer extends Component {
 
     return (
       <div >
-        <PageCaption text="02 Simulation (WIP)" />
-        <div className="pt-callout">
+        <PageCaption text="02 Simulation" />
+        <div className="pt-callout" style={{ fontSize: '80%' }}>
           Here you can control the system simulation somewhat.
           Be aware it will change statuses of events.
+          After you enter the password, you can use these actions.
         </div>
         <p />
         <div>

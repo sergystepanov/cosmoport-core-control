@@ -37,6 +37,10 @@ export default class MainPage extends Component {
     this.getData();
   }
 
+  componentWillUnmount() {
+    this.onViewChange = () => { };
+  }
+
   getData = () => {
     Promise.all([
       this.props.api.fetchReferenceData(),

@@ -12,7 +12,7 @@ import LocaleInput from '../components/locale/LocaleInput';
 import LocaleMapper from '../components/mapper/LocaleMapper';
 import PageCaption from '../components/page/PageCaption';
 import TextValueEditor from '../components/editor/TextValueEditor';
-
+import BusinessHoursEditor from '../components/editor/bs/BusinessHoursEditor';
 import styles from '../components/settings/Settings.css';
 
 const mapEvent = (data) => ({
@@ -124,12 +124,10 @@ export default class SettingsContainer extends Component {
   findSetting = (settings, key) => settings.find(setting => setting.param === key) || { id: 0, value: '' }
 
   handleSettingConfirm = (id, newVal, oldVal) => {
-
     if (newVal === oldVal) {
       return;
     }
 
-    console.log("new value is ", newVal);
     const valueObject = { text: newVal };
 
     this.props.api.updateSettingValueForId(id, valueObject)
@@ -152,6 +150,16 @@ export default class SettingsContainer extends Component {
     this.props.onRefresh();
   }
 
+  handleBs = (id, text_) => {
+    const valueObject = { text: text_ };
+
+    this.props.api
+      .updateSettingValueForId(id, valueObject)
+      .then(() => Message.show('The value has been saved successfully.'))
+      .then(() => this.handleRefresh())
+      .catch(error => ApiError(error));
+  }
+
   render() {
     if (!this.state.hasData) {
       return null;
@@ -169,6 +177,7 @@ export default class SettingsContainer extends Component {
     const linesSetting = this.findSetting(this.state.settings, 'timetable_screen_lines');
     const boardingSetting = this.findSetting(this.state.settings, 'boarding_time');
     const syncServerAddressSetting = this.findSetting(this.state.settings, 'sync_server_address');
+    const businessHoursSetting = this.findSetting(this.state.settings, 'business_hours');
 
     return (
       <div>
@@ -209,6 +218,13 @@ export default class SettingsContainer extends Component {
             <div style={{ fontSize: '85%' }}>
               Fill free to decrease this value but it is not recommended to
               increase it because some of the intervals might overlap each other.
+            </div>
+            <p />
+            <div>
+              <p>
+                Here you can set the business hours when simulation will be working.
+              </p>
+              <BusinessHoursEditor setting={businessHoursSetting} onSet={this.handleBs} />
             </div>
           </div>
 
@@ -260,7 +276,7 @@ export default class SettingsContainer extends Component {
             <EditableText className={styles.baseEdit} value={syncServerAddressSetting.value} placeholder="" />.
           </div>
           <p />
-        </div>
-      </div>);
+        </div >
+      </div >);
   }
 }

@@ -24,7 +24,8 @@ export default class Table extends Component {
     locale: LocalePropType.isRequired,
     events: PropTypes.arrayOf(EventPropType),
     gates: PropTypes.arrayOf(GatePropType),
-    auth: PropTypes.bool
+    auth: PropTypes.bool,
+    defaultRange: PropTypes.arrayOf(PropTypes.instanceOf(Date))
   }
 
   static defaultProps = {
@@ -35,13 +36,14 @@ export default class Table extends Component {
     onDateRangeChange: () => { },
     events: [],
     gates: [],
-    auth: false
+    auth: false,
+    defaultRange: [null, null]
   }
 
   constructor(props) {
     super(props);
 
-    this.state = { range: [null, null] };
+    this.state = { range: props.defaultRange };
   }
 
   handleCreate = (formData, valid) => {
@@ -57,14 +59,9 @@ export default class Table extends Component {
     this.eventAddDialog.toggleDialog();
   }
 
-  handleRefresh = () => {
-    this.props.onRefresh();
-    this.setState({ range: [null, null] });
-  }
+  handleRefresh = () => this.props.onRefresh(this.state.range)
 
-  handlePreDelete = (id) => {
-    this.deleteAlert.open(id);
-  }
+  handlePreDelete = (id) => this.deleteAlert.open(id)
 
   handleEdit = (event) => {
     this.eventEditDialog.edit(event);
@@ -89,8 +86,8 @@ export default class Table extends Component {
   }
 
   handleClearRange = () => {
-    this.props.onDateRangeChange([null, null]);
-    this.setState({ range: [null, null] });
+    this.props.onDateRangeChange(this.props.defaultRange);
+    this.setState({ range: this.props.defaultRange });
   }
 
   render() {

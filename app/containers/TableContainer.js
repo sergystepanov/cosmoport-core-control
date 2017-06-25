@@ -21,21 +21,24 @@ export default class TableContainer extends Component {
     onRefresh: () => { }
   }
 
-  constructor(props) {
-    super(props);
-
-    this.state = { hasData: false, events: [], locale: {}, refs: {}, gates: [] };
+  state = {
+    hasData: false,
+    events: [],
+    locale: {},
+    refs: {},
+    gates: [],
+    defaultRange: _date.getThreeDaysRange()
   }
 
-  componentDidMount() {
+  componentWillMount() {
     this.getData();
   }
 
-  getData = () => {
+  getData = (range) => {
     Promise.all([
       this.props.api.fetchReferenceData(),
       this.props.api.fetchTranslations(),
-      this.props.api.fetchTimetable(),
+      this.apiGetEventInRange(range || this.state.defaultRange),
       this.props.api.fetchGates()
     ])
       .then(data => this.setState(
@@ -68,16 +71,19 @@ export default class TableContainer extends Component {
       .catch(error => ApiError(error));
   }
 
-  handleRefresh = () => {
-    this.getData();
+  handleRefresh = (range) => {
+    this.getData(range);
     this.props.onRefresh();
   }
 
   handleDateChange = (range) => {
-    this.props.api.get(`/timetable?date=${range[0] ? _date.toYmd(range[0]) : ''}&date2=${range[1] ? _date.toYmd(range[1]) : ''}`)
+    this.apiGetEventInRange(range)
       .then(data => this.setState({ events: data }))
       .catch(error => ApiError(error));
   }
+
+  apiGetEventInRange = (range) =>
+    this.props.api.get(`/timetable?date=${range[0] ? _date.toYmd(range[0]) : ''}&date2=${range[1] ? _date.toYmd(range[1]) : ''}`)
 
   render() {
     if (!this.state.hasData) {
@@ -95,6 +101,7 @@ export default class TableContainer extends Component {
           locale={locale}
           gates={gates}
           onDateRangeChange={this.handleDateChange}
+          defaultRange={this.state.defaultRange}
           onCreate={this.handleCreate}
           onEdit={this.handleEdit}
           onDelete={this.handleDelete}

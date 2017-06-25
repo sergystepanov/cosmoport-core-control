@@ -67,4 +67,6 @@ export default class _date {
    * Returns the current date.
    */
   static current = () => moment().format('YYYY-MM-DD')
+
+  static getThreeDaysRange = () => [moment().subtract(3, 'days').toDate(), moment().add(3, 'days').toDate()]
 }
