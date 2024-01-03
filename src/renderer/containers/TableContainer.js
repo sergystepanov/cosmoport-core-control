@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
-import PageCaption from '../components/page/PageCaption';
 import Table from '../components/table/Table';
 import ApiError from '../components/indicators/ApiError';
 import { Api } from 'cosmoport-core-api-client';
@@ -104,29 +103,24 @@ export default class TableContainer extends Component {
   render() {
     const { events, refs, locale, gates, range, hasData } = this.state;
 
-    return (
-      <>
-        <PageCaption text="03 Timetable" />
-        {hasData ? (
-          <Table
-            auth={this.props.auth}
-            defaultRange={this.state.defaultRange}
-            events={events}
-            gates={gates}
-            locale={locale}
-            onCreate={this.handleCreate}
-            onDateRangeChange={this.handleDateChange}
-            onDateRangeClear={this.handleDateClear}
-            onDelete={this.handleDelete}
-            onEdit={this.handleEdit}
-            onRefresh={this.handleRefresh}
-            range={range}
-            refs={refs}
-          />
-        ) : (
-          <>Loading...</>
-        )}
-      </>
+    return hasData ? (
+      <Table
+        auth={this.props.auth}
+        defaultRange={this.state.defaultRange}
+        events={events}
+        gates={gates}
+        locale={locale}
+        onCreate={this.handleCreate}
+        onDateRangeChange={this.handleDateChange}
+        onDateRangeClear={this.handleDateClear}
+        onDelete={this.handleDelete}
+        onEdit={this.handleEdit}
+        onRefresh={this.handleRefresh}
+        range={range}
+        refs={refs}
+      />
+    ) : (
+      'Loading...'
     );
   }
 }

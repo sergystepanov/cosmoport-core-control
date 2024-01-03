@@ -10,7 +10,6 @@ import Message from '../components/messages/Message';
 import ApiError from '../components/indicators/ApiError';
 import LocaleInput from '../components/locale/LocaleInput';
 import LocaleMapper from '../components/mapper/LocaleMapper';
-import PageCaption from '../components/page/PageCaption';
 import TextValueEditor from '../components/editor/TextValueEditor';
 import BusinessHoursEditor from '../components/editor/bs/BusinessHoursEditor';
 
@@ -270,8 +269,6 @@ export default class SettingsContainer extends Component {
           }}
           callback={this.handleDelete}
         />
-
-        <PageCaption text="05 Settings" />
 
         <div className="bp5-callout" style={{ fontSize: '80%' }}>
           All of thees changes are applied in real time. So no need to restart

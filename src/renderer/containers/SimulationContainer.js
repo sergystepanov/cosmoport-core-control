@@ -2,7 +2,6 @@ import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import { Button, Classes, Icon, Popover, Tag } from '@blueprintjs/core';
 
-import PageCaption from '../components/page/PageCaption';
 import GateSchedule from '../components/simulator/GateSchedule';
 import EventPropType from '../props/EventPropType';
 import SimulationPropType from '../props/SimulationPropType';
@@ -117,7 +116,6 @@ export default class SimulationContainer extends PureComponent {
     return (
       <>
         <div className={styles.cap}>
-          <PageCaption text="02 Simulation" />
           <Popover
             interactionKind="hover"
             popoverClassName={Classes.POPOVER_CONTENT_SIZING}

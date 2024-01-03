@@ -4,7 +4,6 @@ import PropTypes from 'prop-types';
 import Calendar from '../components/calendar/Calendar';
 import { Api } from 'cosmoport-core-api-client';
 import ApiError from '../components/indicators/ApiError';
-import PageCaption from '../components/page/PageCaption';
 import EventMenu from '../components/calendar/EventMenu';
 import EventTicketBuyDialog from '../components/dialog/EventTicketBuyDialog';
 import L18n from '../components/l18n/L18n';
@@ -168,48 +167,43 @@ export default class MainPage extends Component {
         })
       : null;
 
-    return (
+    return hasData ? (
       <>
-        <PageCaption text="01 Calendar" />
-        {hasData ? (
-          <>
-            <EventTicketBuyDialog
-              ref={(dialog) => {
-                this.eventTicketsDialog = dialog;
-              }}
-              l18n={l18n}
-              et={et}
-              onTicketUpdate={this.handleTickets}
-            />
-            <EventAddDialog
-              ref={(dialog) => {
-                this.eventAddDialog = dialog;
-              }}
-              callback={this.handleCreate}
-              refs={refs}
-              locale={locale}
-              gates={gates}
-            />
-            <EventMenu
-              ref={(em) => {
-                this.eventMenu = em;
-              }}
-              onEventTickets={this.handleEventTickets}
-              onEventCreate={this.handleEventCreate}
-            />
-            <Calendar
-              events={events}
-              l18n={l18n}
-              et={et}
-              onMenu={this.handleMenu}
-              onViewChange={this.handleCalendarViewChange}
-            />
-            <p />
-          </>
-        ) : (
-          <>Loading...</>
-        )}
+        <EventTicketBuyDialog
+          ref={(dialog) => {
+            this.eventTicketsDialog = dialog;
+          }}
+          l18n={l18n}
+          et={et}
+          onTicketUpdate={this.handleTickets}
+        />
+        <EventAddDialog
+          ref={(dialog) => {
+            this.eventAddDialog = dialog;
+          }}
+          callback={this.handleCreate}
+          refs={refs}
+          locale={locale}
+          gates={gates}
+        />
+        <EventMenu
+          ref={(em) => {
+            this.eventMenu = em;
+          }}
+          onEventTickets={this.handleEventTickets}
+          onEventCreate={this.handleEventCreate}
+        />
+        <Calendar
+          events={events}
+          l18n={l18n}
+          et={et}
+          onMenu={this.handleMenu}
+          onViewChange={this.handleCalendarViewChange}
+        />
+        <p />
       </>
+    ) : (
+      'Loading...'
     );
   }
 }

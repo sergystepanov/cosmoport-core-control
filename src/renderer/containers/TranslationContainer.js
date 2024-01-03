@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Button } from '@blueprintjs/core';
 
-import PageCaption from '../components/page/PageCaption';
 import Message from '../components/messages/Message';
 import Translation from '../components/translation/Translation';
 import TranslationTable from '../components/translation/TranslationTable';
@@ -97,7 +96,6 @@ export default class TranslationContainer extends Component {
 
     return (
       <>
-        <PageCaption text="04 Translations" />
         <LocaleAddDialog
           ref={(c) => {
             this.addDialog = c;
