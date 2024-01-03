@@ -1,31 +1,36 @@
 
 .centred {
-  text-align: center;
+    text-align: center;
 }
 
 .overlay {
-  background-color: white;
+    background-color: white;
+
+    width: 20em;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .player {
-  font-size: 85%;
-  cursor: default;
+    font-size: 85%;
+    cursor: default;
 }
 
 .controls {
-  display: flex;
+    display: flex;
 }
 
 .periodBlock {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .number div input {
-  width: 2em !important;
+    width: 2em !important;
 }
 
 .number div input {
-  height: 1em;
+    height: 1em;
 }

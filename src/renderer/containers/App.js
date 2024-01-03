@@ -308,7 +308,7 @@ export default class App extends Component {
                 nodes={nodes}
                 audio={audio}
                 auth={auth_}
-                simulation={sim}
+                simulation={sim.active}
               />
               <div className={styles.content}>
                 <Routes>

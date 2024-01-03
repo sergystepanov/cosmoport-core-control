@@ -60,3 +60,10 @@ export type RefsType = {
   types: EventTypeType[];
   type_categories: EventTypeCategoryType[];
 };
+
+export type MusicListType = {
+  music: {
+    path: string;
+    files: string[];
+  };
+};
