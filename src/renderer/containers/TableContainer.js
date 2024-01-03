@@ -102,30 +102,30 @@ export default class TableContainer extends Component {
     );
 
   render() {
-    if (!this.state.hasData) {
-      return <span>Loading...</span>;
-    }
-
-    const { events, refs, locale, gates, range } = this.state;
+    const { events, refs, locale, gates, range, hasData } = this.state;
 
     return (
       <>
         <PageCaption text="03 Timetable" />
-        <Table
-          events={events}
-          refs={refs}
-          locale={locale}
-          gates={gates}
-          range={range}
-          onDateRangeChange={this.handleDateChange}
-          onDateRangeClear={this.handleDateClear}
-          defaultRange={this.state.defaultRange}
-          onCreate={this.handleCreate}
-          onEdit={this.handleEdit}
-          onDelete={this.handleDelete}
-          onRefresh={this.handleRefresh}
-          auth={this.props.auth}
-        />
+        {hasData ? (
+          <Table
+            auth={this.props.auth}
+            defaultRange={this.state.defaultRange}
+            events={events}
+            gates={gates}
+            locale={locale}
+            onCreate={this.handleCreate}
+            onDateRangeChange={this.handleDateChange}
+            onDateRangeClear={this.handleDateClear}
+            onDelete={this.handleDelete}
+            onEdit={this.handleEdit}
+            onRefresh={this.handleRefresh}
+            range={range}
+            refs={refs}
+          />
+        ) : (
+          <>Loading...</>
+        )}
       </>
     );
   }

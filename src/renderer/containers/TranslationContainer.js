@@ -96,7 +96,7 @@ export default class TranslationContainer extends Component {
     ));
 
     return (
-      <div>
+      <>
         <PageCaption text="04 Translations" />
         <LocaleAddDialog
           ref={(c) => {
@@ -116,7 +116,7 @@ export default class TranslationContainer extends Component {
           translations={this.state.translations}
           onTextChange={this.handleTextChange}
         />
-      </div>
+      </>
     );
   }
 }

@@ -158,54 +158,58 @@ export default class MainPage extends Component {
   };
 
   render() {
-    if (!this.state.hasData) {
-      return <span>Loading...</span>;
-    }
+    const { events, locale, refs, gates, hasData } = this.state;
 
-    const { events, locale, refs, gates } = this.state;
-    const l18n = new L18n(locale, refs);
-
-    const et = EventType({
-      categories: refs.type_categories,
-      translation: locale,
-    });
+    const l18n = hasData ? new L18n(locale, refs) : null;
+    const et = hasData
+      ? EventType({
+          categories: refs.type_categories,
+          translation: locale,
+        })
+      : null;
 
     return (
-      <div>
+      <>
         <PageCaption text="01 Calendar" />
-        <EventTicketBuyDialog
-          ref={(dialog) => {
-            this.eventTicketsDialog = dialog;
-          }}
-          l18n={l18n}
-          et={et}
-          onTicketUpdate={this.handleTickets}
-        />
-        <EventAddDialog
-          ref={(dialog) => {
-            this.eventAddDialog = dialog;
-          }}
-          callback={this.handleCreate}
-          refs={refs}
-          locale={locale}
-          gates={gates}
-        />
-        <EventMenu
-          ref={(em) => {
-            this.eventMenu = em;
-          }}
-          onEventTickets={this.handleEventTickets}
-          onEventCreate={this.handleEventCreate}
-        />
-        <Calendar
-          events={events}
-          l18n={l18n}
-          et={et}
-          onMenu={this.handleMenu}
-          onViewChange={this.handleCalendarViewChange}
-        />
-        <p />
-      </div>
+        {hasData ? (
+          <>
+            <EventTicketBuyDialog
+              ref={(dialog) => {
+                this.eventTicketsDialog = dialog;
+              }}
+              l18n={l18n}
+              et={et}
+              onTicketUpdate={this.handleTickets}
+            />
+            <EventAddDialog
+              ref={(dialog) => {
+                this.eventAddDialog = dialog;
+              }}
+              callback={this.handleCreate}
+              refs={refs}
+              locale={locale}
+              gates={gates}
+            />
+            <EventMenu
+              ref={(em) => {
+                this.eventMenu = em;
+              }}
+              onEventTickets={this.handleEventTickets}
+              onEventCreate={this.handleEventCreate}
+            />
+            <Calendar
+              events={events}
+              l18n={l18n}
+              et={et}
+              onMenu={this.handleMenu}
+              onViewChange={this.handleCalendarViewChange}
+            />
+            <p />
+          </>
+        ) : (
+          <>Loading...</>
+        )}
+      </>
     );
   }
 }

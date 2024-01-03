@@ -317,7 +317,6 @@ export default class App extends Component {
                     path="/simulation"
                     element={
                       <Simulation
-                        auth={auth_}
                         simulation={sim}
                         announcements={sa}
                         onActionClick={this.handleAction}
