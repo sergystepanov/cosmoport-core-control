@@ -7,7 +7,6 @@ import DefaultLocaleMessage from '../components/locale/DefaultLocaleMessage';
 import EventTypeAddDialog from '../components/dialog/EventTypeAddDialog';
 import EventTypeDelDialog from '../components/dialog/EventTypeDelDialog';
 import Message from '../components/messages/Message';
-import ApiError from '../components/indicators/ApiError';
 import LocaleInput from '../components/locale/LocaleInput';
 import LocaleMapper from '../components/mapper/LocaleMapper';
 import TextValueEditor from '../components/editor/TextValueEditor';
@@ -31,10 +30,8 @@ function Caption(props) {
 }
 
 Caption.propTypes = { text: PropTypes.string.isRequired };
-const updateLocale = (locale, locales) => {
-  const jo = locales.map((l) => (l.id === locale.id ? locale : l));
-  return jo;
-};
+const updateLocale = (locale, locales) =>
+  locales.map((l) => (l.id === locale.id ? locale : l));
 
 export default class SettingsContainer extends Component {
   static propTypes = {
@@ -70,17 +67,15 @@ export default class SettingsContainer extends Component {
       this.props.api.fetchLocales(),
       this.props.api.fetchTranslations(),
       this.props.api.fetchSettings(),
-    ])
-      .then((data) =>
-        this.setState({
-          hasData: true,
-          refs: data[0],
-          locales: data[1],
-          trans: data[2].en,
-          settings: data[3],
-        }),
-      )
-      .catch((error) => ApiError(error));
+    ]).then((data) =>
+      this.setState({
+        hasData: true,
+        refs: data[0],
+        locales: data[1],
+        trans: data[2].en,
+        settings: data[3],
+      }),
+    );
   };
 
   onEventTypeAddDialogToggle = () =>
@@ -102,41 +97,32 @@ export default class SettingsContainer extends Component {
       return;
     }
 
-    this.props.api
-      .createEventType(mapEvent(formData))
-      .then((result) => {
-        const id = result.eventTypes[0].id;
-        Message.show(`Event type has been created [${id}].`);
-        this.getData();
-        callback();
+    this.props.api.createEventType(mapEvent(formData)).then((result) => {
+      const id = result.eventTypes[0].id;
+      Message.show(`Event type has been created [${id}].`);
+      this.getData();
+      callback();
 
-        return 1;
-      })
-      .catch((error) => ApiError(error));
+      return 1;
+    });
   };
 
   handleNewCategory = (name) => {
     if (name === '') return;
 
-    this.props.api
-      .createEventTypeCategory({ name: name })
-      .then((result) => {
-        Message.show(`Event type category has been created [${result.id}].`);
-        this.getData();
-      })
-      .catch((error) => ApiError(error));
+    this.props.api.createEventTypeCategory({ name: name }).then((result) => {
+      Message.show(`Event type category has been created [${result.id}].`);
+      this.getData();
+    });
   };
 
   handleDelete = (id, callback) => {
-    this.props.api
-      .deleteEventType(id)
-      .then((result) => {
-        Message.show(`Event type has been deleted [:${result.deleted}]`);
-        this.getData();
-        callback();
-        return 1;
-      })
-      .catch((error) => ApiError(error));
+    this.props.api.deleteEventType(id).then((result) => {
+      Message.show(`Event type has been deleted [:${result.deleted}]`);
+      this.getData();
+      callback();
+      return 1;
+    });
   };
 
   handleLocaleTimeoutChange = (locale, value) => {
@@ -145,15 +131,14 @@ export default class SettingsContainer extends Component {
     this.props.api
       .updateLocaleShowData(updated)
       .then((result) => Message.show(`Locale has been updated [${result.id}].`))
-      .then(
+      .then(() => {
         this.setState({
           locales: updateLocale(
             LocaleMapper.unmap(updated),
             this.state.locales,
           ),
-        }),
-      )
-      .catch((error) => ApiError(error));
+        });
+      });
   };
 
   handleCheck = (locale, value) => {
@@ -162,15 +147,14 @@ export default class SettingsContainer extends Component {
     this.props.api
       .updateLocaleShowData(updated)
       .then((result) => Message.show(`Locale has been updated [${result.id}].`))
-      .then(
+      .then(() => {
         this.setState({
           locales: updateLocale(
             LocaleMapper.unmap(updated),
             this.state.locales,
           ),
-        }),
-      )
-      .catch((error) => ApiError(error));
+        });
+      });
   };
 
   findSetting = (settings, key) =>
@@ -186,8 +170,7 @@ export default class SettingsContainer extends Component {
     this.props.api
       .updateSettingValueForId(id, valueObject)
       .then(() => Message.show('The value has been saved successfully.'))
-      .then(() => this.handleRefresh())
-      .catch((error) => ApiError(error));
+      .then(() => this.handleRefresh());
   };
 
   handlePassChange = () => {
@@ -199,8 +182,7 @@ export default class SettingsContainer extends Component {
         response.result
           ? Message.show('Password has changed.')
           : Message.show('Error during save.', 'error'),
-      )
-      .catch((error) => ApiError(error));
+      );
   };
 
   handleRefresh = () => {
@@ -214,8 +196,7 @@ export default class SettingsContainer extends Component {
     this.props.api
       .updateSettingValueForId(id, valueObject)
       .then(() => Message.show('The value has been saved successfully.'))
-      .then(() => this.handleRefresh())
-      .catch((error) => ApiError(error));
+      .then(() => this.handleRefresh());
   };
 
   render() {

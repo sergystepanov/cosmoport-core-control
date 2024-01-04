@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { MemoryRouter as Router, Routes, Route } from 'react-router-dom';
 
-import { FocusStyleManager } from '@blueprintjs/core';
+import { Button, FocusStyleManager } from '@blueprintjs/core';
 
 import NavigationBar from '../components/navigation/NavigationBar';
 import { Api, Websocket } from 'cosmoport-core-api-client';
@@ -29,17 +29,54 @@ export default class App extends Component {
   constructor(props) {
     super(props);
 
+    const { ssl, server } = props.conf.address;
+    const address = `http${ssl === 'true' ? 's' : ''}://${server}`;
+    const api = new Api({
+      url: address,
+      request: (uri, options) =>
+        new Promise((resolve, reject) => {
+          fetch(address + uri, Object.assign({}, options, { mode: 'cors' }))
+            .then(
+              (response) =>
+                new Promise((resolve) =>
+                  response
+                    .json()
+                    .then((json) =>
+                      resolve({
+                        status: response.status,
+                        ok: response.ok,
+                        json,
+                      }),
+                    )
+                    .catch(() => {
+                      if (response.status === 504) {
+                        this.setState({ serverIsDown: true });
+                      }
+                    }),
+                ),
+            )
+            .then((response) => {
+              if (response.ok) {
+                resolve(response.json);
+              } else {
+                return Promise.reject(response.json);
+              }
+            })
+            .catch((error) => {
+              ApiError(error);
+              reject({ code: error.code, message: error.message });
+            });
+        }),
+    });
+
     this.state = {
       timestamp: 0,
       nodes: { gates: 0, timetables: 0 },
       boarding: 10,
       events: [],
       audio: { path: props.audio.dir, files: props.audio.mp3s },
-      api: new Api(
-        `http${props.conf.address.ssl === 'true' ? 's' : ''}://${
-          props.conf.address.server
-        }`,
-      ),
+      api: api,
+      serverIsDown: false,
       socket: null,
       simulationAnnouncements: [],
       simulationAnnouncementsPlay: 'PLAYING',
@@ -127,6 +164,7 @@ export default class App extends Component {
             actions: this.simulator.scheduleActions(events),
             ticks: simulation.ticks,
           },
+          serverIsDown: false,
         });
 
         return 1;
@@ -165,7 +203,7 @@ export default class App extends Component {
 
         return 1;
       })
-      .catch((error) => ApiError(error));
+      .catch(console.error);
   };
 
   handleLogout = () => {
@@ -198,8 +236,7 @@ export default class App extends Component {
       .then((result) =>
         Message.show(`Event status has been updated [${result.id}].`),
       )
-      // .then(() => this.handleRefresh())
-      .catch((error) => ApiError(error));
+      .catch(console.error);
   };
 
   handleTurnGateOn = (action) => {
@@ -211,7 +248,7 @@ export default class App extends Component {
     this.state.api
       .proxy({ name: 'fire_gate', event: evt, type: tpy })
       .then(() => Message.show(`Firing up the Gate #${evt.gateId}.`))
-      .catch((error) => ApiError(error));
+      .catch(console.error);
   };
 
   handleArchive = (action) => {
@@ -257,6 +294,7 @@ export default class App extends Component {
       boarding,
       bs,
       events: events_,
+      serverIsDown,
       simulation: sim,
       simulationAnnouncements: sa,
       simulationAnnouncementsPlay: playStatus,
@@ -294,61 +332,78 @@ export default class App extends Component {
           onNewDay={this.handleRefresh}
           onActionsUpdate={this.handleActionsUpdate}
         />
-        <Rupor
-          audio={audio}
-          status={playStatus}
-          announcements={sa}
-          onAnnouncementEnd={this.handleAnnouncementEnd}
-        />
-        <Router>
-          <div className="bp5-ui-text">
-            <div className={styles.container}>
-              <NavigationBar
-                timestamp={timestamp}
-                nodes={nodes}
-                audio={audio}
-                auth={auth_}
-                simulation={sim.active}
-              />
-              <div className={styles.content}>
-                <Routes>
-                  <Route path="/" element={<MainPage {...commonProps} />} />
-                  <Route
-                    path="/simulation"
-                    element={
-                      <Simulation
-                        simulation={sim}
-                        announcements={sa}
-                        onActionClick={this.handleAction}
-                        onStopAnnounce={this.handleStopAnnounce}
-                        events={events_}
-                        {...commonProps}
+        {serverIsDown ? (
+          <>
+            {'Server is not available :('}
+            <Button
+              text="Reload"
+              onClick={() => {
+                this.getData();
+              }}
+            />
+          </>
+        ) : (
+          <>
+            <Rupor
+              audio={audio}
+              status={playStatus}
+              announcements={sa}
+              onAnnouncementEnd={this.handleAnnouncementEnd}
+            />
+            <Router>
+              <div className="bp5-ui-text">
+                <div className={styles.container}>
+                  <NavigationBar
+                    timestamp={timestamp}
+                    nodes={nodes}
+                    audio={audio}
+                    auth={auth_}
+                    simulation={sim.active}
+                  />
+                  <div className={styles.content}>
+                    <Routes>
+                      <Route path="/" element={<MainPage {...commonProps} />} />
+                      <Route
+                        path="/simulation"
+                        element={
+                          <Simulation
+                            simulation={sim}
+                            announcements={sa}
+                            onActionClick={this.handleAction}
+                            onStopAnnounce={this.handleStopAnnounce}
+                            events={events_}
+                            {...commonProps}
+                          />
+                        }
                       />
-                    }
-                  />
-                  <Route
-                    path="/translation"
-                    element={<Translation {...commonProps} auth />}
-                  />
-                  <Route path="/table" element={<Table {...commonProps} />} />
-                  <Route
-                    path="/login"
-                    element={<Unlock onAuth={this.handlePassword} />}
-                  />
-                  <Route
-                    path="/logout"
-                    element={<Lock onDeAuth={this.handleLogout} />}
-                  />
-                  <Route
-                    path="/settings"
-                    element={<Settings {...commonProps} />}
-                  />
-                </Routes>
+                      <Route
+                        path="/translation"
+                        element={<Translation {...commonProps} auth />}
+                      />
+                      <Route
+                        path="/table"
+                        element={<Table {...commonProps} />}
+                      />
+                      <Route
+                        path="/login"
+                        element={<Unlock onAuth={this.handlePassword} />}
+                      />
+                      <Route
+                        path="/logout"
+                        element={<Lock onDeAuth={this.handleLogout} />}
+                      />
+                      <Route
+                        path="/settings"
+                        element={<Settings {...commonProps} />}
+                      />
+                    </Routes>
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
-        </Router>
-        <Message.render />
+            </Router>
+            <Message.render />
+          </>
+        )}
       </>
     );
   }

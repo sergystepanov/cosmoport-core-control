@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 
 import Calendar from '../components/calendar/Calendar';
 import { Api } from 'cosmoport-core-api-client';
-import ApiError from '../components/indicators/ApiError';
 import EventMenu from '../components/calendar/EventMenu';
 import EventTicketBuyDialog from '../components/dialog/EventTicketBuyDialog';
 import L18n from '../components/l18n/L18n';
@@ -60,14 +59,14 @@ export default class MainPage extends Component {
           gates: g,
         }),
       )
-      .catch((error) => ApiError(error));
+      .catch(console.error);
   };
 
   refreshEventsData = () => {
     this.props.api
       .fetchEventsInRange(this.state.start, this.state.end)
       .then((result) => this.setState({ events: result }))
-      .catch((error) => ApiError(error));
+      .catch(console.error);
   };
 
   handleMenu = (event, data, type) => {
@@ -78,7 +77,7 @@ export default class MainPage extends Component {
     this.props.api
       .fetchEventsByIdForGate(id)
       .then((data) => this.eventTicketsDialog.toggle(data[0]))
-      .catch((error) => ApiError(error));
+      .catch(console.error);
   };
 
   handleTickets = (eventId, tickets_, force) => {
@@ -96,7 +95,7 @@ export default class MainPage extends Component {
 
         return 1;
       })
-      .catch((error) => ApiError(error));
+      .catch(console.error);
   };
 
   handleEventCreate = (date) => {
@@ -104,18 +103,18 @@ export default class MainPage extends Component {
     this.eventAddDialog.openWith(date);
   };
 
-  handleCreate = (formData, valid) => {
+  handleCreate = async (formData, valid) => {
     if (!valid) {
       Message.show('Please check the form data.', 'error');
       return;
     }
 
-    this.props.api
-      .createEvent(formData)
-      .then((result) => Message.show(`Event has been created [${result.id}].`))
-      .then(() => this.eventAddDialog.suggestNext(this.props.pre))
-      .then(() => this.handleRefresh())
-      .catch((error) => ApiError(error));
+    try {
+      const { id } = await this.props.api.createEvent(formData);
+      Message.show(`Event has been created [${id}].`);
+      this.eventAddDialog.suggestNext(this.props.pre);
+      this.handleRefresh();
+    } catch (e) {}
   };
 
   handleRefresh = () => {
@@ -153,7 +152,7 @@ export default class MainPage extends Component {
 
         return 1;
       })
-      .catch((error) => ApiError(error));
+      .catch(console.error);
   };
 
   render() {

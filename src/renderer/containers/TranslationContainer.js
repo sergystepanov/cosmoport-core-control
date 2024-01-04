@@ -7,7 +7,6 @@ import Translation from '../components/translation/Translation';
 import TranslationTable from '../components/translation/TranslationTable';
 import LocaleAddDialog from '../components/dialog/LocaleAddDialog';
 import { Api } from 'cosmoport-core-api-client';
-import ApiError from '../components/indicators/ApiError';
 
 import styles from './App.module.css';
 
@@ -34,7 +33,7 @@ export default class TranslationContainer extends Component {
     this.props.api
       .fetchLocales()
       .then((data) => this.setState({ locales: data }))
-      .catch((error) => ApiError(error));
+      .catch(console.error);
   };
 
   handleLocaleSelect = (locale) => {
@@ -43,7 +42,7 @@ export default class TranslationContainer extends Component {
       .then((data) =>
         this.setState({ translations: data, currentTranslation: locale }),
       )
-      .catch((error) => ApiError(error));
+      .catch(console.error);
   };
 
   handleTextChange = (id, value, okCallback, notOkCallback) => {
@@ -57,7 +56,7 @@ export default class TranslationContainer extends Component {
       .then(() => this.updateTranslationStateById(id, value))
       .then(() => okCallback)
       .catch((error) => {
-        ApiError(error);
+        console.error(error);
         notOkCallback();
       });
   };
@@ -72,7 +71,7 @@ export default class TranslationContainer extends Component {
       .then(() => Message.show('Locale has been created.'))
       .then(() => this.addDialog.toggleDialog())
       .then(() => this.fetchLocales())
-      .catch((error) => ApiError(error));
+      .catch(console.error);
   };
 
   updateTranslationStateById = (id, value) => {

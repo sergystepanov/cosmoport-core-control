@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
 import Table from '../components/table/Table';
-import ApiError from '../components/indicators/ApiError';
 import { Api } from 'cosmoport-core-api-client';
 import Message from '../components/messages/Message';
 import _date from '../components/date/_date';
@@ -50,7 +49,7 @@ export default class TableContainer extends Component {
           gates: data[3],
         }),
       )
-      .catch((error) => ApiError(error));
+      .catch(console.error);
   };
 
   handleCreate = (formData, suggester) => {
@@ -59,7 +58,7 @@ export default class TableContainer extends Component {
       .then((result) => Message.show(`Event has been created [${result.id}].`))
       .then(() => suggester && suggester(this.props.pre))
       .then(() => this.handleRefresh())
-      .catch((error) => ApiError(error));
+      .catch(console.error);
   };
 
   handleEdit = (formData) => {
@@ -67,7 +66,7 @@ export default class TableContainer extends Component {
       .updateEvent(formData)
       .then((result) => Message.show(`Event has been updated [${result.id}].`))
       .then(() => this.handleRefresh())
-      .catch((error) => ApiError(error));
+      .catch(console.error);
   };
 
   handleDelete = (id) => {
@@ -75,7 +74,7 @@ export default class TableContainer extends Component {
       .deleteEvent(id)
       .then((result) => Message.show(`Deleted ${result.deleted}.`))
       .then(() => this.handleRefresh())
-      .catch((error) => ApiError(error));
+      .catch(console.error);
   };
 
   handleRefresh = () => {
@@ -86,7 +85,7 @@ export default class TableContainer extends Component {
   handleDateChange = (range_) => {
     this.apiGetEventInRange(range_)
       .then((data) => this.setState({ events: data, range: range_ }))
-      .catch((error) => ApiError(error));
+      .catch(console.error);
   };
 
   handleDateClear = () => {
