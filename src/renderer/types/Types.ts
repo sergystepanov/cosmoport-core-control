@@ -53,6 +53,30 @@ export type LocaleType = {
   };
 };
 
+export type LocaleDescriptionType = {
+  code: string;
+  default: boolean;
+  id: number;
+  localeDescription: string;
+  show: boolean;
+  showTime: number;
+};
+
+export type I18nType = {
+  id: number;
+  tag: string;
+  external: boolean;
+  description: string;
+  params: string;
+};
+
+export type TranslationType = {
+  i18n: I18nType;
+  id: number;
+  localeId: number;
+  text: string;
+};
+
 export type RefsType = {
   destinations: EventDestinationType[];
   statuses: EventStatusType[];
