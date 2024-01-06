@@ -1,4 +1,28 @@
-export { EventType } from './Event';
+export type AnnouncementType = {
+  id: number;
+  time: number;
+  type: string;
+};
+
+export type EventType = {
+  id: number;
+  contestants: number;
+  cost: number;
+  dateAdded: string;
+  durationTime: number;
+  eventDate: string;
+  eventDestinationId: number;
+  eventStateId: number;
+  eventStatusId: number;
+  eventTypeId: number;
+  /** @param gateId - id number for the gate of departure */
+  gateId: number;
+  /** @param gate2Id - id number for the gate of return */
+  gate2Id: number;
+  peopleLimit: number;
+  repeatInterval: number;
+  startTime: number;
+};
 
 export type GateType = {
   id: number;
@@ -83,6 +107,18 @@ export type RefsType = {
   states: EventStateType[];
   types: EventTypeType[];
   type_categories: EventTypeCategoryType[];
+};
+
+export type SimulationDataType = {
+  active: boolean;
+  ticks: number;
+  actions: SimulationActionType[];
+};
+
+export type SimulationActionType = {
+  event: EventType;
+  time: number;
+  do: string;
 };
 
 export type MusicListType = {
