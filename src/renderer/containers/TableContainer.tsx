@@ -131,7 +131,7 @@ export default function TableContainer({
 
   const { events, gates, locale, range, refs } = state;
 
-  return events.length > 0 ? (
+  return (
     <Table
       auth={auth}
       events={events}
@@ -146,7 +146,5 @@ export default function TableContainer({
       range={range}
       refs={refs}
     />
-  ) : (
-    'No data...'
   );
 }
