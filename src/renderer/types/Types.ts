@@ -127,3 +127,9 @@ export type MusicListType = {
     files: string[];
   };
 };
+
+export type SettingType = {
+  id: number;
+  param: string;
+  value: string;
+};
