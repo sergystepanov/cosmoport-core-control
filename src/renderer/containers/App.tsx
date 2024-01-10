@@ -6,10 +6,7 @@ import { Button, FocusStyleManager } from '@blueprintjs/core';
 import NavigationBar from '../components/navigation/NavigationBar';
 import { Websocket } from '../api/Socket';
 import { Api } from '../api/Api';
-import {
-  default as Rupor,
-  PlayStatusType,
-} from '../components/player/Announcer';
+import Announcer, { PlayStatusType } from '../components/player/Announcer';
 import MainPage from './MainPage';
 import Table from './TableContainer';
 import Simulation from './SimulationContainer';
@@ -320,7 +317,7 @@ export default function App({
         </>
       ) : (
         <>
-          <Rupor
+          <Announcer
             audio={audio2}
             status={playStatus}
             announcements={sa}
