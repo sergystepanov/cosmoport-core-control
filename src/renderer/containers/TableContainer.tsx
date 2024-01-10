@@ -19,7 +19,7 @@ type Props = {
   api: Api;
   auth?: boolean;
   onRefresh?: () => void;
-  pre: number;
+  pre?: number;
 };
 
 type State = {
@@ -35,7 +35,7 @@ export default function TableContainer({
   api,
   auth = false,
   onRefresh = () => {},
-  pre,
+  pre = 10,
 }: Props) {
   const [state, setState] = useState<State>({
     events: [],

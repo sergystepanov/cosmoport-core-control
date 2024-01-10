@@ -28,12 +28,13 @@ type Props = {
 type State = {
   hasData?: boolean;
   isItOpen?: boolean;
+  isLoaded?: boolean;
   events: EventType2[];
   locale: LocaleType;
   gates: GateType[];
   refs: RefsType;
-  start?: string;
-  end?: string;
+  dateRangeStart: string;
+  dateRangeEnd: string;
 };
 
 export default function MainPage({
@@ -42,8 +43,8 @@ export default function MainPage({
   pre = 10,
 }: Props) {
   const [state, setState] = useState<State>({
-    hasData: false,
     isItOpen: false,
+    isLoaded: false,
     events: [],
     locale: {},
     refs: {
@@ -54,33 +55,27 @@ export default function MainPage({
       type_categories: [],
     },
     gates: [],
-    start: _date.current(),
-    end: _date.current(),
+    dateRangeStart: _date.startOfMonth(),
+    dateRangeEnd: _date.endOfMonth(),
   });
 
   useEffect(() => {
     getData();
   }, []);
 
-  useEffect(() => {
-    refreshEventsData();
-  }, [state.start, state.end]);
-
   const getData = () => {
     Promise.all([
       api.fetchReferenceData(),
       api.fetchTranslations(),
       // Fetch all the events between the current calendar view range
-      api.fetchEventsInRange(state.start, state.end),
       api.fetchGates(),
     ])
-      .then(([r, l, e, g]) =>
+      .then(([r, l, g]) =>
         setState({
           ...state,
-          hasData: true,
+          isLoaded: true,
           refs: r,
           locale: l.en,
-          events: e,
           gates: g,
         }),
       )
@@ -91,10 +86,17 @@ export default function MainPage({
   const eventTicketsDialogRef = useRef<EventTicketBuyDialog>(null);
   const eventMenuRef = useRef<typeof EventMenu>(null);
 
-  const refreshEventsData = () => {
+  const refreshEventsData = (start: string, end: string) => {
     api
-      .fetchEventsInRange(state.start, state.end)
-      .then((result) => setState({ ...state, events: result }))
+      .fetchEventsInRange(start, end)
+      .then((result) =>
+        setState({
+          ...state,
+          dateRangeStart: start,
+          dateRangeEnd: end,
+          events: result,
+        }),
+      )
       .catch(console.error);
   };
 
@@ -146,7 +148,7 @@ export default function MainPage({
   };
 
   const handleRefresh = () => {
-    getData();
+    refreshEventsData(state.dateRangeStart, state.dateRangeEnd);
     onRefresh();
   };
 
@@ -154,14 +156,14 @@ export default function MainPage({
     start: moment.Moment;
     end: moment.Moment;
   }) => {
-    setState({
-      ...state,
-      start: dates.start.format('YYYY-MM-DD'),
-      end: dates.end.format('YYYY-MM-DD'),
-    });
+    console.log('calendar');
+    const start = dates.start.format('YYYY-MM-DD');
+    const end = dates.end.format('YYYY-MM-DD');
+    refreshEventsData(start, end);
   };
 
-  const { events, locale, refs, gates, hasData } = state;
+  const { events, locale, refs, gates, isLoaded } = state;
+  const hasData = isLoaded;
 
   const l18n = hasData ? new L18n(locale, refs) : null;
   const et = hasData
@@ -170,6 +172,8 @@ export default function MainPage({
         translation: locale,
       })
     : null;
+
+  console.log(hasData, 'render');
 
   return hasData ? (
     <>

@@ -40,6 +40,11 @@ export default class _date {
   // Returns the current date.
   static current = (): string => moment().format('YYYY-MM-DD');
 
+  static startOfMonth = (): string =>
+    moment().startOf('month').format('YYYY-MM-DD');
+  static endOfMonth = (): string =>
+    moment().endOf('month').format('YYYY-MM-DD');
+
   // Returns two dates in the array as [-3 days, +3 days] counting from the current date.
   static getThreeDaysRange = (): [Date, Date] => [
     moment().subtract(3, 'days').toDate(),

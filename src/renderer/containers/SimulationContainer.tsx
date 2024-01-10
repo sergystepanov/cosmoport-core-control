@@ -21,9 +21,9 @@ const groupBy = (values: any, prop: any) =>
   }, {});
 
 type Props = {
-  auth: boolean;
-  events: EventType[];
-  announcements: (AnnouncementType & { c: number })[];
+  auth?: boolean;
+  events?: EventType[];
+  announcements: Partial<AnnouncementType & { c: number }>[];
   simulation: SimulationDataType;
   onActionClick: (action: SimulationActionType) => void;
   onStopAnnounce: () => void;
@@ -54,7 +54,7 @@ export default function SimulationContainer({
   const hasAnnouncements = ann.length > 0;
 
   let c = 0;
-  const grouped: (AnnouncementType & { c: number })[] = [];
+  const grouped: Partial<AnnouncementType & { c: number }>[] = [];
   ann.forEach((a) => {
     const last = grouped[grouped.length - 1];
     if (!grouped.length || a.id !== last.id || a.type !== last.type) {
@@ -62,6 +62,7 @@ export default function SimulationContainer({
       c = 0;
       grouped.push(a);
     } else {
+      // @ts-ignore
       grouped[grouped.length - 1].c++;
     }
   });

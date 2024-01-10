@@ -14,16 +14,16 @@ import ServerTime from '../time/ServerTime';
 import Player from '../player/Player';
 
 type NavBar = {
-  auth: boolean;
-  audio: {
+  auth?: boolean;
+  audio?: {
     path: string;
     files: string[];
   };
-  nodes: {
+  nodes?: {
     timetables: number;
     gates: number;
   };
-  timestamp: number;
+  timestamp?: number;
   simulation: boolean;
 };
 

@@ -1,3 +1,27 @@
+/** Used for passing configuration from the main process (system) into renderer. */
+export type AppResourcesType = {
+  /** Contains audio track list information. */
+  audio: {
+    /** The dir relative to the app's home, where audio files are stored. */
+    dir: string;
+    /** A list of mp3 filenames relative to the audio dir. */
+    mp3s: string[];
+  };
+
+  /** Contains key-value params parsed from the ini config files. Values are strings. */
+  config: {
+    /** Contains server address configuration. */
+    address: {
+      /** If the address has SSL protection ('true'). Needed for the https/wss protocol prefix generation.*/
+      ssl?: string;
+      /** Server address without the protocol. */
+      server: string;
+      /** Websocket address of the server without the protocol. */
+      ws: string;
+    };
+  };
+};
+
 export type AnnouncementType = {
   id: number;
   time: number;
@@ -119,6 +143,12 @@ export type SimulationActionType = {
   event: EventType;
   time: number;
   do: string;
+};
+
+export type BusinessHoursType = {
+  start: number;
+  end: number;
+  non: boolean;
 };
 
 export type MusicListType = {
