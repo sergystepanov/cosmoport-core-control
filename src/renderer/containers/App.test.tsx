@@ -1,8 +1,8 @@
 import '@testing-library/jest-dom';
 import { render, waitFor } from '@testing-library/react';
-import App from '../renderer/containers/App';
-import Api from '../renderer/api/Api';
-import Socket from '../renderer/api/Socket';
+import App from '../containers/App';
+import Api from '../api/Api';
+import Socket from '../api/Socket';
 
 global.fetch = jest.fn(() =>
   Promise.resolve({
