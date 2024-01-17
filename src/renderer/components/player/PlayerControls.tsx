@@ -1,10 +1,4 @@
-import {
-  Button,
-  NumericInput,
-  Tooltip,
-  Position,
-  Intent,
-} from '@blueprintjs/core';
+import { Button, NumericInput, Intent } from '@blueprintjs/core';
 
 import styles from './Player.module.css';
 
@@ -36,17 +30,13 @@ export default function PlayerControls({
   return (
     <div className={styles.controls}>
       <div className={styles.periodBlock}>
-        <Tooltip
-          content="Here you can set a delay in minutes between tacks."
-          position={Position.BOTTOM}
-        >
-          <NumericInput
-            className={styles.number}
-            buttonPosition="none"
-            value={period}
-            onValueChange={onPeriodChange}
-          />
-        </Tooltip>
+        <NumericInput
+          title="Here you can set a delay in minutes between tacks."
+          className={styles.number}
+          buttonPosition="none"
+          value={period}
+          onValueChange={onPeriodChange}
+        />
         <span>m</span>
       </div>
       <Button minimal icon="step-forward" onClick={onNext} />

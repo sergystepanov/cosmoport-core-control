@@ -1,7 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, memo } from 'react';
 import Sound from 'react-sound';
 
-import { MusicListType } from '../../types/Types';
 import PlayerControls from './PlayerControls';
 
 import styles from './Player.module.css';
@@ -23,12 +22,15 @@ enum PLAYER {
   PAUSED = 'PAUSED',
 }
 
-export default function Player({
-  music = { path: '', files: [] },
-}: MusicListType) {
+type Props = {
+  dir: string;
+  files: string[];
+};
+
+export default memo(function Player({ dir = '', files = [] }: Props) {
   const [volume, setVolume] = useState(20);
   const [wait, setWait] = useState(1);
-  const [playlist, setPlaylist] = useState(music.files);
+  const [playlist, setPlaylist] = useState(files);
   const [trackNo, setTrackNo] = useState(0);
   const [player, setPlayer] = useState({
     status: PLAYER.STOPPED,
@@ -39,14 +41,14 @@ export default function Player({
   let t: ReturnType<typeof setTimeout>;
 
   useEffect(() => {
-    shuffle(music.files);
-    setPlaylist(music.files);
+    shuffle(files);
+    setPlaylist(files);
     next();
     return () => {
       setPlayer({ status: PLAYER.STOPPED, isWait: false, pos: 0 });
       clearTimeout(t);
     };
-  }, [music]);
+  }, [dir, files]);
 
   useEffect(() => {
     if (!player.isWait) return;
@@ -60,7 +62,7 @@ export default function Player({
     );
   }, [player]);
 
-  const next = () => setTrackNo((trackNo + 1) % (music.files.length - 1));
+  const next = () => setTrackNo((trackNo + 1) % (files.length - 1));
 
   const handlePeriodChange = (minutes: number) => setWait(minutes);
 
@@ -83,7 +85,7 @@ export default function Player({
   };
 
   const track = playlist[trackNo] || '';
-  const hasTrack = track !== '' && music.files.length > 0;
+  const hasTrack = track !== '' && files.length > 0;
   const trackTitle = track.replace('.mp3', '');
   const trackStatus = player.isWait
     ? `waiting (${wait} m)`
@@ -105,7 +107,7 @@ export default function Player({
       {hasTrack && (
         <>
           <Sound
-            url={buildUrl(music.path, track)}
+            url={buildUrl(dir, track)}
             playStatus={player.status}
             playFromPosition={player.pos}
             volume={volume}
@@ -118,4 +120,4 @@ export default function Player({
       )}
     </div>
   );
-}
+});
