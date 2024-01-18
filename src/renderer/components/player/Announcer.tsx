@@ -2,7 +2,7 @@ import Sound from 'react-sound';
 import { AnnouncementType } from '../../types/Types';
 
 type Announcer = {
-  audio?: { path: string };
+  audioPath: string;
   announcements: Partial<AnnouncementType>[];
   status: PlayStatusType;
   onAnnouncementEnd: () => void;
@@ -14,7 +14,7 @@ const buildUrl = (path: string, track: string) =>
   `media:///${path}/events/${track}`;
 
 export default function Announcer({
-  audio = { path: '' },
+  audioPath = '',
   announcements = [],
   status = 'PLAYING',
   onAnnouncementEnd = () => {},
@@ -23,7 +23,7 @@ export default function Announcer({
 
   return (
     <Sound
-      url={buildUrl(audio.path, `${announcements[0].type}.mp3`)}
+      url={buildUrl(audioPath, `${announcements[0].type}.mp3`)}
       playStatus={status}
       playFromPosition={0}
       volume={30}

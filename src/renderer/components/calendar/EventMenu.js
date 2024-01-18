@@ -27,8 +27,8 @@ class EventMenu extends PureComponent {
   show = (event, data_, type_) => {
     this.setState({
       isOpen: true,
-      x: event.pageX,
-      y: event.pageY,
+      x: event?.pageX,
+      y: event?.pageY,
       type: type_,
       data: data_,
     });
@@ -43,7 +43,11 @@ class EventMenu extends PureComponent {
     const { type, data } = this.state;
 
     const value =
-      type === 'day' ? data.format() : type === 'event' ? data.start.format() : '';
+      type === 'day'
+        ? data.format()
+        : type === 'event'
+        ? data.start.format()
+        : '';
 
     onEventCreate(value);
   };

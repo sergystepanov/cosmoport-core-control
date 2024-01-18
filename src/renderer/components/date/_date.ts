@@ -6,9 +6,15 @@ import moment from 'moment';
  * @since 0.1.0
  */
 export default class _date {
-  // Returns the amount of minutes passed since 00:00 of the date.
-  static toMinutes = (date: Date): number =>
+  // Returns the number of minutes passed since 00:00 of the date.
+  static toMinutes = (date: Date = new Date()): number =>
     moment.duration(`${date.getHours()}:${date.getMinutes()}`).asMinutes();
+
+  // Returns the number of seconds passed since 00:00 of the date.
+  static toSeconds = (date: Date = new Date()): number =>
+    moment
+      .duration(`${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`)
+      .asSeconds();
 
   // Adds given value of minutes to a date.
   static toDate = (minutes: number): Date =>

@@ -1,5 +1,5 @@
 import { ReactNode, useState } from 'react';
-import { Button, Classes, Icon, Popover, Tag } from '@blueprintjs/core';
+import { Button, Icon, Tag } from '@blueprintjs/core';
 
 import GateSchedule from '../components/simulator/GateSchedule';
 import _date from '../components/date/_date';
@@ -7,11 +7,11 @@ import _date from '../components/date/_date';
 import {
   AnnouncementType,
   EventType,
-  SimulationActionType,
   SimulationDataType,
 } from '../types/Types';
 
 import styles from '../components/simulator/Simulator.module.css';
+import { CosmoAction } from '../components/simulator/CosmoportSimulator';
 
 const groupBy = (values: any, prop: any) =>
   values.reduce((a: any, b: any) => {
@@ -25,7 +25,7 @@ type Props = {
   events?: EventType[];
   announcements: Partial<AnnouncementType & { c: number }>[];
   simulation: SimulationDataType;
-  onActionClick: (action: SimulationActionType) => void;
+  onActionClick: (action: CosmoAction) => void;
   onStopAnnounce: () => void;
 };
 
@@ -35,6 +35,7 @@ export default function SimulationContainer({
     active: false,
     ticks: 0,
     actions: [],
+    minutes: 0,
   },
   announcements: ann = [],
   events = [],
@@ -47,10 +48,9 @@ export default function SimulationContainer({
     setShowSchedule(!showSchedule);
   };
 
-  const handleActionClick = (action: SimulationActionType) =>
+  const handleActionClick = (action: CosmoAction) =>
     auth && onActionClick(action);
 
-  const minutes = _date.toMinutes(new Date());
   const hasAnnouncements = ann.length > 0;
 
   let c = 0;
@@ -79,7 +79,7 @@ export default function SimulationContainer({
 
   const groupById = groupBy(
     simulation.actions,
-    ({ event }: SimulationActionType) => event.id,
+    ({ event }: CosmoAction) => event.id,
   );
 
   const actionInfo: ReactNode[] = [];
@@ -91,7 +91,7 @@ export default function SimulationContainer({
 
     line.push(
       <div key={j} className={styles.actionList}>
-        {actions.map((action: SimulationActionType, i: number) => {
+        {actions.map((action: CosmoAction, i: number) => {
           let destination = '';
           if (action.do === 'turn_on_gate') {
             destination = `(G${action.event.gateId}) `;
@@ -99,8 +99,9 @@ export default function SimulationContainer({
             destination = `(G${action.event.gate2Id}) `;
           }
 
-          const time = _date.minutesToHm(action.time);
-          const doneMaybe = action.time < minutes ? styles.done : '';
+          const m = action.time / 60; // convert to minutes
+          const time = _date.minutesToHm(m);
+          const doneMaybe = m < simulation.minutes ? styles.done : '';
 
           return (
             <Tag
@@ -112,7 +113,7 @@ export default function SimulationContainer({
                 onClick: () => handleActionClick(action),
               })}
             >
-              {`${time} ${action.do} ${destination}`}
+              {`${time} ${action.do} ${action.data ?? ''} ${destination}`}
             </Tag>
           );
         })}
@@ -128,18 +129,13 @@ export default function SimulationContainer({
   return (
     <>
       <div className={styles.cap}>
-        <Popover
-          interactionKind="hover"
-          popoverClassName={Classes.POPOVER_CONTENT_SIZING}
-          placement="left-start"
-          content={`Here you can control the system simulation somewhat. Be aware it
-              will change statuses of events. After you enter the password,
-              you can use all the actions.`}
-          renderTarget={({ isOpen, ...targetProps }) => (
-            <span {...targetProps}>
-              <Icon icon="help" style={{ color: '#97a4b7' }} size={20} />
-            </span>
-          )}
+        <Icon
+          icon="help"
+          style={{ color: '#97a4b7' }}
+          size={20}
+          title={`Here you can control the system simulation somewhat.
+          Be aware it will change statuses of events. 
+          After you enter the password, you can use all the actions.`}
         />
       </div>
       <p />
@@ -156,25 +152,22 @@ export default function SimulationContainer({
       <div>
         <span className={styles.strong}>Simulation ticks</span>
         <div className={styles.simulationInfo}>
-          <span>
-            <Icon
-              className={simulation.active ? styles.heart : ''}
-              icon="heart"
-            />
-            {simulation.ticks > 0 && simulation.ticks}
-          </span>
-          <span>{minutes}/1440</span>
-          <div>
-            <Button
-              minimal
-              small
-              icon={showSchedule ? 'caret-down' : 'caret-right'}
-              text="Show schedule infographic"
-              onClick={handleShowScheduleClick}
-            />
-          </div>
+          <Icon
+            className={simulation.active ? styles.heart : ''}
+            icon="heart"
+          />
+          <span>{simulation.minutes}/1440</span>
+          <Button
+            minimal
+            small
+            icon={showSchedule ? 'caret-down' : 'caret-right'}
+            text="Show schedule infographic"
+            onClick={handleShowScheduleClick}
+          />
         </div>
-        {showSchedule && <GateSchedule events={events} minutes={minutes} />}
+        {showSchedule && (
+          <GateSchedule events={events} minutes={simulation.minutes} />
+        )}
         <p />
         <span className={styles.strong}>Event list</span>
         <div>{actionInfo}</div>

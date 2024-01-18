@@ -156,7 +156,6 @@ export default function MainPage({
     start: moment.Moment;
     end: moment.Moment;
   }) => {
-    console.log('calendar');
     const start = dates.start.format('YYYY-MM-DD');
     const end = dates.end.format('YYYY-MM-DD');
     refreshEventsData(start, end);
@@ -172,8 +171,6 @@ export default function MainPage({
         translation: locale,
       })
     : null;
-
-  console.log(hasData, 'render');
 
   return hasData ? (
     <>

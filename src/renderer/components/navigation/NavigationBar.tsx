@@ -1,30 +1,23 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 
-import {
-  Alignment,
-  Tooltip,
-  Position,
-  Colors,
-  Navbar,
-} from '@blueprintjs/core';
+import { Alignment, Colors, Navbar } from '@blueprintjs/core';
 import { Exchange, Lock, Unlock, Translate } from '@blueprintjs/icons';
 
-import ServerTime from '../time/ServerTime';
 import Player from '../player/Player';
 
 type NavBar = {
   auth?: boolean;
   audio?: {
-    path: string;
-    files: string[];
+    dir: string;
+    mp3s: string[];
   };
   nodes?: {
     timetables: number;
     gates: number;
   };
-  timestamp?: number;
   simulation: boolean;
+  clock: React.JSX.Element;
 };
 
 type Navigate = {
@@ -42,10 +35,10 @@ function Navigate({ to, icon }: Navigate) {
 
 export default function NavigationBar({
   auth = false,
-  audio = { path: '', files: [] },
+  audio = { dir: '', mp3s: [] },
   nodes = { timetables: 0, gates: 0 },
-  timestamp = 0,
   simulation = false,
+  clock,
 }: NavBar) {
   return (
     <Navbar style={{ cursor: 'default', position: 'fixed' }}>
@@ -71,23 +64,17 @@ export default function NavigationBar({
         </>
       </Navbar.Group>
       <Navbar.Group align={Alignment.RIGHT}>
-        <Player music={audio} />
+        <Player dir={audio.dir} files={audio.mp3s} />
         <Navbar.Divider />
         <>{`${nodes.timetables}/${nodes.gates}`}</>
         <Navbar.Divider />
-        <Tooltip
-          content={`Simulation is ${simulation ? 'ON' : 'OFF'}`}
-          position={Position.BOTTOM}
-        >
-          <Exchange
-            size={18}
-            color={simulation ? Colors.GREEN4 : Colors.LIGHT_GRAY1}
-          />
-        </Tooltip>
+        <Exchange
+          size={18}
+          color={simulation ? Colors.GREEN4 : Colors.LIGHT_GRAY1}
+          title={`Simulation is ${simulation ? 'ON' : 'OFF'}`}
+        />
         <Navbar.Divider />
-        <Tooltip content="Server time" position={Position.BOTTOM}>
-          <ServerTime timestamp={timestamp} />
-        </Tooltip>
+        {clock}
       </Navbar.Group>
     </Navbar>
   );

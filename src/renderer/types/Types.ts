@@ -1,3 +1,5 @@
+import { CosmoAction } from '../components/simulator/CosmoportSimulator';
+
 /** Used for passing configuration from the main process (system) into renderer. */
 export type AppResourcesType = {
   /** Contains audio track list information. */
@@ -136,13 +138,8 @@ export type RefsType = {
 export type SimulationDataType = {
   active: boolean;
   ticks: number;
-  actions: SimulationActionType[];
-};
-
-export type SimulationActionType = {
-  event: EventType;
-  time: number;
-  do: string;
+  actions: CosmoAction[];
+  minutes: number;
 };
 
 export type BusinessHoursType = {

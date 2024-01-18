@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { MemoryRouter as Router, Routes, Route } from 'react-router-dom';
 
 import { Button, FocusStyleManager } from '@blueprintjs/core';
@@ -14,11 +14,14 @@ import Translation from './TranslationContainer';
 import Settings from './SettingsContainer';
 import Lock from './LockContainer';
 import Unlock from './UnlockContainer';
-import Simulator from '../components/simulator/Simulator';
 import EventMapper from '../components/mapper/EventMapper';
 import _date from '../components/date/_date';
 import Message from '../components/messages/Message';
 import { defaultBusiness } from '../components/simulator/Defaults';
+
+import CosmoportSimulator, {
+  CosmoAction,
+} from '../components/simulator/CosmoportSimulator';
 
 import './app.global.css';
 import styles from './App.module.css';
@@ -26,9 +29,10 @@ import {
   AnnouncementType,
   BusinessHoursType,
   EventType,
-  SimulationActionType,
   SimulationDataType,
 } from '../types/Types';
+import ServerTime from '../components/time/ServerTime';
+import { Clock } from '../components/time/Clock';
 
 FocusStyleManager.onlyShowFocusOnTabs();
 
@@ -42,20 +46,12 @@ type Props = {
 };
 
 type State = {
-  auth?: boolean;
-  audio2?: { path: string; files: string[] };
   boarding?: number;
-  bs: BusinessHoursType;
-  events?: EventType[];
+  events: EventType[];
   nodes?: {
     gates: number;
     timetables: number;
   };
-  serverIsDown?: boolean;
-  timestamp?: number;
-  simulation: SimulationDataType;
-  simulationAnnouncements: Partial<AnnouncementType & { c: number }>[];
-  simulationAnnouncementsPlay: PlayStatusType;
 };
 
 export default function App({
@@ -64,43 +60,47 @@ export default function App({
   audio = { dir: '', mp3s: [] },
 }: Props) {
   const [state, setState] = useState<State>({
-    timestamp: 0,
     nodes: { gates: 0, timetables: 0 },
     boarding: 10,
-    bs: {
-      start: 0,
-      end: 0,
-      non: false,
-    },
     events: [],
-    audio2: { path: audio.dir, files: audio.mp3s },
-    serverIsDown: false,
-    simulationAnnouncements: [],
-    simulationAnnouncementsPlay: 'PLAYING',
-    simulation: {
-      active: true,
-      actions: [],
-      ticks: 0,
-    },
-    auth: false,
   });
 
-  api.onServerUnavailable = () => {
-    setState({ ...state, serverIsDown: true });
-  };
+  const [auth, setAuth] = useState(false);
+  const [announcement, setAnnouncement] = useState<{
+    queue: Partial<AnnouncementType & { c: number }>[];
+    status: PlayStatusType;
+  }>({
+    queue: [],
+    status: 'PLAYING',
+  });
+  const [isDown, setIsDown] = useState(false);
+
+  const [simulation, setSimulation] = useState<SimulationDataType>({
+    active: false,
+    actions: [],
+    ticks: 0,
+    minutes: 0,
+  });
+
+  // Does my waiting howl?
+  let simulacra: ReturnType<typeof CosmoportSimulator>;
+
+  // Time, alone we bide our time
+  const clock = useMemo(() => Clock({ rate: 1000 }), []);
+
+  api.onServerUnavailable = () => setIsDown(true);
 
   socket.onMessage = (message) => {
     console.debug(message);
     if (message === ':update-nodes:') {
       api
         .fetchNodes()
-        .then((data) => setState({ ...state, nodes: data }))
+        .then((data) => setState((s) => ({ ...s, nodes: data })))
         .catch(console.error);
     }
   };
 
   const getData = () => {
-    const { simulation } = state;
     const today = _date.current();
 
     Promise.all([
@@ -124,22 +124,37 @@ export default function App({
           (setting) => setting.param === 'business_hours',
         )?.value;
         const todayBs = business ? JSON.parse(business) : defaultBusiness;
-        const dayBs = todayBs.hours[(new Date().getDay() + 6) % 7];
+        const dayBs: BusinessHoursType =
+          todayBs.hours[(new Date().getDay() + 6) % 7];
 
-        setState({
-          ...state,
-          timestamp: time.timestamp,
+        const curMinutes = _date.toMinutes(new Date(time.timestamp * 1000));
+
+        clock.timestamp = time.timestamp * 1000;
+
+        if (simulacra) {
+          simulacra.events = events;
+          simulacra.business = dayBs.non ? null : [dayBs.start, dayBs.end];
+          simulacra.reset(curMinutes);
+        }
+
+        setSimulation({
+          active:
+            !dayBs.non &&
+            curMinutes >= dayBs.start &&
+            (dayBs.end === 0 || curMinutes <= dayBs.end),
+          minutes: curMinutes,
+          ticks: simulacra.ticks,
+          actions: simulacra.actions,
+        });
+
+        setState((s) => ({
+          ...s,
           nodes: nodes_,
           events: events,
           boarding: boardingTime,
-          bs: dayBs,
-          simulation: {
-            active: simulation.active,
-            actions: simulatorRef.current?.scheduleActions(events),
-            ticks: simulation.ticks,
-          },
-          serverIsDown: false,
-        });
+        }));
+
+        setIsDown(false);
 
         return 1;
       })
@@ -148,29 +163,30 @@ export default function App({
 
   useEffect(() => {
     getData();
+    return () => {
+      clock.stop();
+      simulacra.stop();
+    };
   }, []);
 
-  const simulatorRef = useRef<Simulator | null>(null);
-
-  const handleAnnouncement = (ann: AnnouncementType) => {
-    setState({
-      ...state,
-      simulationAnnouncementsPlay: 'PLAYING',
-      simulationAnnouncements: state.simulationAnnouncements.concat(ann),
-    });
-    console.info('announcement', ann.type);
+  const handleAnnouncement = (action: CosmoAction) => {
+    setAnnouncement((s) => ({
+      status: 'PLAYING',
+      queue: s.queue.concat({
+        id: action.event.id,
+        time: new Date().getTime(),
+        type: action.data,
+      }),
+    }));
   };
 
   const handleAnnouncementEnd = () => {
-    if (state.simulationAnnouncements.length > 0) {
-      // Remove last announcement
-      setState({
-        ...state,
-        simulationAnnouncements: state.simulationAnnouncements.filter(
-          (_, i) => i !== 0,
-        ),
-      });
-    }
+    announcement.queue.length > 0 &&
+      setAnnouncement((s) => ({
+        ...s,
+        // remove last announcement
+        queue: s.queue.filter((_, i) => i !== 0),
+      }));
   };
 
   const handlePassword = (pass: string) => {
@@ -178,7 +194,7 @@ export default function App({
       .authWith({ pwd: pass })
       .then((response) => {
         if (response.result) {
-          setState({ ...state, auth: true });
+          setAuth(true);
           Message.show('Access was granted.');
         }
         return 1;
@@ -187,29 +203,19 @@ export default function App({
   };
 
   const handleLogout = () => {
-    setState({ ...state, auth: false });
+    setAuth(false);
     Message.show('Access was revoked.');
   };
 
-  const handleStatusChange = (action: SimulationActionType) => {
-    console.info('status', action);
-    setEventStatus(action.event, action);
+  const handleStatusChange = (action: CosmoAction) => {
+    setEventStatus(action);
   };
 
-  const setEventStatus = (event: EventType, action: SimulationActionType) => {
-    // Be careful with these values
-    const statusIdMap = {
-      set_status_boarding: 2,
-      set_status_departed: 3,
-      show_return: 4,
-      set_status_returned: 5,
-    }[action.do];
+  const setEventStatus = (action: CosmoAction) => {
+    if (!action.do || !action.event.eventStatusId) return;
 
-    if (!statusIdMap) return;
-
-    const ev = event;
-    ev.eventStatusId = statusIdMap;
-    const modifiedEvent = EventMapper.unmap(ev);
+    const { event } = action;
+    const modifiedEvent = EventMapper.unmap(event);
 
     api
       .updateEvent(modifiedEvent)
@@ -219,66 +225,68 @@ export default function App({
       .catch(console.error);
   };
 
-  const handleTurnGateOn = (action: SimulationActionType) => {
-    console.info('gateOn', action);
-    fireUpTheGate(action.event, 'before_departion');
-  };
-
-  const fireUpTheGate = (evt: EventType, tpy: string) => {
+  const fireUpTheGate = (evt: EventType | undefined, tpy: string) => {
     api
       .proxy({ name: 'fire_gate', event: evt, type: tpy })
-      .then(() => Message.show(`Firing up the Gate #${evt.gateId}.`))
+      .then(() => Message.show(`Firing up the Gate #${evt?.gateId}.`))
       .catch(console.error);
   };
 
-  const handleArchive = (action: SimulationActionType) => {
-    console.info('archive', action);
-  };
+  const handleStopAnnounce = () =>
+    setAnnouncement({ queue: [], status: 'STOPPED' });
 
-  const handleReturn = (action: SimulationActionType) => {
-    console.info('return', action);
-    setEventStatus(action.event, action);
-    fireUpTheGate(action.event, 'before_return');
-  };
-
-  const handleAction = (action: SimulationActionType) => {
-    simulatorRef.current?.doIt(action);
-  };
-
-  const handleStopAnnounce = () => {
-    setState({
-      ...state,
-      simulationAnnouncements: [],
-      simulationAnnouncementsPlay: 'STOPPED',
-    });
-  };
-
-  const handleSimulationTick = (simulation: SimulationDataType) => {
-    setState({ ...state, simulation: simulation });
+  const handleSimulationTick = (t: number, a?: boolean) => {
+    console.debug(t, a);
+    const curMinutes = _date.toMinutes(new Date(clock.timestamp));
+    setSimulation((s) => ({
+      ...s,
+      ticks: t,
+      active: !!a,
+      minutes: curMinutes,
+    }));
   };
 
   const handleRefresh = () => getData();
 
-  const handleActionsUpdate = (actions_: SimulationActionType[]) => {
-    if (actions_ !== state.simulation.actions) {
-      const newSimulation = { ...state.simulation, actions: actions_ };
-      setState({ ...state, simulation: newSimulation });
+  const handleAction = (a: CosmoAction) => {
+    console.info(a.do, a);
+    switch (a.do) {
+      case 'archive':
+        break;
+      case 'play_sound':
+        handleAnnouncement(a);
+        break;
+      case 'set_status':
+        handleStatusChange(a);
+        break;
+      case 'show_return':
+        setEventStatus(a);
+        fireUpTheGate(a.event, 'before_return');
+        break;
+      case 'turn_on_gate':
+        fireUpTheGate(a.event, 'before_departion');
+        break;
     }
   };
 
-  const {
-    auth,
-    boarding,
-    bs,
-    events: events_,
-    serverIsDown,
-    simulation: sim,
-    simulationAnnouncements: sa,
-    simulationAnnouncementsPlay: playStatus,
-    timestamp,
-    nodes,
-    audio2,
-  } = state;
+  simulacra = useMemo(() => {
+    const s = CosmoportSimulator({
+      clock,
+      onAction: handleAction,
+      onTick: handleSimulationTick,
+    });
+    s.onOverlap = () => {
+      console.log('overlap');
+      handleRefresh();
+    };
+    s.events = state.events;
+    s.start();
+    return s;
+  }, []);
+
+  console.log('render app');
+
+  const { boarding, events: events_, nodes } = state;
 
   const commonProps = {
     api,
@@ -287,25 +295,9 @@ export default function App({
     onRefresh: handleRefresh,
   };
 
-  // TODO fix simulation
-
   return (
     <>
-      <Simulator
-        ref={simulatorRef}
-        events={events_}
-        boarding={boarding}
-        business={bs}
-        onAnnouncement={handleAnnouncement}
-        onStatusChange={handleStatusChange}
-        onTurnGateOn={handleTurnGateOn}
-        onArchive={handleArchive}
-        onReturn={handleReturn}
-        onSimulationTick={handleSimulationTick}
-        onNewDay={handleRefresh}
-        onActionsUpdate={handleActionsUpdate}
-      />
-      {serverIsDown ? (
+      {isDown ? (
         <>
           {'Server is not available :('}
           <Button
@@ -318,56 +310,54 @@ export default function App({
       ) : (
         <>
           <Announcer
-            audio={audio2}
-            status={playStatus}
-            announcements={sa}
+            audioPath={audio.dir}
+            status={announcement.status}
+            announcements={announcement.queue}
             onAnnouncementEnd={handleAnnouncementEnd}
           />
           <Router>
-            <div className="bp5-ui-text">
-              <div className={styles.container}>
-                <NavigationBar
-                  timestamp={timestamp}
-                  nodes={nodes}
-                  audio={audio2}
-                  auth={auth}
-                  simulation={sim.active}
-                />
-                <div className={styles.content}>
-                  <Routes>
-                    <Route path="/" element={<MainPage {...commonProps} />} />
-                    <Route
-                      path="/simulation"
-                      element={
-                        <Simulation
-                          simulation={sim}
-                          announcements={sa}
-                          onActionClick={handleAction}
-                          onStopAnnounce={handleStopAnnounce}
-                          events={events_}
-                          {...commonProps}
-                        />
-                      }
-                    />
-                    <Route
-                      path="/translation"
-                      element={<Translation {...commonProps} />}
-                    />
-                    <Route path="/table" element={<Table {...commonProps} />} />
-                    <Route
-                      path="/login"
-                      element={<Unlock onAuth={handlePassword} />}
-                    />
-                    <Route
-                      path="/logout"
-                      element={<Lock onDeAuth={handleLogout} />}
-                    />
-                    <Route
-                      path="/settings"
-                      element={<Settings {...commonProps} />}
-                    />
-                  </Routes>
-                </div>
+            <div className={styles.container}>
+              <NavigationBar
+                nodes={nodes}
+                audio={audio}
+                auth={auth}
+                simulation={simulation.active}
+                clock={<ServerTime clock={clock} />}
+              />
+              <div className={styles.content}>
+                <Routes>
+                  <Route path="/" element={<MainPage {...commonProps} />} />
+                  <Route
+                    path="/simulation"
+                    element={
+                      <Simulation
+                        simulation={simulation}
+                        announcements={announcement.queue}
+                        onActionClick={handleAction}
+                        onStopAnnounce={handleStopAnnounce}
+                        events={events_}
+                        {...commonProps}
+                      />
+                    }
+                  />
+                  <Route
+                    path="/translation"
+                    element={<Translation {...commonProps} />}
+                  />
+                  <Route path="/table" element={<Table {...commonProps} />} />
+                  <Route
+                    path="/login"
+                    element={<Unlock onAuth={handlePassword} />}
+                  />
+                  <Route
+                    path="/logout"
+                    element={<Lock onDeAuth={handleLogout} />}
+                  />
+                  <Route
+                    path="/settings"
+                    element={<Settings {...commonProps} />}
+                  />
+                </Routes>
               </div>
             </div>
           </Router>
