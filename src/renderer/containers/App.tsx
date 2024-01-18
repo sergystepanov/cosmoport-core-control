@@ -33,6 +33,7 @@ import {
 } from '../types/Types';
 import ServerTime from '../components/time/ServerTime';
 import { Clock } from '../components/time/Clock';
+import Player from '../components/player/Player';
 
 FocusStyleManager.onlyShowFocusOnTabs();
 
@@ -319,10 +320,10 @@ export default function App({
             <div className={styles.container}>
               <NavigationBar
                 nodes={nodes}
-                audio={audio}
                 auth={auth}
                 simulation={simulation.active}
                 clock={<ServerTime clock={clock} />}
+                player={<Player dir={audio.dir} files={audio.mp3s} />}
               />
               <div className={styles.content}>
                 <Routes>

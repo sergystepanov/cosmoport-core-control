@@ -1,32 +1,26 @@
+import { useCallback, memo } from 'react';
 import { Button, NumericInput, Intent } from '@blueprintjs/core';
 
 import styles from './Player.module.css';
 
-const nop = () => ({});
-
 type Props = {
   isPlaying: boolean;
-  onNext: () => void;
-  onPause: () => void;
+  onEvent?: (op: string) => void;
   onPeriodChange: (minutes: number) => void;
-  onPlay: () => void;
-  onStop: () => void;
-  onVolumeDown: () => void;
-  onVolumeUp: () => void;
   period: number;
 };
 
-export default function PlayerControls({
+export default memo(function PlayerControls({
   period = 0,
   isPlaying = false,
-  onPeriodChange = nop,
-  onNext = nop,
-  onPlay = nop,
-  onStop = nop,
-  onPause = nop,
-  onVolumeDown = nop,
-  onVolumeUp = nop,
+  onEvent = () => {},
+  onPeriodChange = () => {},
 }: Props) {
+  const onClick = useCallback((e: any) => {
+    const { op } = e.currentTarget.dataset;
+    onEvent(op);
+  }, []);
+
   return (
     <div className={styles.controls}>
       <div className={styles.periodBlock}>
@@ -34,22 +28,23 @@ export default function PlayerControls({
           title="Here you can set a delay in minutes between tacks."
           className={styles.number}
           buttonPosition="none"
-          value={period}
+          placeholder={period + ''}
           onValueChange={onPeriodChange}
         />
         <span>m</span>
       </div>
-      <Button minimal icon="step-forward" onClick={onNext} />
+      <Button minimal icon="step-forward" data-op="next" onClick={onClick} />
       <Button
         minimal
         intent={isPlaying ? Intent.WARNING : Intent.NONE}
         icon="play"
-        onClick={onPlay}
+        data-op="play"
+        onClick={onClick}
       />
-      <Button minimal icon="stop" onClick={onStop} />
-      <Button minimal icon="pause" onClick={onPause} />
-      <Button minimal icon="volume-down" onClick={onVolumeDown} />
-      <Button minimal icon="volume-up" onClick={onVolumeUp} />
+      <Button minimal icon="stop" data-op="stop" onClick={onClick} />
+      <Button minimal icon="pause" data-op="pause" onClick={onClick} />
+      <Button minimal icon="volume-down" data-op="vol-" onClick={onClick} />
+      <Button minimal icon="volume-up" data-op="vol+" onClick={onClick} />
     </div>
   );
-}
+});

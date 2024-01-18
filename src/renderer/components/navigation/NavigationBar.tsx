@@ -4,19 +4,14 @@ import { NavLink } from 'react-router-dom';
 import { Alignment, Colors, Navbar } from '@blueprintjs/core';
 import { Exchange, Lock, Unlock, Translate } from '@blueprintjs/icons';
 
-import Player from '../player/Player';
-
 type NavBar = {
   auth?: boolean;
-  audio?: {
-    dir: string;
-    mp3s: string[];
-  };
   nodes?: {
     timetables: number;
     gates: number;
   };
   simulation: boolean;
+  player: React.JSX.Element;
   clock: React.JSX.Element;
 };
 
@@ -35,10 +30,10 @@ function Navigate({ to, icon }: Navigate) {
 
 export default function NavigationBar({
   auth = false,
-  audio = { dir: '', mp3s: [] },
   nodes = { timetables: 0, gates: 0 },
   simulation = false,
   clock,
+  player,
 }: NavBar) {
   return (
     <Navbar style={{ cursor: 'default', position: 'fixed' }}>
@@ -64,7 +59,7 @@ export default function NavigationBar({
         </>
       </Navbar.Group>
       <Navbar.Group align={Alignment.RIGHT}>
-        <Player dir={audio.dir} files={audio.mp3s} />
+        {player}
         <Navbar.Divider />
         <>{`${nodes.timetables}/${nodes.gates}`}</>
         <Navbar.Divider />

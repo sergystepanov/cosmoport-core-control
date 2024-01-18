@@ -1,4 +1,4 @@
-import { useState, useEffect, memo } from 'react';
+import { useCallback, useState, useEffect, memo } from 'react';
 import Sound from 'react-sound';
 
 import PlayerControls from './PlayerControls';
@@ -40,6 +40,8 @@ export default memo(function Player({ dir = '', files = [] }: Props) {
 
   let t: ReturnType<typeof setTimeout>;
 
+  const next = () => setTrackNo((t) => (t + 1) % (files.length - 1));
+
   useEffect(() => {
     shuffle(files);
     setPlaylist(files);
@@ -62,27 +64,42 @@ export default memo(function Player({ dir = '', files = [] }: Props) {
     );
   }, [player]);
 
-  const next = () => setTrackNo((trackNo + 1) % (files.length - 1));
+  const handlePeriodChange = useCallback(
+    (minutes: number) => setWait(minutes),
+    [],
+  );
 
-  const handlePeriodChange = (minutes: number) => setWait(minutes);
-
-  const handleFinish = () => {
+  const onFinishPlay = useCallback(() => {
     setPlayer({ ...player, status: PLAYER.STOPPED, isWait: true });
-  };
+  }, []);
 
-  const handlePlay = () => {
-    setPlayer({ ...player, status: PLAYER.PLAYING, isWait: false });
-  };
-
-  const handleStop = () => {
-    clearTimeout(t);
-    setPlayer({ status: PLAYER.STOPPED, isWait: false, pos: 0 });
-  };
-
-  const handlePause = () => {
-    clearTimeout(t);
-    setPlayer({ ...player, status: PLAYER.PAUSED, isWait: false });
-  };
+  const handleEvent = useCallback((op: string) => {
+    switch (op) {
+      case 'next':
+        next();
+        break;
+      case 'finish':
+        onFinishPlay();
+        break;
+      case 'pause':
+        clearTimeout(t);
+        setPlayer({ ...player, status: PLAYER.PAUSED, isWait: false });
+        break;
+      case 'play':
+        setPlayer({ ...player, status: PLAYER.PLAYING, isWait: false });
+        break;
+      case 'stop':
+        clearTimeout(t);
+        setPlayer({ status: PLAYER.STOPPED, isWait: false, pos: 0 });
+        break;
+      case 'vol+':
+        setVolume((vol) => (vol >= 100 ? vol : vol + 10));
+        break;
+      case 'vol-':
+        setVolume((vol) => (vol <= 0 ? vol : vol - 10));
+        break;
+    }
+  }, []);
 
   const track = playlist[trackNo] || '';
   const hasTrack = track !== '' && files.length > 0;
@@ -95,12 +112,7 @@ export default memo(function Player({ dir = '', files = [] }: Props) {
     <div className={`${styles.centred} ${styles.overlay}`}>
       <PlayerControls
         isPlaying={player.status === PLAYER.PLAYING}
-        onNext={next}
-        onPlay={handlePlay}
-        onPause={handlePause}
-        onStop={handleStop}
-        onVolumeUp={() => setVolume(volume >= 100 ? volume : volume + 10)}
-        onVolumeDown={() => setVolume(volume <= 0 ? volume : volume - 10)}
+        onEvent={handleEvent}
         period={wait}
         onPeriodChange={handlePeriodChange}
       />
@@ -111,7 +123,7 @@ export default memo(function Player({ dir = '', files = [] }: Props) {
             playStatus={player.status}
             playFromPosition={player.pos}
             volume={volume}
-            onFinishedPlaying={handleFinish}
+            onFinishedPlaying={onFinishPlay}
           />
           <div title={track} className={`${styles.centred} ${styles.player}`}>
             {`Track ${trackTitle} is ${trackStatus}`}
