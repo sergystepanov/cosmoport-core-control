@@ -19,6 +19,8 @@ export interface ClockOpts {
    * Contains current UTC timestamp in milliseconds
    * that will be incremented with each clock tick.
    *
+   * Be aware the it is incremented by the fixed value of 1000ms each clock tick.
+   *
    * @default local Date as UTC+0
    */
   timestamp?: number;

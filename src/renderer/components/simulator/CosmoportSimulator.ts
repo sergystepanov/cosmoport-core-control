@@ -14,7 +14,11 @@ export type CosmoActionType =
 export interface CosmoAction extends Action<CosmoActionType> {
   /** Event reference. */
   event: EventType;
-  /** The trigger time of the action in seconds since midnight. */
+
+  /**
+   * The trigger time of the action in seconds since midnight.
+   * Should use the local time.
+   **/
   time: number;
 }
 
@@ -46,8 +50,14 @@ export default function CosmoportSimulator({
     actions.length > 0 && actions.forEach((a) => onAction(a));
 
     // trunc ms timestamp to a unix-like timestamp
-    // we are losing milliseconds from the initial clock timestamp param
+    // we are losing milliseconds from the initial and current clock timestamp param
     // 1705555555[281]
+    //
+    // it is needed for precise clock.timestamp comparisons since
+    // the internal clock can only change in the increments of 1000,
+    // so with the initial clock timestamp skew (non-zero ms)
+    // it will be impossible to do modulo ops reliably
+    //
     const unix = Math.trunc(clock.timestamp / 1000);
 
     // call a tick callback only when 60 pseudo-seconds have passed
