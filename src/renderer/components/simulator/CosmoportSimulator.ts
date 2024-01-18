@@ -42,13 +42,21 @@ export default function CosmoportSimulator({
 
   simulator.queue = [];
   simulator.onTick = (actions, t, s) => {
+    // poll all available actions with the highest resolution (clock rate)
     actions.length > 0 && actions.forEach((a) => onAction(a));
 
+    // trunc ms timestamp to a unix-like timestamp
+    // we are losing milliseconds from the initial clock timestamp param
+    // 1705555555[281]
     const unix = Math.trunc(clock.timestamp / 1000);
+
+    // call a tick callback only when 60 pseudo-seconds have passed
     if (!(t === 0 || unix % sec === 0)) return;
 
-    const secSinceMidnight = _date.toSeconds(new Date(clock.timestamp));
-    onTick(secSinceMidnight / sec, s);
+    // we use the local time (GMT+3 or something) for
+    // seconds since midnight calculations
+    // instead of a simple unix % 86400 (UTC+0)
+    onTick(_date.toSeconds(new Date(unix * 1000)) / sec, s);
   };
 
   const schedule = (events: EventType[]) =>

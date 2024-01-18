@@ -5,7 +5,7 @@ describe('Test Cosmoport simulator', () => {
   it('should run', async () => {
     let tick = 0;
     let hadActions = false;
-    const clock = Clock({ rate: 1, timestamp: 946760399000 });
+    const clock = Clock({ rate: 1 });
     const cs = CosmoportSimulator({
       clock,
       onAction: () => (hadActions = true),
