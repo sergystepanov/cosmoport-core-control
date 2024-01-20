@@ -87,7 +87,7 @@ export default function App({
   let simulacra: ReturnType<typeof CosmoportSimulator>;
 
   // Time, alone we bide our time
-  const clock = useMemo(() => Clock({ rate: 1000 }), []);
+  let clock = useMemo(() => Clock({ rate: 1000 }), []);
 
   api.onServerUnavailable = () => setIsDown(true);
 
@@ -270,6 +270,11 @@ export default function App({
     }
   };
 
+  const handleClockRateChange = (x: number) => {
+    // setClockRate(1000 / x);
+    clock.rate = x;
+  };
+
   simulacra = useMemo(() => {
     const s = CosmoportSimulator({
       clock,
@@ -335,6 +340,7 @@ export default function App({
                         simulation={simulation}
                         announcements={announcement.queue}
                         onActionClick={handleAction}
+                        onClockRateChange={handleClockRateChange}
                         onStopAnnounce={handleStopAnnounce}
                         events={events_}
                         {...commonProps}

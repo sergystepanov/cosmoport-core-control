@@ -32,18 +32,30 @@ export function Clock({
   manual = false,
 }: ClockOpts) {
   let t = 0;
+  let clockRate = rate;
   let done: any = () => {};
   const sub = PubSub<number>();
   const wait = new Promise((resolve) => (done = resolve));
 
-  const ticker = !manual
+  let ticker = !manual
     ? setInterval(() => {
         sub.pub('tick', t++);
         timestamp += 1000;
-      }, rate)
+      }, clockRate)
     : 0;
 
   return {
+    get rate() {
+      return clockRate;
+    },
+    set rate(rate: number) {
+      clockRate = rate;
+      clearInterval(ticker);
+      ticker = setInterval(() => {
+        sub.pub('tick', t++);
+        timestamp += 1000;
+      }, clockRate);
+    },
     get timestamp() {
       return timestamp;
     },

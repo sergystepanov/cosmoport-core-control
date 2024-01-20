@@ -1,5 +1,5 @@
 import { ReactNode, useCallback, useMemo, useState } from 'react';
-import { Button, Icon, Tag } from '@blueprintjs/core';
+import { Button, Icon, Slider, Tag } from '@blueprintjs/core';
 
 import GateSchedule from '../components/simulator/GateSchedule';
 import _date from '../components/date/_date';
@@ -27,6 +27,7 @@ type Props = {
   simulation: SimulationDataType;
   onActionClick: (action: CosmoAction) => void;
   onStopAnnounce: () => void;
+  onClockRateChange: (x: number) => void;
 };
 
 export default function SimulationContainer({
@@ -41,8 +42,10 @@ export default function SimulationContainer({
   events = [],
   onActionClick = () => {},
   onStopAnnounce = () => {},
+  onClockRateChange = () => {},
 }: Props) {
   const [showSchedule, setShowSchedule] = useState(false);
+  const [speed, setSpeed] = useState(0);
 
   const handleShowScheduleClick = useCallback(
     () => setShowSchedule((s) => !s),
@@ -137,9 +140,31 @@ export default function SimulationContainer({
     [],
   );
 
+  const renderPercentLabels = (value: number) =>
+    `x${1000 / ((1000 - value) / (value > 0 ? 5 : 1) || 1)}`;
+
   return (
     <>
       {help}
+      <p />
+      <span className={styles.strong}>Simulation speed</span>
+      <div style={{ width: '150px', margin: '10px 0 0 30px' }}>
+        <Slider
+          initialValue={0}
+          stepSize={500}
+          max={1000}
+          min={0}
+          value={speed}
+          labelValues={[0, 500, 1000]}
+          labelRenderer={renderPercentLabels}
+          onChange={(value) => {
+            setSpeed(value);
+          }}
+          onRelease={(value) => {
+            onClockRateChange(1000 - value);
+          }}
+        />
+      </div>
       <p />
       <span className={styles.strong}>Announcements</span>
       <Button
