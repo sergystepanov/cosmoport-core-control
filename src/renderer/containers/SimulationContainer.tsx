@@ -1,4 +1,4 @@
-import { ReactNode, useState } from 'react';
+import { ReactNode, useCallback, useMemo, useState } from 'react';
 import { Button, Icon, Tag } from '@blueprintjs/core';
 
 import GateSchedule from '../components/simulator/GateSchedule';
@@ -44,90 +44,85 @@ export default function SimulationContainer({
 }: Props) {
   const [showSchedule, setShowSchedule] = useState(false);
 
-  const handleShowScheduleClick = () => {
-    setShowSchedule(!showSchedule);
-  };
+  const handleShowScheduleClick = useCallback(
+    () => setShowSchedule((s) => !s),
+    [],
+  );
 
   const handleActionClick = (action: CosmoAction) =>
     auth && onActionClick(action);
 
-  const hasAnnouncements = ann.length > 0;
-
-  let c = 0;
-  const grouped: Partial<AnnouncementType & { c: number }>[] = [];
-  ann.forEach((a) => {
-    const last = grouped[grouped.length - 1];
-    if (!grouped.length || a.id !== last.id || a.type !== last.type) {
-      a.c = c;
-      c = 0;
-      grouped.push(a);
-    } else {
-      // @ts-ignore
-      grouped[grouped.length - 1].c++;
+  // render announcements with the consecutive duplicates display
+  const announcements = useMemo(() => {
+    if (ann.length === 0) return <span>...</span>;
+    const list = [];
+    for (let i = 0, c = 1, k = 0; i < ann.length; i++, ++c) {
+      const a = ann[i],
+        b = ann[i + 1];
+      if (a.id !== b?.id || a.type !== b?.type) {
+        list.push(
+          <span key={k++}>{`#${a.id} ${a.type}${c > 1 ? ' x' + c : ''}`}</span>,
+        );
+        c = 0;
+      }
     }
-  });
+    return list;
+  }, [ann]);
 
-  const announcementList = hasAnnouncements ? (
-    grouped.map((a, i) => (
-      <Tag minimal key={i}>{`#${a.id} ${a.type}${
-        a.c ? ' x' + (a.c + 1) : ''
-      }`}</Tag>
-    ))
-  ) : (
-    <div>...</div>
-  );
+  const actions = useMemo(() => {
+    const actionInfo: ReactNode[] = [];
 
-  const groupById = groupBy(
-    simulation.actions,
-    ({ event }: CosmoAction) => event.id,
-  );
-
-  const actionInfo: ReactNode[] = [];
-
-  Object.keys(groupById).forEach((id, j) => {
-    const line = [];
-    line.push(<div key={`h${j}`}>#{id}</div>);
-    const actions = groupById[id];
-
-    line.push(
-      <div key={j} className={styles.actionList}>
-        {actions.map((action: CosmoAction, i: number) => {
-          let destination = '';
-          if (action.do === 'turn_on_gate') {
-            destination = `(G${action.event.gateId}) `;
-          } else if (action.do === 'show_return') {
-            destination = `(G${action.event.gate2Id}) `;
-          }
-
-          const m = action.time / 60; // convert to minutes
-          const time = _date.minutesToHm(m);
-          const doneMaybe = m < simulation.minutes ? styles.done : '';
-
-          return (
-            <Tag
-              minimal
-              {...(auth && { interactive: true })}
-              className={`${styles.noSelect} ${doneMaybe}`}
-              key={`${j}${i}`}
-              {...(auth && {
-                onClick: () => handleActionClick(action),
-              })}
-            >
-              {`${time} ${action.do} ${action.data ?? ''} ${destination}`}
-            </Tag>
-          );
-        })}
-      </div>,
+    const groupById = groupBy(
+      simulation.actions,
+      ({ event }: CosmoAction) => event.id,
     );
-    actionInfo.push(
-      <div key={`l${j}`} className={styles.actionListRecord}>
-        {line}
-      </div>,
-    );
-  });
+    Object.keys(groupById).forEach((id, j) => {
+      const line = [];
+      line.push(<div key={`h${j}`}>#{id}</div>);
+      const actions = groupById[id];
 
-  return (
-    <>
+      line.push(
+        <div key={j} className={styles.actionList}>
+          {actions.map((action: CosmoAction, i: number) => {
+            let destination = '';
+            if (action.do === 'turn_on_gate') {
+              destination = `(G${action.event.gateId}) `;
+            } else if (action.do === 'show_return') {
+              destination = `(G${action.event.gate2Id}) `;
+            }
+
+            const m = action.time / 60; // convert to minutes
+            const time = _date.minutesToHm(m);
+            const doneMaybe = m < simulation.minutes ? styles.done : '';
+
+            return (
+              <Tag
+                minimal
+                {...(auth && {
+                  interactive: true,
+                  onClick: () => handleActionClick(action),
+                })}
+                className={`${styles.noSelect} ${doneMaybe}`}
+                key={`${j}${i}`}
+              >
+                {`${time} ${action.do} ${action.data ?? ''} ${destination}`}
+              </Tag>
+            );
+          })}
+        </div>,
+      );
+      actionInfo.push(
+        <div key={`l${j}`} className={styles.actionListRecord}>
+          {line}
+        </div>,
+      );
+    });
+
+    return actionInfo;
+  }, [auth, simulation.actions, simulation.minutes]);
+
+  const help = useMemo(
+    () => (
       <div className={styles.cap}>
         <Icon
           icon="help"
@@ -138,6 +133,13 @@ export default function SimulationContainer({
           After you enter the password, you can use all the actions.`}
         />
       </div>
+    ),
+    [],
+  );
+
+  return (
+    <>
+      {help}
       <p />
       <span className={styles.strong}>Announcements</span>
       <Button
@@ -147,7 +149,7 @@ export default function SimulationContainer({
         text="stop all"
         onClick={onStopAnnounce}
       />
-      <div className={styles.announcementInfo}>{announcementList}</div>
+      <div className={styles.announcementInfo}>{announcements}</div>
       <p />
       <div>
         <span className={styles.strong}>Simulation ticks</span>
@@ -170,7 +172,7 @@ export default function SimulationContainer({
         )}
         <p />
         <span className={styles.strong}>Event list</span>
-        <div>{actionInfo}</div>
+        {actions}
       </div>
       <p />
     </>

@@ -7,9 +7,8 @@
 .announcementInfo {
     display: grid;
     grid-template-columns: repeat(8, 8.5em);
-    grid-template-rows: 1em;
-    grid-gap: 5px;
     text-align: center;
+    cursor: default;
 }
 
 .heart {
