@@ -1,8 +1,7 @@
-import React from 'react';
 import { Intent, OverlayToaster, Position } from '@blueprintjs/core';
 
 function Message() {
-  let toaster;
+  let toaster: OverlayToaster | null;
 
   return {
     render() {
@@ -13,8 +12,8 @@ function Message() {
         />
       );
     },
-    show(text, type) {
-      toaster.show({
+    show(text: string, type: string) {
+      toaster?.show({
         message: text,
         intent: type === 'error' ? Intent.DANGER : Intent.SUCCESS,
       });
