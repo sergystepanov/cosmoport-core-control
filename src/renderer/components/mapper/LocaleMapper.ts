@@ -1,5 +1,5 @@
 export default class LocaleMapper {
-  static map = (object) => ({
+  static map = (object: any) => ({
     code: object.code,
     is_default: object.default,
     id: object.id,
@@ -8,7 +8,7 @@ export default class LocaleMapper {
     show_time: object.showTime,
   });
 
-  static unmap = (object) => ({
+  static unmap = (object: any) => ({
     code: object.code,
     default: object.is_default,
     id: object.id,

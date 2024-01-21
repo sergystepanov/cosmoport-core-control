@@ -12,7 +12,7 @@ function Message() {
         />
       );
     },
-    show(text: string, type: string) {
+    show(text: string, type?: string) {
       toaster?.show({
         message: text,
         intent: type === 'error' ? Intent.DANGER : Intent.SUCCESS,

@@ -1,5 +1,5 @@
 export default class EventMapper {
-  static fromForm = (object) => ({
+  static fromForm = (object: any) => ({
     id: object.id || 0,
     contestants: object.bought,
     cost: object.cost,
@@ -16,7 +16,7 @@ export default class EventMapper {
     event_type_id: object.type,
   });
 
-  static unmap = (object) => ({
+  static unmap = (object: any) => ({
     id: object.id || 0,
     event_date: object.eventDate,
     event_type_id: object.eventTypeId,
