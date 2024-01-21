@@ -1,12 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import {
-  Dialog,
-  DialogBody,
-  DialogFooter,
-  Button,
-  Intent,
-} from '@blueprintjs/core';
+import { Dialog, DialogBody, DialogFooter, Button } from '@blueprintjs/core';
 
 import RefsPropType from '../../props/RefsPropType';
 import LocalePropType from '../../props/LocalePropType';
