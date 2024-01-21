@@ -148,13 +148,6 @@ export type BusinessHoursType = {
   non: boolean;
 };
 
-export type MusicListType = {
-  music: {
-    path: string;
-    files: string[];
-  };
-};
-
 export type SettingType = {
   id: number;
   param: string;
