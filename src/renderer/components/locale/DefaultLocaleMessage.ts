@@ -5,10 +5,7 @@ export default function DefaultLocaleMessage(locales: LocaleDescriptionType[]) {
     return '';
   }
 
-  let defaultLocale: LocaleDescriptionType = {
-    code: 'xx',
-    localeDescription: 'N/A',
-  };
+  let defaultLocale: LocaleDescriptionType;
   const rest: LocaleDescriptionType[] = [];
   locales.forEach((locale) => {
     if (!defaultLocale && locale.default) {
@@ -25,5 +22,6 @@ export default function DefaultLocaleMessage(locales: LocaleDescriptionType[]) {
     sep = ', ';
   });
 
+  // @ts-ignore
   return `Default locale is ${defaultLocale.code} (${defaultLocale.localeDescription}) and the rest are ${restText}.`;
 }
