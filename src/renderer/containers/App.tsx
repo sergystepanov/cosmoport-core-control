@@ -68,7 +68,7 @@ export default function App({
 
   const [auth, setAuth] = useState(false);
   const [announcement, setAnnouncement] = useState<{
-    queue: Partial<AnnouncementType & { c: number }>[];
+    queue: AnnouncementType[];
     status: PlayStatusType;
   }>({
     queue: [],
@@ -306,12 +306,7 @@ export default function App({
       {isDown ? (
         <>
           {'Server is not available :('}
-          <Button
-            text="Reload"
-            onClick={() => {
-              getData();
-            }}
-          />
+          <Button text="Reload" onClick={handleRefresh} />
         </>
       ) : (
         <>
