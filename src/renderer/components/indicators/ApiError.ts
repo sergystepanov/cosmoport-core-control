@@ -1,9 +1,13 @@
 import Message from '../../components/messages/Message';
 
-const ApiError = (error) =>
-  Message.show(
+export interface Error {
+  code: string;
+  message: string;
+}
+
+export default function ApiError(error: Error) {
+  return Message.show(
     `Error #${error.code || '000'}: ${error.message || 'No message'}`,
     'error',
   );
-
-export default ApiError;
+}
