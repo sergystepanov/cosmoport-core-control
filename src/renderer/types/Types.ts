@@ -105,11 +105,11 @@ export type LocaleType = {
 
 export type LocaleDescriptionType = {
   code: string;
-  default: boolean;
-  id: number;
+  default?: boolean;
+  id?: number;
   localeDescription: string;
-  show: boolean;
-  showTime: number;
+  show?: boolean;
+  showTime?: number;
 };
 
 export type I18nType = {

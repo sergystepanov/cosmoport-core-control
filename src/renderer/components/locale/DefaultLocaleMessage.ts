@@ -1,10 +1,15 @@
-const DefaultLocaleMessage = (locales) => {
+import { LocaleDescriptionType } from '../../types/Types';
+
+export default function DefaultLocaleMessage(locales: LocaleDescriptionType[]) {
   if (locales.length < 1) {
     return '';
   }
 
-  let defaultLocale = false;
-  const rest = [];
+  let defaultLocale: LocaleDescriptionType = {
+    code: 'xx',
+    localeDescription: 'N/A',
+  };
+  const rest: LocaleDescriptionType[] = [];
   locales.forEach((locale) => {
     if (!defaultLocale && locale.default) {
       defaultLocale = locale;
@@ -21,6 +26,4 @@ const DefaultLocaleMessage = (locales) => {
   });
 
   return `Default locale is ${defaultLocale.code} (${defaultLocale.localeDescription}) and the rest are ${restText}.`;
-};
-
-export default DefaultLocaleMessage;
+}
