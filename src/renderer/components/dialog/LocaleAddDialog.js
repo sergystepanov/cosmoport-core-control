@@ -6,32 +6,44 @@ import LocaleForm from '../form/locale/LocaleForm';
 
 export default class LocaleAddDialog extends Component {
   static propTypes = {
-    callback: PropTypes.func
-  }
+    callback: PropTypes.func,
+  };
 
   static defaultProps = {
-    callback: () => { }
-  }
+    callback: () => {},
+  };
 
   constructor(props) {
     super(props);
 
     this.state = {
-      isOpen: false
+      isOpen: false,
+      code: '',
+      description: '',
     };
   }
 
+  handleChange = (code, description) => {
+    this.setState({
+      ...(code && { code }),
+      ...(description && { description }),
+    });
+  };
+
   passState = () => {
-    this.props.callback(this.form.getFormData());
-  }
+    const { code, description } = this.state;
+    this.props.callback({ code, description });
+  };
 
   toggleDialog = () => {
     this.setState({
-      isOpen: !this.state.isOpen
+      isOpen: !this.state.isOpen,
     });
-  }
+  };
 
   render() {
+    const { code, description } = this.state;
+
     return (
       <Dialog
         iconName="translate"
@@ -41,11 +53,19 @@ export default class LocaleAddDialog extends Component {
         title="Create locale"
       >
         <div className="bp5-dialog-body">
-          <LocaleForm ref={(form) => { this.form = form; }} />
+          <LocaleForm
+            code={code}
+            description={description}
+            onChange={this.handleChange}
+          />
         </div>
         <div className="bp5-dialog-footer">
           <div className="bp5-dialog-footer-actions">
-            <Button intent={Intent.PRIMARY} onClick={this.passState} text="Create" />
+            <Button
+              intent={Intent.PRIMARY}
+              onClick={this.passState}
+              text="Create"
+            />
           </div>
         </div>
       </Dialog>
