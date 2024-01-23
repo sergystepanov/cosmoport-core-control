@@ -1,10 +1,5 @@
 import React, { Component } from 'react';
-import PropTypes from 'prop-types';
 
-import EventPropType from '../../props/EventPropType';
-import RefsPropType from '../../props/RefsPropType';
-import LocalePropType from '../../props/LocalePropType';
-import GatePropType from '../../props/GatePropType';
 import L18n from '../l18n/L18n';
 import DateFiledGroup from './group/DateFieldGroup';
 import TimeFieldGroup from './group/TimeFieldGroup';
@@ -15,19 +10,70 @@ import _date from '../date/_date';
 
 import styles from './EventForm.module.css';
 import TextAreaGroup from './group/TextAreaGroup';
+import {
+  EventType,
+  EventTypeType,
+  GateType,
+  LocaleType,
+  RefsType,
+} from '../../types/Types';
+import { JSX } from 'react/jsx-runtime';
+
+type Props = {
+  forCreate?: boolean;
+  event?: EventType;
+  refs: RefsType;
+  locale: LocaleType;
+  gates: GateType[];
+  date?: string;
+};
+
+type State = {
+  id: number;
+  // The day of the event
+  date: string;
+  // Start minute of the event (in minutes)
+  time: number;
+  // Duration of the event (in minutes)
+  duration: number;
+  limit: number;
+  bought: number;
+  category: number;
+  subcategory: number;
+  tree: boolean;
+  type: number;
+  destination: number;
+  gate: number;
+  gate2: number;
+  status: number;
+  state: number;
+  cost: number;
+  repeat_interval: number;
+  default_duration: number;
+  default_repeat_interval: number;
+  default_cost: number;
+};
 
 /**
  * The class for event properties form.
  *
  * @since 0.1.0
  */
-export default class EventForm extends Component {
-  constructor(props) {
+export default class EventForm extends Component<Props, State> {
+  private readonly validators: {
+    [index: string]: () => string;
+  };
+  private readonly warnings: {
+    [index: string]: () => string;
+  };
+
+  constructor(props: Props) {
     super(props);
 
     this.state = {
+      id: 0,
       // The day of the event
-      date: _date.toYmd(new Date()),
+      date: props.date || _date.toYmd(new Date()),
       // Start minute of the event (in minutes)
       time: 0,
       // Duration of the event (in minutes)
@@ -53,10 +99,6 @@ export default class EventForm extends Component {
     // Overrides initial data with passed in parameters
     if (props.event) {
       this.fillState(props.event);
-    }
-
-    if (props.date) {
-      this.state.date = props.date;
     }
 
     this.validators = {
@@ -95,7 +137,7 @@ export default class EventForm extends Component {
   }
 
   // fill fields with default values
-  defaults_set = (data) =>
+  defaults_set = (data: EventTypeType) =>
     this.setState({
       cost: data.defaultCost,
       duration: data.defaultDuration,
@@ -106,18 +148,17 @@ export default class EventForm extends Component {
     });
 
   // get type's data from a repository
-  defaults_fill = (value) => {
-    const eventTypeData = this.findEventTypeData(value) || {
-      defaultDuration: 0,
-      defaultRepeatInterval: 0,
-      defaultCost: 0,
-    };
-
-    this.defaults_set(eventTypeData);
+  defaults_fill = (value: number) => {
+    const eventTypeData = this.findEventTypeData(value);
+    eventTypeData && this.defaults_set(eventTypeData);
   };
 
   defaults_reset = () =>
     this.defaults_set({
+      id: 0,
+      categoryId: 0,
+      i18nEventTypeDescription: 0,
+      i18nEventTypeName: 0,
       defaultDuration: 0,
       defaultRepeatInterval: 0,
       defaultCost: 0,
@@ -126,20 +167,20 @@ export default class EventForm extends Component {
   /**
    * Returns all form's field mapped values.
    *
-   * @return {Object} The form field values.
+   * @return The form field values.
    * @since 0.1.0
    */
-  getFormData = () => {
-    const data = Object.assign(this.state, {
-      date: _date.toYmd(this.state.date),
+  getFormData = (): object => {
+    return {
+      ...this.state,
+      date: this.state.date,
       valid: this.isValid(),
-    });
-
-    if (this.state.subcategory) {
-      data.type = this.state.subcategory;
-    }
-
-    return data;
+      ...{
+        ...(this.state.subcategory && {
+          type: this.state.subcategory,
+        }),
+      },
+    };
   };
 
   /**
@@ -147,15 +188,18 @@ export default class EventForm extends Component {
    *
    * @since 0.1.0
    */
-  fillState = (event) => {
+  fillState = (event: EventType) => {
     if (!event) return;
 
+    const td = this.findEventTypeData(event.eventTypeId);
+    if (!td) return;
+
     const { categoryId, defaultDuration, defaultRepeatInterval, defaultCost } =
-      this.findEventTypeData(event.eventTypeId);
+      td;
 
     // build the category tree
     let category = categoryId;
-    const cat = this.findEventTypeCategory(category);
+    const cat = this.findEventTypeCategory(category) || { parent: null };
 
     let [type, subcategory, tree] = [event.eventTypeId, 0, false];
     if (cat.parent) {
@@ -167,7 +211,7 @@ export default class EventForm extends Component {
 
     this.state = {
       id: event.id,
-      date: _date.fromYmd(event.eventDate),
+      date: event.eventDate,
       time: event.startTime,
       duration: event.durationTime,
       limit: event.peopleLimit,
@@ -190,24 +234,16 @@ export default class EventForm extends Component {
   };
 
   /**
-   * Handles a change event on an input component.
-   *
-   * @since 0.1.0
-   */
-  handleChangeEvent = (event) => {
-    this.handleChange(event.target.name, event.target.value);
-  };
-
-  /**
    * Handles a component's value change.
    *
    * @since 0.1.0
    */
-  handleChange = (name, value) => {
+  handleChange = (name: string, value: any) => {
+    // @ts-ignore
     this.setState({ [name]: value });
   };
 
-  suggestNext = (pre) => {
+  suggestNext = (pre: number) => {
     if (this.props.forCreate && this.state.repeat_interval > 0) {
       this.setState({
         time: this.state.time + this.state.repeat_interval + pre,
@@ -220,12 +256,16 @@ export default class EventForm extends Component {
    *
    * @since 0.1.0
    */
-  handleTypeChange = (name, value, event) => {
+  handleTypeChange = (
+    name: string,
+    value: any,
+    event: React.ChangeEvent<HTMLSelectElement>,
+  ) => {
     // is it a tree
     let tree = false;
     const opts = event.currentTarget.selectedOptions || [];
     if (opts.length > 0) {
-      tree = opts[0].dataset.tree || false;
+      tree = !!opts[0].dataset.tree || false;
     }
 
     this.setState({ subcategory: 0, tree: tree });
@@ -234,31 +274,31 @@ export default class EventForm extends Component {
     this.defaults_fill(value);
   };
 
-  handleCategoryChange = (name, value) => {
+  handleCategoryChange = (name: string, value: any) => {
     this.setState({ type: 0, subcategory: 0, tree: false });
     this.handleChange(name, value);
     this.defaults_reset();
   };
 
-  handleSubCategoryChange = (name, value) => {
+  handleSubCategoryChange = (name: string, value: any) => {
     this.handleChange(name, value);
     this.defaults_fill(value);
   };
 
-  findEventTypeData = (value) =>
+  findEventTypeData = (value: number) =>
     this.props.refs.types.find((type) => type.id === value);
 
-  findEventTypeCategory = (value) =>
+  findEventTypeCategory = (value: number) =>
     this.props.refs.type_categories.find((type) => type.id === value);
 
   /**
    * Handles the change event on an input field of <day> type.
    *
-   * @param {Date} day The date value.
+   * @param day The date value.
    *
    * @since 0.1.0
    */
-  handleDayChange = (day) => {
+  handleDayChange = (day: Date) => {
     // It can be null if user selects same date - skip the state change in that case
     day && this.setState({ date: _date.toYmd(day) });
   };
@@ -267,14 +307,14 @@ export default class EventForm extends Component {
    * Returns all form validators' call result.
    * It will return false on a first validation rule violation (which has a message).
    *
-   * @return {boolean} The result of validation.
+   * @return The result of validation.
    * @since 0.1.0
    */
-  isValid = () =>
+  isValid = (): boolean =>
     !Object.keys(this.validators).some((key) => this.validators[key]() !== '');
 
   renderWarnings = () => {
-    const warnings = [];
+    const warnings: { name: string; message: any }[] = [];
 
     Object.keys(this.warnings).forEach((warning) => {
       const check = this.warnings[warning]();
@@ -342,7 +382,7 @@ export default class EventForm extends Component {
         </option>
       ));
 
-    let typeOptions = [];
+    let typeOptions: React.JSX.Element[] = [];
     if (this.state.category) {
       typeOptions = types
         .filter((t) => t.categoryId === this.state.category)
@@ -358,10 +398,10 @@ export default class EventForm extends Component {
             {l18n.findTranslationById(op, 'i18nEventTypeCategoryName')}
           </option>
         ));
-      typeOptions.push(typeSubOptions);
+      typeOptions.push(...typeSubOptions);
     }
 
-    let subTypeOptions = [];
+    let subTypeOptions: React.JSX.Element | JSX.Element[] | undefined = [];
     if (this.state.type && this.state.category) {
       subTypeOptions = types
         .filter((t) => t.categoryId === this.state.type)
@@ -398,14 +438,12 @@ export default class EventForm extends Component {
     const totalTime = _date.minutesToHm(timeRange);
     const warnings = this.renderWarnings();
 
-    const ymd = _date.toYmd(date);
-
     return (
       <>
         <DateFiledGroup
           name="date"
           caption="day"
-          date={ymd}
+          date={date}
           onChange={this.handleChange}
         />
         <ListFieldGroup
@@ -563,21 +601,3 @@ export default class EventForm extends Component {
     );
   }
 }
-
-EventForm.propTypes = {
-  forCreate: PropTypes.bool,
-  event: EventPropType,
-  refs: RefsPropType.isRequired,
-  locale: LocalePropType.isRequired,
-  gates: PropTypes.arrayOf(GatePropType).isRequired,
-  date: PropTypes.string,
-};
-
-EventForm.defaultProps = {
-  forCreate: false,
-  event: null,
-  refs: { destinations: [], statuses: [], states: [], types: [] },
-  locale: {},
-  gates: [],
-  date: '',
-};
