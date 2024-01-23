@@ -22,8 +22,14 @@ import styles from './EventTypeForm.module.css';
 const uuid = () => crypto.randomUUID();
 
 function EventTypeForm(
-  { categories = [], categoryCreateCallback = (name) => {} },
-  ref,
+  {
+    categories = [],
+    categoryCreateCallback = () => {},
+  }: {
+    categories: { id: number; name: string }[];
+    categoryCreateCallback: (name: string) => void;
+  },
+  ref: any,
 ) {
   const [
     {
@@ -34,7 +40,6 @@ function EventTypeForm(
       default_duration,
       default_repeat_interval,
       sections,
-      section_last_pos,
       category_name,
     },
     setState,
@@ -53,12 +58,12 @@ function EventTypeForm(
     category_name: '',
   });
 
-  const validate_section_name = (s) =>
+  const validate_section_name = (s: { name: string }) =>
     s && s.name === '' ? "Name shouldn't be empty." : '';
-  const validate_section_description = (s) =>
+  const validate_section_description = (s: { description: string }) =>
     s && s.description === '' ? "Description shouldn't be empty." : '';
 
-  const validators = {
+  const validators: any = {
     name: () =>
       name === '' ? "Field name/subcategory shouldn't be empty." : '',
     category_id: () => (category_id === 0 ? 'Category is not selected.' : ''),
@@ -81,10 +86,10 @@ function EventTypeForm(
    * Returns all form validators' call result.
    * It will return false on a first validation with a negative result (which has a message).
    *
-   * @return {boolean} The result of validation.
+   * @return The result of validation.
    * @since 0.1.0
    */
-  const isValid = () => {
+  const isValid = (): boolean => {
     return !Object.keys(validators)
       // skip
       .filter((v) => !['category_name'].includes(v))
@@ -99,10 +104,10 @@ function EventTypeForm(
     /**
      * Returns all form's field mapped values.
      *
-     * @return {Object} The form field values.
+     * @return The form field values.
      * @since 0.1.0
      */
-    getFormData() {
+    getFormData(): object {
       // transform sections
       const subtypes = Object.values(sections)
         .sort((a, b) => (a.pos < b.pos ? -1 : a.pos > b.pos ? 1 : 0))
@@ -128,11 +133,11 @@ function EventTypeForm(
    *
    * @since 0.1.0
    */
-  const handleChange = (name_, value) => {
+  const handleChange = (name_: string, value: any) => {
     setState((prevState) => ({ ...prevState, [name_]: value }));
   };
 
-  const handleSectionNameChange = (name_, value) => {
+  const handleSectionNameChange = (name_: string, value: string) => {
     setState((prev) => {
       const { sections, ...rest } = prev;
       sections[name_].name = value;
@@ -140,7 +145,7 @@ function EventTypeForm(
     });
   };
 
-  const handleSectionDescChange = (name_, value) => {
+  const handleSectionDescChange = (name_: string, value: string) => {
     setState((prev) => {
       const { sections, ...rest } = prev;
       sections[name_].description = value;
@@ -158,11 +163,11 @@ function EventTypeForm(
     });
   };
 
-  const handleRemoveEvent = (event) => {
+  const handleRemoveEvent = (event: React.MouseEvent<HTMLElement>) => {
     const { id } = event.currentTarget.dataset;
     setState((prev) => {
       const { sections, ...rest } = prev;
-      delete sections[id];
+      id && delete sections[id];
       return { sections, ...rest };
     });
   };

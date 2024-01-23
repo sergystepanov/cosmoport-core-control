@@ -10,10 +10,10 @@ type Props = {
   disabled?: boolean;
   inline?: boolean;
   name: string;
-  noLabel: boolean;
-  onChange: (name: string, val: string) => void;
-  placeholder: string;
-  validator: string;
+  noLabel?: boolean;
+  onChange?: (name: string, val: string) => void;
+  placeholder?: string;
+  validator?: string;
   value: string;
 };
 
