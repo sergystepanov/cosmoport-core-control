@@ -143,6 +143,7 @@ export type SimulationDataType = {
 };
 
 export type BusinessHoursType = {
+  day?: string;
   start: number;
   end: number;
   non: boolean;
