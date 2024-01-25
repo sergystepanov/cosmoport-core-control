@@ -15,6 +15,10 @@ export class Api extends Client {
   set onServerUnavailable(cb: () => void) {
     this._onServerUnavailable = cb;
   }
+
+  get onServerUnavailable() {
+    return this._onServerUnavailable;
+  }
 }
 
 const api = (address: string): Api => {
