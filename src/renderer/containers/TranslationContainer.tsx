@@ -1,4 +1,4 @@
-import { MutableRefObject as Ref, useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Button } from '@blueprintjs/core';
 
 import Message from '../components/messages/Message';
@@ -26,7 +26,7 @@ export default function TranslationContainer({ api }: Props) {
     translations: [],
   });
 
-  const localeAddDialogRef: Ref<null | LocaleAddDialog> = useRef(null);
+  const [isLocaleDialogOpen, setIsLocaleDialogOpen] = useState(false);
 
   useEffect(() => {
     fetchLocales();
@@ -72,14 +72,14 @@ export default function TranslationContainer({ api }: Props) {
       });
   };
 
-  const handleAddClick = () => localeAddDialogRef.current?.toggleDialog();
+  const handleAddClick = () => setIsLocaleDialogOpen((s) => !s);
 
   const handleLocaleCreate = (data: { code: string; description: string }) => {
     api
       .createLocale({ code: data.code, locale_description: data.description })
       .then(() => {
         Message.show('Locale has been created.');
-        localeAddDialogRef.current?.toggleDialog();
+        setIsLocaleDialogOpen((s) => !s);
         fetchLocales();
       })
       .catch(console.error);
@@ -95,9 +95,15 @@ export default function TranslationContainer({ api }: Props) {
     }
   };
 
+  const handleDialogClose = () => setIsLocaleDialogOpen((s) => !s);
+
   return (
     <>
-      <LocaleAddDialog ref={localeAddDialogRef} callback={handleLocaleCreate} />
+      <LocaleAddDialog
+        callback={handleLocaleCreate}
+        isOpen={isLocaleDialogOpen}
+        onClose={handleDialogClose}
+      />
       <div className={styles.inlineContainer}>
         {translation.locales.map((locale) => (
           <Translation
