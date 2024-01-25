@@ -284,8 +284,6 @@ export default function SettingsContainer({ api, onRefresh }: Props) {
               id={boardingSetting.id}
               text={boardingSetting.value}
               onConfirm={handleSettingConfirm}
-              placeholder=""
-              selectAllOnFocus
             />
             minutes to show an information.
           </div>
@@ -343,8 +341,6 @@ export default function SettingsContainer({ api, onRefresh }: Props) {
             id={linesSetting.id}
             text={linesSetting.value}
             onConfirm={handleSettingConfirm}
-            placeholder=""
-            selectAllOnFocus
           />
           lines of events.
         </div>
