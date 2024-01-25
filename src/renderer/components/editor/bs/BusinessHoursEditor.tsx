@@ -7,11 +7,13 @@ import _date from '../../../components/date/_date';
 import { BusinessHoursType } from '../../../types/Types';
 
 type Props = {
-  setting: {
-    id: number;
-    param: string;
-    value: string;
-  };
+  setting:
+    | {
+        id: number;
+        param: string;
+        value: string;
+      }
+    | { id: number; value: string };
   onSet: (id: number, val: string) => void;
 };
 

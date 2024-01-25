@@ -1,4 +1,4 @@
-import { MutableRefObject as Ref, useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import {
   Button,
@@ -72,11 +72,12 @@ export default function SettingsContainer({ api, onRefresh }: Props) {
     locales: [],
     trans: {},
     settings: [],
-
-    eventTypeAddDialogIsOpen: false,
   });
 
   const [pass, setPass] = useState('');
+
+  const [isEventTypeDelDialogOpen, setIsEventTypeDelDialogOpen] =
+    useState(false);
 
   useEffect(() => {
     getData();
@@ -100,8 +101,6 @@ export default function SettingsContainer({ api, onRefresh }: Props) {
     );
   };
 
-  const eventTypeDelDialogRef: Ref<null | EventTypeDelDialog> = useRef(null);
-
   const onEventTypeAddDialogToggle = () =>
     setState({
       ...state,
@@ -112,9 +111,9 @@ export default function SettingsContainer({ api, onRefresh }: Props) {
     onEventTypeAddDialogToggle();
   };
 
-  const handleDeleteEventType = () => {
-    eventTypeDelDialogRef.current?.toggleDialog();
-  };
+  const toggleEventTypeDelDialog = () => setIsEventTypeDelDialogOpen((s) => !s);
+
+  const handleDeleteEventType = () => toggleEventTypeDelDialog();
 
   const handleCreate = (formData: any, callback: () => void) => {
     if (!formData.valid) {
@@ -122,30 +121,39 @@ export default function SettingsContainer({ api, onRefresh }: Props) {
       return;
     }
 
-    api.createEventType(mapEvent(formData)).then((result) => {
-      const id = result.eventTypes[0].id;
-      Message.show(`Event type has been created [${id}].`);
-      getData();
-      callback();
-      return 1;
-    });
+    api
+      .createEventType(mapEvent(formData))
+      .then((result) => {
+        const id = result.eventTypes[0].id;
+        Message.show(`Event type has been created [${id}].`);
+        getData();
+        callback();
+        return 1;
+      })
+      .catch(console.error);
   };
 
   const handleNewCategory = (name: string) => {
     name !== '' &&
-      api.createEventTypeCategory({ name: name }).then((result) => {
-        Message.show(`Event type category has been created [${result.id}].`);
-        getData();
-      });
+      api
+        .createEventTypeCategory({ name: name })
+        .then((result) => {
+          Message.show(`Event type category has been created [${result.id}].`);
+          getData();
+        })
+        .catch(console.error);
   };
 
-  const handleDelete = (id: number, callback: () => void) => {
-    api.deleteEventType(id).then((result) => {
-      Message.show(`Event type has been deleted [:${result.deleted}]`);
-      getData();
-      callback();
-      return 1;
-    });
+  const handleDelete = (id: string, callback: () => void) => {
+    api
+      .deleteEventType(id)
+      .then((result) => {
+        Message.show(`Event type has been deleted [:${result.deleted}]`);
+        getData();
+        callback();
+        return 1;
+      })
+      .catch(console.error);
   };
 
   const handleLocaleTimeoutChange = (
@@ -162,7 +170,8 @@ export default function SettingsContainer({ api, onRefresh }: Props) {
           ...state,
           locales: updateLocale(LocaleMapper.unmap(updated), state.locales),
         });
-      });
+      })
+      .catch(console.error);
   };
 
   const handleCheck = (locale: LocaleDescriptionType, value: boolean) => {
@@ -176,7 +185,8 @@ export default function SettingsContainer({ api, onRefresh }: Props) {
           ...state,
           locales: updateLocale(LocaleMapper.unmap(updated), state.locales),
         });
-      });
+      })
+      .catch(console.error);
   };
 
   const findSetting = (settings: SettingType[], key: string) =>
@@ -190,7 +200,8 @@ export default function SettingsContainer({ api, onRefresh }: Props) {
     api
       .updateSettingValueForId(id, { text: newVal })
       .then(() => Message.show('The value has been saved successfully.'))
-      .then(() => handleRefresh());
+      .then(() => handleRefresh())
+      .catch(console.error);
   };
 
   const handlePasswordChange = (value: string) => {
@@ -206,7 +217,8 @@ export default function SettingsContainer({ api, onRefresh }: Props) {
         response.result
           ? Message.show('Password has changed.')
           : Message.show('Error during save.', 'error'),
-      );
+      )
+      .catch(console.error);
   };
 
   const handleRefresh = () => {
@@ -218,7 +230,8 @@ export default function SettingsContainer({ api, onRefresh }: Props) {
     api
       .updateSettingValueForId(id, { text: text_ })
       .then(() => Message.show('The value has been saved successfully.'))
-      .then(() => handleRefresh());
+      .then(() => handleRefresh())
+      .catch(console.error);
   };
 
   const { hasData, locales, refs, settings, trans, eventTypeAddDialogIsOpen } =
@@ -258,10 +271,12 @@ export default function SettingsContainer({ api, onRefresh }: Props) {
         categoryCreateCallback={handleNewCategory}
       />
       <EventTypeDelDialog
-        etDisplay={et}
+        isOpen={isEventTypeDelDialogOpen}
+        et={et}
         types={refs.types}
-        ref={eventTypeDelDialogRef}
         callback={handleDelete}
+        onClose={toggleEventTypeDelDialog}
+        onSuccess={toggleEventTypeDelDialog}
       />
 
       <Callout
