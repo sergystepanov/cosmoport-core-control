@@ -59,6 +59,11 @@ export default function MainPage({
     dateRangeEnd: _date.endOfMonth(),
   });
 
+  const [ticketInfo, setTicketInfo] = useState({
+    isOpen: false,
+    event: undefined,
+  });
+
   useEffect(() => {
     getData();
   }, []);
@@ -83,7 +88,6 @@ export default function MainPage({
   };
 
   const eventAddDialogRef = useRef<EventAddDialog>(null);
-  const eventTicketsDialogRef = useRef<EventTicketBuyDialog>(null);
   const eventMenuRef = useRef<typeof EventMenu>(null);
 
   const refreshEventsData = (start: string, end: string) => {
@@ -111,7 +115,7 @@ export default function MainPage({
   const handleEventTickets = (id: number) => {
     api
       .fetchEventsByIdForGate(id)
-      .then((data) => eventTicketsDialogRef.current?.toggle(data[0]))
+      .then((data) => setTicketInfo({ isOpen: true, event: data[0] }))
       .catch(console.error);
   };
 
@@ -120,12 +124,16 @@ export default function MainPage({
       .updateEventTickets(eventId, tickets_, force)
       .then((response) => {
         if (response.result) {
-          eventTicketsDialogRef.current?.close();
+          setTicketInfo({ isOpen: false, event: undefined });
           Message.show('Ticket data have been updated.');
         }
         return 1;
       })
       .catch(console.error);
+  };
+
+  const handleTicketsDialogClose = () => {
+    setTicketInfo({ isOpen: false, event: undefined });
   };
 
   const handleEventCreate = (date: Date) => {
@@ -164,21 +172,23 @@ export default function MainPage({
   const { events, locale, refs, gates, isLoaded } = state;
   const hasData = isLoaded;
 
-  const l18n = hasData ? new L18n(locale, refs) : null;
+  const l18n = hasData ? new L18n(locale, refs) : undefined;
   const et = hasData
     ? EventType({
         categories: refs.type_categories,
         translation: locale,
       })
-    : null;
+    : undefined;
 
   return hasData ? (
     <>
       <EventTicketBuyDialog
-        ref={eventTicketsDialogRef}
+        isOpen={ticketInfo.isOpen}
+        event={ticketInfo.event}
         l18n={l18n}
         et={et}
         onTicketUpdate={handleTickets}
+        onClose={handleTicketsDialogClose}
       />
       <EventAddDialog
         ref={eventAddDialogRef}
