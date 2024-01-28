@@ -264,7 +264,7 @@ export default function SettingsContainer({ api, onRefresh }: Props) {
     <>
       <EventTypeAddDialog
         categories={refs.type_categories}
-        etDisplay={et}
+        et={et}
         isOpen={eventTypeAddDialogIsOpen}
         toggle={onEventTypeAddDialogToggle}
         callback={handleCreate}

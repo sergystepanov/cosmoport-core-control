@@ -1,5 +1,5 @@
 import { useRef } from 'react';
-import PropTypes from 'prop-types';
+
 import {
   Dialog,
   DialogBody,
@@ -9,36 +9,41 @@ import {
 } from '@blueprintjs/core';
 
 import EventTypeForm from '../form/event/EventTypeForm';
-import EventTypeCategoryPropType from '../../props/EventTypeCategoryPropType';
+import { EventTypeCategoryType } from '../../types/Types';
 import EventType from '../eventType/EventType';
 
-/**
- * The class for event type add dialog.
- *
- * @since 0.1.0
- */
+type Props = {
+  et: ReturnType<typeof EventType>;
+  callback: (data: any, callback: () => void) => void;
+  categoryCreateCallback: (name: string) => void;
+  categories?: EventTypeCategoryType[];
+  isOpen?: boolean;
+  toggle: () => void;
+};
+
 export default function EventTypeAddDialog({
   callback,
   categoryCreateCallback,
-  etDisplay,
-  categories,
-  isOpen,
-  toggle,
-}) {
-  const ref = useRef();
+  et,
+  categories = [],
+  isOpen = false,
+  toggle = () => {},
+}: Props) {
+  const ref: any = useRef();
 
   const passState = () => {
-    callback(ref.current.getFormData(), toggle);
+    const form = ref.current;
+    form && callback(form.getFormData(), toggle);
   };
 
-  const handleNewCategory = (name) => {
+  const handleNewCategory = (name: string) => {
     categoryCreateCallback(name);
   };
 
   // build root cats
   const cats = categories
     .filter((c) => c.parent === 0)
-    .map((c) => ({ id: c.id, name: etDisplay.getCategory(c) }));
+    .map((c) => ({ id: c.id, name: et.getCategory(c) }));
 
   return (
     <Dialog
@@ -63,19 +68,3 @@ export default function EventTypeAddDialog({
     </Dialog>
   );
 }
-
-EventTypeAddDialog.propTypes = {
-  etDisplay: PropTypes.objectOf(EventType).isRequired,
-  callback: PropTypes.func.isRequired,
-  categoryCreateCallback: PropTypes.func,
-  categories: PropTypes.arrayOf(EventTypeCategoryPropType),
-  isOpen: PropTypes.bool,
-  toggle: PropTypes.func,
-};
-
-EventTypeAddDialog.defaultProps = {
-  categories: [],
-  isOpen: false,
-  toggle: () => {},
-  categoryCreateCallback: () => {},
-};
