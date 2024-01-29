@@ -48,8 +48,9 @@ export default function Table({
   refs,
 }: Props) {
   const addDialogRef: Ref<null | EventAddDialog> = useRef(null);
-  const deleteAlertRef: Ref<null | EventDeleteAlert> = useRef(null);
 
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [eventId, setEventId] = useState(0);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [event, setEvent] = useState<EventType>();
 
@@ -70,11 +71,17 @@ export default function Table({
     setIsEditDialogOpen(false);
     setEvent(undefined);
   };
-  const handlePreDelete = (id: number) => deleteAlertRef.current?.open(id);
+  const handlePreDelete = (id: number) => setEventId(id);
+  const handleDeleteClose = () => setIsDeleteDialogOpen(false);
 
   return (
     <>
-      <EventDeleteAlert ref={deleteAlertRef} onConfirm={onDelete} />
+      <EventDeleteAlert
+        id={eventId}
+        isOpen={isDeleteDialogOpen}
+        onConfirm={onDelete}
+        onCancel={handleDeleteClose}
+      />
       <EventAddDialog
         ref={addDialogRef}
         callback={handleCreate}
