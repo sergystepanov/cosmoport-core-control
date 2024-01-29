@@ -1,36 +1,37 @@
 import React, { Component } from 'react';
-import PropTypes from 'prop-types';
+
 import $ from 'jquery';
 
 import L18n from '../l18n/L18n';
 import _date from '../date/_date';
-import EventPropType from '../../props/EventPropType';
+import { EventType } from '../../types/Types';
+import { default as Et } from '../eventType/EventType';
 
 require('fullcalendar/dist/fullcalendar');
 
-const eventTypeColorMap = (type) =>
+const eventTypeColorMap = (type: number) =>
   ({ 1: '#f44336', 2: '#9c27b0', 3: '#2196f3', 4: '#009688' })[type];
+
+type Props = {
+  events: EventType[];
+  et: ReturnType<typeof Et>;
+  l18n: L18n;
+  onMenu: (jsEvent: any, calEvent: any, type: string) => void;
+  onViewChange: (_: { start: Date; end: Date }) => void;
+};
 
 /**
  * Hybrid React/Fullcalendar component.
  *
  * @since 0.1.0
  */
-export default class Calendar extends Component {
-  static propTypes = {
-    events: PropTypes.arrayOf(EventPropType),
-    l18n: PropTypes.instanceOf(L18n).isRequired,
-    onMenu: PropTypes.func,
-    onViewChange: PropTypes.func,
-  };
+export default class Calendar extends Component<Props> {
+  private events: EventType[];
+  private calendar: any;
+  private $node: any;
+  private l18n: L18n | undefined;
 
-  static defaultProps = {
-    events: [],
-    onMenu: () => {},
-    onViewChange: () => {},
-  };
-
-  constructor(props) {
+  constructor(props: Props) {
     super(props);
 
     this.events = [];
@@ -77,7 +78,7 @@ export default class Calendar extends Component {
    *
    * @param {*} nextProps The properties of the object.
    */
-  UNSAFE_componentWillReceiveProps(nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps: Props) {
     this.events = nextProps.events;
     this.l18n = nextProps.l18n;
     this.$node.fullCalendar('refetchEvents');
@@ -97,11 +98,11 @@ export default class Calendar extends Component {
     this.$node.fullCalendar('destroy');
   }
 
-  handleDayClick = (date, jsEvent) => {
+  handleDayClick = (date: any, jsEvent: any) => {
     this.props.onMenu(jsEvent, date, 'day');
   };
 
-  handleEventClick = (calEvent, jsEvent) => {
+  handleEventClick = (calEvent: any, jsEvent: any) => {
     this.props.onMenu(jsEvent, calEvent, 'event');
   };
 
@@ -109,9 +110,9 @@ export default class Calendar extends Component {
     this.props.onViewChange(this.getCurrentDateRange());
   };
 
-  getEvents = (start, end, timezone, callback) => {
+  getEvents = (_start: any, _end: any, _timezone: any, callback: any) => {
     const events = this.events.map((event) => {
-      const eventData = this.l18n.findEventRefByEventTypeId(event.eventTypeId);
+      const eventData = this.l18n?.findEventRefByEventTypeId(event.eventTypeId);
       const finish = _date.minutesToHm(event.startTime + event.durationTime);
 
       return {
@@ -128,7 +129,6 @@ export default class Calendar extends Component {
 
   getCurrentDateRange = () => {
     const view = this.$node.fullCalendar('getView');
-
     return { start: view.start, end: view.end };
   };
 
