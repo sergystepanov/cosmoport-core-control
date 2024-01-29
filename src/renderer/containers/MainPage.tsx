@@ -91,7 +91,7 @@ export default function MainPage({
   const [addDate, setAddDate] = useState('');
   const [nextRange, setNextRange] = useState(0);
 
-  const eventMenuRef = useRef<typeof EventMenu>(null);
+  const eventMenuRef: any = useRef();
 
   const refreshEventsData = (start: string, end: string) => {
     api
@@ -139,9 +139,9 @@ export default function MainPage({
     setTicketInfo({ isOpen: false, event: undefined });
   };
 
-  const handleEventCreate = (date: Date) => {
+  const handleEventCreate = (date: Date | string) => {
     eventMenuRef.current?.getInstance().close();
-    setAddDate(_date.toYmd(date));
+    setAddDate(typeof date === 'string' ? date : _date.toYmd(date));
     setIsAddDialogOpen(true);
   };
 

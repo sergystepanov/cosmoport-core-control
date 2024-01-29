@@ -1,30 +1,40 @@
 import React, { PureComponent } from 'react';
-import PropTypes from 'prop-types';
+
 import { Menu, MenuItem, MenuDivider } from '@blueprintjs/core';
 import onClickOutside from 'react-onclickoutside';
 
 import styles from './EventMenu.module.css';
 
-class EventMenu extends PureComponent {
-  static propTypes = {
-    onEventTickets: PropTypes.func,
-    onEventCreate: PropTypes.func,
-  };
+type Props = {
+  onEventTickets: (id: number) => void;
+  onEventCreate: (date: string) => void;
+};
 
-  static defaultProps = {
-    onEventTickets: () => {},
-    onEventCreate: () => {},
-  };
+type State = {
+  isOpen: boolean;
+  x: number;
+  y: number;
+  type: string;
+  data: any;
+};
 
+class EventMenu extends PureComponent<Props, State> {
   state = {
     isOpen: false,
     x: 0,
     y: 0,
     type: 'day',
-    data: {},
+    data: {
+      id: 0,
+      start: {
+        format: (f = '') => f,
+      },
+      title: '',
+      format: () => '',
+    },
   };
 
-  show = (event, data_, type_) => {
+  show = (event: any, data_: any, type_: any) => {
     this.setState({
       isOpen: true,
       x: event?.pageX,
