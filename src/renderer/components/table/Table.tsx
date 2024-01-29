@@ -1,4 +1,4 @@
-import React, { useRef, useState, MutableRefObject as Ref } from 'react';
+import React, { useState } from 'react';
 
 import { Button } from '@blueprintjs/core';
 import { DateRange, DateRangeInput3 } from '@blueprintjs/datetime2';
