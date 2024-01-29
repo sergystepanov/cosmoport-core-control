@@ -87,7 +87,10 @@ export default function MainPage({
       .catch(console.error);
   };
 
-  const eventAddDialogRef = useRef<EventAddDialog>(null);
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [addDate, setAddDate] = useState('');
+  const [nextRange, setNextRange] = useState(0);
+
   const eventMenuRef = useRef<typeof EventMenu>(null);
 
   const refreshEventsData = (start: string, end: string) => {
@@ -138,7 +141,8 @@ export default function MainPage({
 
   const handleEventCreate = (date: Date) => {
     eventMenuRef.current?.getInstance().close();
-    eventAddDialogRef.current?.openWith(date);
+    setAddDate(_date.toYmd(date));
+    setIsAddDialogOpen(true);
   };
 
   const handleCreate = async (formData: any, valid: boolean) => {
@@ -150,7 +154,7 @@ export default function MainPage({
     try {
       const { id } = await api.createEvent(formData);
       Message.show(`Event has been created [${id}].`);
-      eventAddDialogRef.current?.suggestNext(pre);
+      setNextRange(pre);
       handleRefresh();
     } catch (e) {}
   };
@@ -167,6 +171,10 @@ export default function MainPage({
     const start = dates.start.format('YYYY-MM-DD');
     const end = dates.end.format('YYYY-MM-DD');
     refreshEventsData(start, end);
+  };
+
+  const handleAddDialogClose = () => {
+    setIsAddDialogOpen(false);
   };
 
   const { events, locale, refs, gates, isLoaded } = state;
@@ -191,11 +199,14 @@ export default function MainPage({
         onClose={handleTicketsDialogClose}
       />
       <EventAddDialog
-        ref={eventAddDialogRef}
+        isOpen={isAddDialogOpen}
         callback={handleCreate}
         refs={refs}
         locale={locale}
         gates={gates}
+        date={addDate}
+        next={nextRange}
+        onClose={handleAddDialogClose}
       />
       <EventMenu
         ref={eventMenuRef}

@@ -47,19 +47,21 @@ export default function Table({
   range,
   refs,
 }: Props) {
-  const addDialogRef: Ref<null | EventAddDialog> = useRef(null);
-
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [nextRange, setNextRange] = useState(0);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [eventId, setEventId] = useState(0);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [event, setEvent] = useState<EventType>();
 
-  const suggestNext = (pre: number) => addDialogRef.current?.suggestNext(pre);
+  const suggestNext = (pre: number) => setNextRange(pre);
 
-  const handleAddClick = () => addDialogRef.current?.toggleDialog();
+  const handleAddClick = () => setIsAddDialogOpen(true);
   const handleCreate = (data: EventFormDataType, ok: boolean) => {
     ok ? onCreate(data, suggestNext) : showFormError();
   };
+  const handleAddDialogClose = () => setIsAddDialogOpen(false);
+
   const handleEdit = (event: EventType) => {
     setEvent(event);
     setIsEditDialogOpen(true);
@@ -83,11 +85,13 @@ export default function Table({
         onCancel={handleDeleteClose}
       />
       <EventAddDialog
-        ref={addDialogRef}
+        isOpen={isAddDialogOpen}
         callback={handleCreate}
         refs={refs}
         locale={locale}
         gates={gates}
+        next={nextRange}
+        onClose={handleAddDialogClose}
       />
       <EventEditDialog
         event={event}
