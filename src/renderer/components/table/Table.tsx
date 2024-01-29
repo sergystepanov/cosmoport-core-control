@@ -1,4 +1,4 @@
-import React, { useRef, MutableRefObject as Ref } from 'react';
+import React, { useRef, useState, MutableRefObject as Ref } from 'react';
 
 import { Button } from '@blueprintjs/core';
 import { DateRange, DateRangeInput3 } from '@blueprintjs/datetime2';
@@ -49,7 +49,9 @@ export default function Table({
 }: Props) {
   const addDialogRef: Ref<null | EventAddDialog> = useRef(null);
   const deleteAlertRef: Ref<null | EventDeleteAlert> = useRef(null);
-  const editDialogRef: Ref<null | EventEditDialog> = useRef(null);
+
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [event, setEvent] = useState<EventType>();
 
   const suggestNext = (pre: number) => addDialogRef.current?.suggestNext(pre);
 
@@ -57,9 +59,16 @@ export default function Table({
   const handleCreate = (data: EventFormDataType, ok: boolean) => {
     ok ? onCreate(data, suggestNext) : showFormError();
   };
-  const handleEdit = (event: EventType) => editDialogRef.current?.edit(event);
+  const handleEdit = (event: EventType) => {
+    setEvent(event);
+    setIsEditDialogOpen(true);
+  };
   const handleEditApply = (data: EventType, ok: boolean) => {
     ok ? onEdit(data) : showFormError();
+  };
+  const handleEditClose = () => {
+    setIsEditDialogOpen(false);
+    setEvent(undefined);
   };
   const handlePreDelete = (id: number) => deleteAlertRef.current?.open(id);
 
@@ -74,11 +83,13 @@ export default function Table({
         gates={gates}
       />
       <EventEditDialog
-        ref={editDialogRef}
+        event={event}
         callback={handleEditApply}
         refs={refs}
+        isOpen={isEditDialogOpen}
         locale={locale}
         gates={gates}
+        onClose={handleEditClose}
       />
       <div className={styles.controls}>
         <Button minimal icon="add" onClick={handleAddClick} />
