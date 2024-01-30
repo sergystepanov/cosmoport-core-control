@@ -1,5 +1,5 @@
 import { useCallback, useState, useEffect, memo } from 'react';
-import Sound from 'react-sound';
+import Sound from '../../components/sound/Sound';
 
 import PlayerControls from './PlayerControls';
 
@@ -35,7 +35,6 @@ export default memo(function Player({ dir = '', files = [] }: Props) {
   const [player, setPlayer] = useState({
     status: PLAYER.STOPPED,
     isWait: false,
-    pos: 0,
   });
 
   let t: ReturnType<typeof setTimeout>;
@@ -47,7 +46,7 @@ export default memo(function Player({ dir = '', files = [] }: Props) {
     setPlaylist(files);
     next();
     return () => {
-      setPlayer({ status: PLAYER.STOPPED, isWait: false, pos: 0 });
+      setPlayer({ status: PLAYER.STOPPED, isWait: false });
       clearTimeout(t);
     };
   }, [dir, files]);
@@ -58,7 +57,7 @@ export default memo(function Player({ dir = '', files = [] }: Props) {
     next();
     t = setTimeout(
       () => {
-        setPlayer({ status: PLAYER.PLAYING, isWait: false, pos: 0 });
+        setPlayer({ status: PLAYER.PLAYING, isWait: false });
       },
       wait * 1000 * 60,
     );
@@ -90,7 +89,7 @@ export default memo(function Player({ dir = '', files = [] }: Props) {
         break;
       case 'stop':
         clearTimeout(t);
-        setPlayer({ status: PLAYER.STOPPED, isWait: false, pos: 0 });
+        setPlayer({ status: PLAYER.STOPPED, isWait: false });
         break;
       case 'vol+':
         setVolume((vol) => (vol >= 100 ? vol : vol + 10));
@@ -121,7 +120,6 @@ export default memo(function Player({ dir = '', files = [] }: Props) {
           <Sound
             url={buildUrl(dir, track)}
             playStatus={player.status}
-            playFromPosition={player.pos}
             volume={volume}
             onFinishedPlaying={onFinishPlay}
           />

@@ -1,4 +1,4 @@
-import Sound from 'react-sound';
+import Sound from '../../components/sound/Sound';
 import { AnnouncementType } from '../../types/Types';
 
 type Announcer = {
