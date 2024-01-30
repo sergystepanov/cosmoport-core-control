@@ -102,12 +102,9 @@
     "react-dom": "^18.2.0",
     "react-onclickoutside": "^6.13.0",
     "react-router-dom": "^6.16.0",
-    "react-sound": "github:leoasis/react-sound"
+    "soundmanager2": "^2.97.20170602"
   },
   "overrides": {
-    "react-sound": {
-      "react": "$react"
-    },
     "@blueprintjs/datetime": {
       "@types/react": "$@types/react",
       "react": "$react",
@@ -131,6 +128,7 @@
     "@types/react-onclickoutside": "^6.7.9",
     "@types/react-sound": "^1.2.5",
     "@types/react-test-renderer": "^18.0.1",
+    "@types/soundmanager2": "^2.97.7",
     "@types/terser-webpack-plugin": "^5.0.4",
     "@types/webpack-bundle-analyzer": "^4.6.0",
     "@typescript-eslint/eslint-plugin": "^6.7.0",
