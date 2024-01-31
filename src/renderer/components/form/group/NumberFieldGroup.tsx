@@ -37,7 +37,7 @@ export default function NumberFieldGroup({
 
   return (
     <FormGroup
-      className={`${className} ${styles.label_lpad}`}
+      className={`${className} ${styles.field}`}
       contentClassName={styles.fill}
       inline={inline}
       labelFor={name}

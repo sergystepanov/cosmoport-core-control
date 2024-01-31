@@ -1,6 +1,7 @@
 import React from 'react';
 
 import { Classes, FormGroup, Label } from '@blueprintjs/core';
+import { DoubleCaretVertical } from '@blueprintjs/icons';
 
 import styles from '../EventForm.module.css';
 
@@ -40,7 +41,7 @@ export default function ListFieldGroup({
   return (
     <FormGroup
       inline
-      className={`${invalidMaybeClass}`}
+      className={`${styles.field} ${invalidMaybeClass}`}
       label={
         <Label
           htmlFor={name}
@@ -69,6 +70,7 @@ export default function ListFieldGroup({
             >{`Select a ${caption.toLowerCase()}...`}</option>
             {children}
           </select>
+          <DoubleCaretVertical />
         </div>
         {rightElement && rightElement}
       </div>

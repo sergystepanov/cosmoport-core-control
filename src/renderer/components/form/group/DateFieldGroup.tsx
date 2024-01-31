@@ -30,21 +30,16 @@ export default function DateFieldGroup({
   return (
     <FormGroup
       inline
-      className={`${invalidMaybeClass}`}
-      label={
-        <label
-          htmlFor={name}
-          className={`${Classes.LABEL} ${Classes.INLINE} ${styles.label_text_short}`}
-        >
-          <span>{caption}</span>
-        </label>
-      }
+      className={`${styles.field} ${invalidMaybeClass}`}
+      label={<span className={`${styles.label_text}`}>{caption}</span>}
+      labelFor={name}
       {...(invalidMaybeClass && {
         contentClassName: invalidMaybeClass,
         helperText: validator,
       })}
+      contentClassName={styles.fullWidth}
     >
-      <div id={name}>
+      <div id={name} className={styles.fullWidth}>
         <DateInput3
           className={styles.fullWidth}
           dateFnsFormat={'yyyy-MM-dd'}

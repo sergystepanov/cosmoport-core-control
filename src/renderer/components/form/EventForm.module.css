@@ -27,6 +27,11 @@
     width: 5.4em;
 }
 
+
+.field label {
+    width: 20%;
+}
+
 .noPadding {
     padding: 0 !important;
 }
