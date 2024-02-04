@@ -28,20 +28,19 @@ export default function EventAddDialog({
 }: Props) {
   const form: any = useRef();
 
-  const passState = () => {
+  const handleAddClick = () => {
     const data = form.current?.getFormData();
     callback(EventMapper.fromForm(data), data.valid);
+    // set time for the next event even if its addition failed on the server
+    data.valid && next > 0 && form.current?.suggestNext(next);
   };
-
-  // todo fix suggest next undef by extracting suggestNext from the form
-  next > 0 && form.current?.suggestNext(next);
 
   return (
     <BaseDialog
       isOpen={isOpen}
       onClose={onClose}
       title="New event"
-      actions={<Button onClick={passState} text="Create" />}
+      actions={<Button onClick={handleAddClick} text="Create" />}
     >
       <EventForm
         ref={form}
