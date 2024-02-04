@@ -6,6 +6,7 @@ import L18n from '../l18n/L18n';
 import _date from '../date/_date';
 import { EventType } from '../../types/Types';
 import { default as Et } from '../eventType/EventType';
+import { Moment } from 'moment';
 
 require('fullcalendar/dist/fullcalendar');
 
@@ -14,10 +15,10 @@ const eventTypeColorMap = (type: number) =>
 
 type Props = {
   events: EventType[];
-  et: ReturnType<typeof Et>;
-  l18n: L18n;
+  et?: ReturnType<typeof Et>;
+  l18n?: L18n;
   onMenu: (jsEvent: any, calEvent: any, type: string) => void;
-  onViewChange: (_: { start: Date; end: Date }) => void;
+  onViewChange?: (_: { start: Moment; end: Moment }) => void;
 };
 
 /**
@@ -107,7 +108,8 @@ export default class Calendar extends Component<Props> {
   };
 
   handleViewChange = () => {
-    this.props.onViewChange(this.getCurrentDateRange());
+    this.props.onViewChange &&
+      this.props.onViewChange(this.getCurrentDateRange());
   };
 
   getEvents = (_start: any, _end: any, _timezone: any, callback: any) => {
@@ -117,7 +119,7 @@ export default class Calendar extends Component<Props> {
 
       return {
         id: event.id,
-        title: this.props.et.getFullName(eventData),
+        title: this.props.et?.getFullName(eventData),
         start: `${event.eventDate}T${_date.minutesToHm(event.startTime)}`,
         end: `${event.eventDate}T${finish}`,
         color: eventTypeColorMap(event.eventTypeId) || '#defe',

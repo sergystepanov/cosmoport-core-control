@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 
 import moment from 'moment';
-import { EventObjectInput } from 'fullcalendar/src/types/input-types';
+import { EventObjectInput } from 'fullcalendar';
 
 import Calendar from '../components/calendar/Calendar';
 import { Api } from 'cosmoport-core-api-client';
@@ -195,7 +195,7 @@ export default function MainPage({
         event={ticketInfo.event}
         l18n={l18n}
         et={et}
-        onTicketUpdate={handleTickets}
+        callback={handleTickets}
         onClose={handleTicketsDialogClose}
       />
       <EventAddDialog
