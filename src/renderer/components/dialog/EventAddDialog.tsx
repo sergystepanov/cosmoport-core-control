@@ -1,27 +1,26 @@
 import { useRef } from 'react';
 
-import { Dialog, DialogBody, DialogFooter, Button } from '@blueprintjs/core';
+import { Button } from '@blueprintjs/core';
 
 import EventForm from '../form/EventForm';
 import EventMapper from '../../components/mapper/EventMapper';
 import { GateType, LocaleType, RefsType } from '../../types/Types';
+import { BaseDialog, BaseDialogCallback, BaseDialogProps } from './BaseDialog';
 
 type Props = {
-  isOpen?: boolean;
-  callback: (data: any, isValid: boolean) => void;
-  refs: RefsType;
-  locale: LocaleType;
-  gates?: GateType[];
-  onClose?: () => void;
   date?: string;
+  gates?: GateType[];
+  locale: LocaleType;
   next: number;
-};
+  refs: RefsType;
+} & BaseDialogProps &
+  BaseDialogCallback<(data: any, isValid: boolean) => void>;
 
 export default function EventAddDialog({
-  isOpen = false,
-  onClose = () => {},
+  isOpen,
+  onClose,
   date = '',
-  callback,
+  callback = () => {},
   refs,
   locale,
   gates = [],
@@ -30,35 +29,28 @@ export default function EventAddDialog({
   const form: any = useRef();
 
   const passState = () => {
-    const data = form.current.getFormData();
+    const data = form.current?.getFormData();
     callback(EventMapper.fromForm(data), data.valid);
   };
 
-  if (next > 0) {
-    form.current.suggestNext(next);
-  }
+  // todo fix suggest next undef by extracting suggestNext from the form
+  next > 0 && form.current?.suggestNext(next);
 
   return (
-    <Dialog
+    <BaseDialog
       isOpen={isOpen}
-      icon="barcode"
       onClose={onClose}
-      canOutsideClickClose={false}
       title="New event"
+      actions={<Button onClick={passState} text="Create" />}
     >
-      <DialogBody useOverflowScrollContainer={false}>
-        <EventForm
-          ref={form}
-          locale={locale}
-          refs={refs}
-          gates={gates}
-          date={date}
-          forCreate
-        />
-      </DialogBody>
-      <DialogFooter
-        actions={<Button onClick={passState} text="Create" />}
-      ></DialogFooter>
-    </Dialog>
+      <EventForm
+        ref={form}
+        locale={locale}
+        refs={refs}
+        gates={gates}
+        date={date}
+        forCreate
+      />
+    </BaseDialog>
   );
 }

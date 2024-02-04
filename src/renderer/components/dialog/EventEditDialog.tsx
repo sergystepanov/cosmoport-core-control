@@ -1,23 +1,22 @@
 import { useRef } from 'react';
 
-import { Dialog, DialogBody, DialogFooter, Button } from '@blueprintjs/core';
+import { Button } from '@blueprintjs/core';
 
 import EventForm from '../form/EventForm';
 import EventMapper from '../../components/mapper/EventMapper';
 import { EventType, GateType, LocaleType, RefsType } from '../../types/Types';
+import { BaseDialog, BaseDialogCallback, BaseDialogProps } from './BaseDialog';
 
 type Props = {
-  callback: (data: any, isValid: boolean) => void;
   event?: EventType;
   gates?: GateType[];
-  isOpen?: boolean;
   locale: LocaleType;
   refs: RefsType;
-  onClose?: () => void;
-};
+} & BaseDialogProps &
+  BaseDialogCallback<(data: any, isValid: boolean) => void>;
 
 export default function EventEditDialog({
-  callback,
+  callback = () => {},
   event,
   gates = [],
   isOpen = false,
@@ -35,22 +34,19 @@ export default function EventEditDialog({
   if (!event) return;
 
   return (
-    <Dialog
+    <BaseDialog
       isOpen={isOpen}
       onClose={onClose}
-      canOutsideClickClose={false}
       title="Edit event"
+      actions={<Button onClick={passState} text="Update" />}
     >
-      <DialogBody>
-        <EventForm
-          event={event}
-          ref={form}
-          locale={locale}
-          refs={refs}
-          gates={gates}
-        />
-      </DialogBody>
-      <DialogFooter actions={<Button onClick={passState} text="Update" />} />
-    </Dialog>
+      <EventForm
+        event={event}
+        ref={form}
+        locale={locale}
+        refs={refs}
+        gates={gates}
+      />
+    </BaseDialog>
   );
 }

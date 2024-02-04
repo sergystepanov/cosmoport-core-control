@@ -1,32 +1,26 @@
 import { useRef } from 'react';
 
-import {
-  Dialog,
-  DialogBody,
-  DialogFooter,
-  Button,
-  Intent,
-} from '@blueprintjs/core';
+import { Button, Intent } from '@blueprintjs/core';
 
 import EventTypeForm from '../form/event/EventTypeForm';
 import { EventTypeCategoryType } from '../../types/Types';
 import EventType from '../eventType/EventType';
+import { BaseDialog, BaseDialogCallback, BaseDialogProps } from './BaseDialog';
 
 type Props = {
   et: ReturnType<typeof EventType>;
-  callback: (data: any, callback: () => void) => void;
   categoryCreateCallback: (name: string) => void;
   categories?: EventTypeCategoryType[];
-  isOpen?: boolean;
   toggle: () => void;
-};
+} & BaseDialogProps &
+  BaseDialogCallback<(data: any, callback: () => void) => void>;
 
 export default function EventTypeAddDialog({
-  callback,
+  callback = () => {},
   categoryCreateCallback,
   et,
   categories = [],
-  isOpen = false,
+  isOpen,
   toggle = () => {},
 }: Props) {
   const ref: any = useRef();
@@ -46,25 +40,19 @@ export default function EventTypeAddDialog({
     .map((c) => ({ id: c.id, name: et.getCategory(c) }));
 
   return (
-    <Dialog
+    <BaseDialog
       isOpen={isOpen}
       onClose={toggle}
-      canOutsideClickClose={false}
       title="Create new event type"
+      actions={
+        <Button intent={Intent.PRIMARY} onClick={passState} text="Create" />
+      }
     >
-      <DialogBody>
-        <EventTypeForm
-          categories={cats}
-          ref={ref}
-          categoryCreateCallback={handleNewCategory}
-        />
-      </DialogBody>
-      <DialogFooter
-        minimal
-        actions={
-          <Button intent={Intent.PRIMARY} onClick={passState} text="Create" />
-        }
+      <EventTypeForm
+        categories={cats}
+        ref={ref}
+        categoryCreateCallback={handleNewCategory}
       />
-    </Dialog>
+    </BaseDialog>
   );
 }

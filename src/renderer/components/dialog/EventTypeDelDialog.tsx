@@ -1,30 +1,24 @@
 import React from 'react';
 
-import { Button, Callout, Dialog, DialogBody, Colors } from '@blueprintjs/core';
+import { Button, Callout, Colors } from '@blueprintjs/core';
 import { Remove } from '@blueprintjs/icons';
 
 import EventType from '../eventType/EventType';
 import { EventTypeType } from '../../types/Types';
+import { BaseDialog, BaseDialogCallback, BaseDialogProps } from './BaseDialog';
 
 type Props = {
   et: ReturnType<typeof EventType>;
   types?: EventTypeType[];
-  callback?: (id: string, onSuccess: () => void) => void;
-  isOpen?: boolean;
-  onClose?: () => void;
   onSuccess?: () => void;
-};
+} & BaseDialogProps &
+  BaseDialogCallback<(id: string, onSuccess: () => void) => void>;
 
-/**
- * The class for event type add dialog.
- *
- * @since 0.1.0
- */
 export default function EventTypeDelDialog({
   et,
   types = [],
   callback = () => {},
-  isOpen = false,
+  isOpen,
   onClose = () => {},
   onSuccess = () => {},
 }: Props) {
@@ -53,23 +47,16 @@ export default function EventTypeDelDialog({
   });
 
   return (
-    <Dialog
-      isOpen={isOpen}
-      onClose={onClose}
-      canOutsideClickClose={false}
-      title="Delete an event type"
-    >
-      <DialogBody>
-        <Callout>
-          Click on the <Remove /> button if you want to delete an event type.
-          <div style={{ color: Colors.RED1 }}>
-            The application does not allow to delete event types which are used
-            in existing events.
-          </div>
-        </Callout>
-        <p>&nbsp;</p>
-        {eventTypes}
-      </DialogBody>
-    </Dialog>
+    <BaseDialog isOpen={isOpen} onClose={onClose} title="Delete an event type">
+      <Callout>
+        Click on the <Remove /> button if you want to delete an event type.
+        <div style={{ color: Colors.RED1 }}>
+          The application does not allow to delete event types which are used in
+          existing events.
+        </div>
+      </Callout>
+      <p>&nbsp;</p>
+      {eventTypes}
+    </BaseDialog>
   );
 }

@@ -1,12 +1,6 @@
 import { useState } from 'react';
 
-import {
-  Dialog,
-  DialogBody,
-  DialogFooter,
-  Button,
-  Switch,
-} from '@blueprintjs/core';
+import { Button, Switch } from '@blueprintjs/core';
 
 import L18n from '../../components/l18n/L18n';
 import _date from '../../components/date/_date';
@@ -14,22 +8,21 @@ import { EventType } from '../../types/Types';
 import { default as Et } from '../eventType/EventType';
 
 import styles from './EventTicketBuyDialog.module.css';
+import { BaseDialog, BaseDialogCallback, BaseDialogProps } from './BaseDialog';
 
 type Props = {
   event?: EventType;
   et?: ReturnType<typeof Et>;
-  isOpen?: boolean;
   l18n?: L18n;
-  onTicketUpdate?: (id: number, tickets: number, force: boolean) => void;
-  onClose?: () => void;
-};
+} & BaseDialogProps &
+  BaseDialogCallback<(id: number, tickets: number, force: boolean) => void>;
 
 export default function EventTicketBuyDialog({
   event,
   et,
-  isOpen = false,
+  isOpen,
   l18n,
-  onTicketUpdate = () => {},
+  callback = () => {},
   onClose = () => {},
 }: Props) {
   if (!event) return null;
@@ -39,7 +32,7 @@ export default function EventTicketBuyDialog({
 
   const passState = () => {
     if (tickets !== event.contestants) {
-      onTicketUpdate(event.id, tickets, forceReopen);
+      callback(event.id, tickets, forceReopen);
     }
   };
 
@@ -122,34 +115,28 @@ export default function EventTicketBuyDialog({
   }
 
   return (
-    <Dialog
+    <BaseDialog
       isOpen={isOpen}
-      icon={'dollar'}
       onClose={onClose}
-      canOutsideClickClose={false}
       title="Sell tickets"
+      actions={
+        <>
+          <Switch
+            className={styles.switch}
+            checked={forceReopen}
+            labelElement={<strong>Reopen</strong>}
+            onChange={handleReopenChange}
+          />
+          <Button onClick={inc} icon={'plus'} />
+          <Button onClick={dec} icon={'minus'} />
+          <Button onClick={passState} text="Save" />
+        </>
+      }
     >
-      <DialogBody>
-        <div className={styles.notice}>
-          Here you can update tickets selling information.
-        </div>
-        {renderEventInfo(event, l18n, et)}
-      </DialogBody>
-      <DialogFooter
-        actions={
-          <>
-            <Switch
-              className={styles.switch}
-              checked={forceReopen}
-              labelElement={<strong>Reopen</strong>}
-              onChange={handleReopenChange}
-            />
-            <Button onClick={inc} icon={'plus'} />
-            <Button onClick={dec} icon={'minus'} />
-            <Button onClick={passState} text="Save" />
-          </>
-        }
-      ></DialogFooter>
-    </Dialog>
+      <div className={styles.notice}>
+        Here you can update tickets selling information.
+      </div>
+      {renderEventInfo(event, l18n, et)}
+    </BaseDialog>
   );
 }

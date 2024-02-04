@@ -1,24 +1,15 @@
 import { useState } from 'react';
 
-import {
-  Dialog,
-  Button,
-  Intent,
-  DialogBody,
-  DialogFooter,
-} from '@blueprintjs/core';
+import { Button, Intent } from '@blueprintjs/core';
 
 import LocaleForm from '../form/locale/LocaleForm';
+import { BaseDialog, BaseDialogCallback, BaseDialogProps } from './BaseDialog';
 
-type Props = {
-  callback?: (v: any) => void;
-  isOpen?: boolean;
-  onClose?: () => void;
-};
+type Props = BaseDialogProps & BaseDialogCallback<(v: any) => void>;
 
 export default function LocaleAddDialog({
   callback = () => {},
-  isOpen = false,
+  isOpen,
   onClose = () => {},
 }: Props) {
   const [state, setState] = useState({ code: '', description: '' });
@@ -39,25 +30,19 @@ export default function LocaleAddDialog({
   const { code, description } = state;
 
   return (
-    <Dialog
-      icon="translate"
+    <BaseDialog
       isOpen={isOpen}
       onClose={onClose}
-      canOutsideClickClose={false}
       title="Create locale"
+      actions={
+        <Button intent={Intent.PRIMARY} onClick={passState} text="Create" />
+      }
     >
-      <DialogBody>
-        <LocaleForm
-          code={code}
-          description={description}
-          onChange={handleChange}
-        />
-      </DialogBody>
-      <DialogFooter
-        actions={
-          <Button intent={Intent.PRIMARY} onClick={passState} text="Create" />
-        }
+      <LocaleForm
+        code={code}
+        description={description}
+        onChange={handleChange}
       />
-    </Dialog>
+    </BaseDialog>
   );
 }
