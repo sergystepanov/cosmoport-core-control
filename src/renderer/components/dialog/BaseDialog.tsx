@@ -8,7 +8,7 @@ export interface BaseDialogProps {
   // main content of the dialog window
   children?: React.ReactNode;
   // the main property for displaying or hiding the dialog
-  isOpen?: boolean;
+  state?: DialogState;
   // an optional callback after closing the dialog
   onClose?: () => void;
   // dialog title
@@ -19,13 +19,26 @@ export interface BaseDialogCallback<fn> {
   callback?: fn;
 }
 
+export enum DialogState {
+  CLOSE,
+  ADD,
+  EDIT,
+  DELETE,
+}
+
 export function BaseDialog({
   actions = null,
   children = null,
-  isOpen = false,
+  state = DialogState.CLOSE,
   onClose = () => {},
   title = '',
 }: BaseDialogProps) {
+  const isOpen =
+    state !== undefined &&
+    (state === DialogState.ADD ||
+      state === DialogState.EDIT ||
+      state === DialogState.DELETE);
+
   return (
     <Dialog
       isOpen={isOpen}

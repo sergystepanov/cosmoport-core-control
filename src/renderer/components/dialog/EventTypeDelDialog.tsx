@@ -18,7 +18,7 @@ export default function EventTypeDelDialog({
   et,
   types = [],
   callback = () => {},
-  isOpen,
+  state,
   onClose = () => {},
   onSuccess = () => {},
 }: Props) {
@@ -47,7 +47,7 @@ export default function EventTypeDelDialog({
   });
 
   return (
-    <BaseDialog isOpen={isOpen} onClose={onClose} title="Delete an event type">
+    <BaseDialog state={state} onClose={onClose} title="Delete an event type">
       <Callout>
         Click on the <Remove /> button if you want to delete an event type.
         <div style={{ color: Colors.RED1 }}>

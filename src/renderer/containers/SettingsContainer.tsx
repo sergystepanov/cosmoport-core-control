@@ -27,6 +27,7 @@ import {
   RefsType,
   SettingType,
 } from '../types/Types';
+import { DialogState } from '../components/dialog/BaseDialog';
 
 type Props = {
   api: Api;
@@ -39,7 +40,7 @@ type State = {
   refs: RefsType;
   settings: SettingType[];
   trans: LocaleType;
-  eventTypeAddDialogIsOpen?: boolean;
+  eventTypeAddDialogState?: DialogState;
 };
 
 // !to remove this
@@ -76,8 +77,9 @@ export default function SettingsContainer({ api, onRefresh }: Props) {
 
   const [pass, setPass] = useState('');
 
-  const [isEventTypeDelDialogOpen, setIsEventTypeDelDialogOpen] =
-    useState(false);
+  const [eventTypeDelDialogState, setEventTypeDelDialogState] = useState(
+    DialogState.CLOSE,
+  );
 
   useEffect(() => {
     getData();
@@ -104,14 +106,20 @@ export default function SettingsContainer({ api, onRefresh }: Props) {
   const onEventTypeAddDialogToggle = () =>
     setState({
       ...state,
-      eventTypeAddDialogIsOpen: !state.eventTypeAddDialogIsOpen,
+      eventTypeAddDialogState:
+        state.eventTypeAddDialogState === DialogState.ADD
+          ? DialogState.CLOSE
+          : DialogState.ADD,
     });
 
   const handleCreateEventType = () => {
     onEventTypeAddDialogToggle();
   };
 
-  const toggleEventTypeDelDialog = () => setIsEventTypeDelDialogOpen((s) => !s);
+  const toggleEventTypeDelDialog = () =>
+    setEventTypeDelDialogState((s) =>
+      s === DialogState.CLOSE ? DialogState.EDIT : DialogState.CLOSE,
+    );
 
   const handleDeleteEventType = () => toggleEventTypeDelDialog();
 
@@ -234,7 +242,7 @@ export default function SettingsContainer({ api, onRefresh }: Props) {
       .catch(console.error);
   };
 
-  const { hasData, locales, refs, settings, trans, eventTypeAddDialogIsOpen } =
+  const { hasData, locales, refs, settings, trans, eventTypeAddDialogState } =
     state;
 
   if (!hasData) {
@@ -265,13 +273,13 @@ export default function SettingsContainer({ api, onRefresh }: Props) {
       <EventTypeAddDialog
         categories={refs.type_categories}
         et={et}
-        isOpen={eventTypeAddDialogIsOpen}
+        state={eventTypeAddDialogState}
         toggle={onEventTypeAddDialogToggle}
         callback={handleCreate}
         categoryCreateCallback={handleNewCategory}
       />
       <EventTypeDelDialog
-        isOpen={isEventTypeDelDialogOpen}
+        state={eventTypeDelDialogState}
         et={et}
         types={refs.types}
         callback={handleDelete}

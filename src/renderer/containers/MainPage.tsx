@@ -9,14 +9,14 @@ import EventMenu from '../components/calendar/EventMenu';
 import EventTicketBuyDialog from '../components/dialog/EventTicketBuyDialog';
 import L18n from '../components/l18n/L18n';
 import Message from '../components/messages/Message';
-import EventAddDialog from '../components/dialog/EventAddDialog';
+import EventDialog, { DialogState } from '../components/dialog/EventDialog';
 import _date from '../components/date/_date';
 import EventType from '../components/eventType/EventType';
 import {
-  RefsType,
   EventType as EventType2,
-  LocaleType,
   GateType,
+  LocaleType,
+  RefsType,
 } from '../types/Types';
 
 type Props = {
@@ -60,7 +60,7 @@ export default function MainPage({
   });
 
   const [ticketInfo, setTicketInfo] = useState({
-    isOpen: false,
+    state: DialogState.CLOSE,
     event: undefined,
   });
 
@@ -87,7 +87,7 @@ export default function MainPage({
       .catch(console.error);
   };
 
-  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [addDialogState, setAddDialogState] = useState(DialogState.CLOSE);
   const [addDate, setAddDate] = useState('');
   const [nextRange, setNextRange] = useState(0);
 
@@ -118,7 +118,7 @@ export default function MainPage({
   const handleEventTickets = (id: number) => {
     api
       .fetchEventsByIdForGate(id)
-      .then((data) => setTicketInfo({ isOpen: true, event: data[0] }))
+      .then((data) => setTicketInfo({ state: DialogState.ADD, event: data[0] }))
       .catch(console.error);
   };
 
@@ -127,7 +127,7 @@ export default function MainPage({
       .updateEventTickets(eventId, tickets_, force)
       .then((response) => {
         if (response.result) {
-          setTicketInfo({ isOpen: false, event: undefined });
+          setTicketInfo({ state: DialogState.CLOSE, event: undefined });
           Message.show('Ticket data have been updated.');
         }
         return 1;
@@ -136,13 +136,13 @@ export default function MainPage({
   };
 
   const handleTicketsDialogClose = () => {
-    setTicketInfo({ isOpen: false, event: undefined });
+    setTicketInfo({ state: DialogState.CLOSE, event: undefined });
   };
 
   const handleEventCreate = (date: Date | string) => {
     eventMenuRef.current?.getInstance().close();
     setAddDate(typeof date === 'string' ? date : _date.toYmd(date));
-    setIsAddDialogOpen(true);
+    setAddDialogState(DialogState.ADD);
   };
 
   const handleCreate = async (formData: any, valid: boolean) => {
@@ -173,9 +173,7 @@ export default function MainPage({
     refreshEventsData(start, end);
   };
 
-  const handleAddDialogClose = () => {
-    setIsAddDialogOpen(false);
-  };
+  const handleAddDialogClose = () => setAddDialogState(DialogState.CLOSE);
 
   const { events, locale, refs, gates, isLoaded } = state;
   const hasData = isLoaded;
@@ -191,15 +189,15 @@ export default function MainPage({
   return hasData ? (
     <>
       <EventTicketBuyDialog
-        isOpen={ticketInfo.isOpen}
+        state={ticketInfo.state}
         event={ticketInfo.event}
         l18n={l18n}
         et={et}
         callback={handleTickets}
         onClose={handleTicketsDialogClose}
       />
-      <EventAddDialog
-        isOpen={isAddDialogOpen}
+      <EventDialog
+        state={addDialogState}
         callback={handleCreate}
         refs={refs}
         locale={locale}

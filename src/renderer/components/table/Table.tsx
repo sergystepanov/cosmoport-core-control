@@ -3,8 +3,7 @@ import React, { useState } from 'react';
 import { Button } from '@blueprintjs/core';
 import { DateRange, DateRangeInput3 } from '@blueprintjs/datetime2';
 
-import EventAddDialog from '../dialog/EventAddDialog';
-import EventEditDialog from '../dialog/EventEditDialog';
+import EventDialog, { DialogState } from '../dialog/EventDialog';
 import EventDeleteAlert from '../dialog/EventDeleteAlert';
 import EventTable from '../eventTable/EventTable';
 import {
@@ -47,30 +46,29 @@ export default function Table({
   range,
   refs,
 }: Props) {
-  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [dialogState, setDialogState] = useState(DialogState.CLOSE);
   const [nextRange, setNextRange] = useState(0);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [eventId, setEventId] = useState(0);
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [event, setEvent] = useState<EventType>();
 
   const suggestNext = (pre: number) => setNextRange(pre);
 
-  const handleAddClick = () => setIsAddDialogOpen(true);
-  const handleCreate = (data: EventFormDataType, ok: boolean) => {
-    ok ? onCreate(data, suggestNext) : showFormError();
-  };
-  const handleAddDialogClose = () => setIsAddDialogOpen(false);
-
-  const handleEdit = (event: EventType) => {
+  const handleAddClick = () => setDialogState(DialogState.ADD);
+  const handleEditClick = (event: EventType) => {
     setEvent(event);
-    setIsEditDialogOpen(true);
+    setDialogState(DialogState.EDIT);
   };
-  const handleEditApply = (data: EventType, ok: boolean) => {
-    ok ? onEdit(data) : showFormError();
+  const handleEventDialog = (data: EventType, ok: boolean) => {
+    if (!ok) {
+      showFormError();
+      return;
+    }
+    dialogState === DialogState.ADD && onCreate(data, suggestNext);
+    dialogState === DialogState.EDIT && onEdit(data);
   };
-  const handleEditClose = () => {
-    setIsEditDialogOpen(false);
+  const handleEventDialogClose = () => {
+    setDialogState(DialogState.CLOSE);
     setEvent(undefined);
   };
   const handlePreDelete = (id: number) => setEventId(id);
@@ -84,23 +82,15 @@ export default function Table({
         onConfirm={onDelete}
         onCancel={handleDeleteClose}
       />
-      <EventAddDialog
-        isOpen={isAddDialogOpen}
-        callback={handleCreate}
+      <EventDialog
+        state={dialogState}
+        event={event}
+        callback={handleEventDialog}
         refs={refs}
         locale={locale}
         gates={gates}
         next={nextRange}
-        onClose={handleAddDialogClose}
-      />
-      <EventEditDialog
-        event={event}
-        callback={handleEditApply}
-        refs={refs}
-        isOpen={isEditDialogOpen}
-        locale={locale}
-        gates={gates}
-        onClose={handleEditClose}
+        onClose={handleEventDialogClose}
       />
       <div className={styles.controls}>
         <Button minimal icon="add" onClick={handleAddClick} />
@@ -109,7 +99,7 @@ export default function Table({
         <Button minimal icon="remove" onClick={onDateRangeClear} />
       </div>
       <EventTable
-        editCallback={handleEdit}
+        editCallback={handleEditClick}
         callback={handlePreDelete}
         refs={refs}
         locale={locale}

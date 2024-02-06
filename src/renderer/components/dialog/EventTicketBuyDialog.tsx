@@ -8,7 +8,12 @@ import { EventType } from '../../types/Types';
 import { default as Et } from '../eventType/EventType';
 
 import styles from './EventTicketBuyDialog.module.css';
-import { BaseDialog, BaseDialogCallback, BaseDialogProps } from './BaseDialog';
+import {
+  BaseDialog,
+  BaseDialogCallback,
+  BaseDialogProps,
+  DialogState,
+} from './BaseDialog';
 
 type Props = {
   event?: EventType;
@@ -20,7 +25,7 @@ type Props = {
 export default function EventTicketBuyDialog({
   event,
   et,
-  isOpen,
+  state,
   l18n,
   callback = () => {},
   onClose = () => {},
@@ -110,13 +115,13 @@ export default function EventTicketBuyDialog({
     setForceReopen((r) => !r);
   };
 
-  if (!isOpen) {
+  if (state === DialogState.CLOSE) {
     return null;
   }
 
   return (
     <BaseDialog
-      isOpen={isOpen}
+      state={state}
       onClose={onClose}
       title="Sell tickets"
       actions={

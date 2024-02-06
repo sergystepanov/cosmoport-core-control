@@ -20,7 +20,7 @@ export default function EventTypeAddDialog({
   categoryCreateCallback,
   et,
   categories = [],
-  isOpen,
+  state,
   toggle = () => {},
 }: Props) {
   const ref: any = useRef();
@@ -41,7 +41,7 @@ export default function EventTypeAddDialog({
 
   return (
     <BaseDialog
-      isOpen={isOpen}
+      state={state}
       onClose={toggle}
       title="Create new event type"
       actions={

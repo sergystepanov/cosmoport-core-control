@@ -9,29 +9,29 @@ type Props = BaseDialogProps & BaseDialogCallback<(v: any) => void>;
 
 export default function LocaleAddDialog({
   callback = () => {},
-  isOpen,
+  state,
   onClose = () => {},
 }: Props) {
-  const [state, setState] = useState({ code: '', description: '' });
+  const [locale, setLocale] = useState({ code: '', description: '' });
 
   const handleChange = (code: string | null, description: string | null) => {
-    setState({
-      ...state,
+    setLocale({
+      ...locale,
       ...(code && { code }),
       ...(description && { description }),
     });
   };
 
   const passState = () => {
-    const { code, description } = state;
+    const { code, description } = locale;
     callback({ code, description });
   };
 
-  const { code, description } = state;
+  const { code, description } = locale;
 
   return (
     <BaseDialog
-      isOpen={isOpen}
+      state={state}
       onClose={onClose}
       title="Create locale"
       actions={

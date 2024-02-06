@@ -10,6 +10,7 @@ import { Api } from 'cosmoport-core-api-client';
 import { LocaleDescriptionType, TranslationType } from '../types/Types';
 
 import styles from './App.module.css';
+import { DialogState } from '../components/dialog/BaseDialog';
 
 type Props = {
   api: Api;
@@ -26,7 +27,7 @@ export default function TranslationContainer({ api }: Props) {
     translations: [],
   });
 
-  const [isLocaleDialogOpen, setIsLocaleDialogOpen] = useState(false);
+  const [localeDialogState, setLocaleDialogState] = useState(DialogState.CLOSE);
 
   useEffect(() => {
     fetchLocales();
@@ -72,14 +73,19 @@ export default function TranslationContainer({ api }: Props) {
       });
   };
 
-  const handleAddClick = () => setIsLocaleDialogOpen((s) => !s);
+  const toggleLocaleAddDialog = () =>
+    setLocaleDialogState((s) =>
+      s === DialogState.ADD ? DialogState.CLOSE : DialogState.ADD,
+    );
+
+  const handleAddClick = () => toggleLocaleAddDialog();
 
   const handleLocaleCreate = (data: { code: string; description: string }) => {
     api
       .createLocale({ code: data.code, locale_description: data.description })
       .then(() => {
         Message.show('Locale has been created.');
-        setIsLocaleDialogOpen((s) => !s);
+        toggleLocaleAddDialog();
         fetchLocales();
       })
       .catch(console.error);
@@ -95,13 +101,13 @@ export default function TranslationContainer({ api }: Props) {
     }
   };
 
-  const handleDialogClose = () => setIsLocaleDialogOpen((s) => !s);
+  const handleDialogClose = () => toggleLocaleAddDialog();
 
   return (
     <>
       <LocaleAddDialog
         callback={handleLocaleCreate}
-        isOpen={isLocaleDialogOpen}
+        state={localeDialogState}
         onClose={handleDialogClose}
       />
       <div className={styles.inlineContainer}>
